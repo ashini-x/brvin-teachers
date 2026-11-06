@@ -25,6 +25,7 @@ const title=el("div","workspace-title");title.append(el("h2","",t.name));
 const sub=el("div","workspace-sub");sub.append(el("span","ref",t.reference),el("span","pill",t.status),el("span","","Created "+new Intl.DateTimeFormat(undefined,{dateStyle:"medium"}).format(t.createdAt)));
 title.append(sub);head.append(title);content.append(head);
 const tabs=el("div","tabs"),grid=el("div","grid");content.append(tabs,grid);
+let classroomRequestId=null,collectionRequestId=null;
 function choose(name){tabs.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.textContent===name))}
 function pending(title,desc,note){const c=el("article","workspace-card");c.append(el("h3","",title),el("p","",desc),el("div","note",note));return c}
 function field(label,id,type="text",value=""){const wrap=el("div","field-group");const l=el("label","",label);l.htmlFor=id;const input=el("input","field-input");input.id=id;input.type=type;input.value=value;input.maxLength=type==="number"?undefined:120;wrap.append(l,input);return{wrap,input}}
@@ -50,9 +51,9 @@ else result.projects.forEach(project=>{const c=el("article","teacher"),left=el("
 form.addEventListener("submit",async e=>{
 e.preventDefault();create.disabled=true;create.textContent="Creating…";
 try{
-const requestId=crypto.randomUUID();
+const requestId=classroomRequestId||(classroomRequestId=crypto.randomUUID());
 await api("teachers/"+encodeURIComponent(t.id)+"/projects",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:name.input.value,subject:subject.input.value,description:description.input.value,requestId})});
-toast("Classroom created");classrooms();
+classroomRequestId=null;toast("Classroom created");classrooms();
 }catch(error){toast(error.message)}finally{create.disabled=false;create.textContent="Create classroom"}
 });
 }
@@ -71,7 +72,7 @@ if(!result.collections.length){const empty=el("div","empty");empty.append(el("h3
 else result.collections.forEach(c=>{const card=el("article","teacher"),main=el("div"),actions=el("div","teacher-actions"),meta=el("div","meta");main.append(el("h3","",c.name));meta.append(el("span","ref",c.reference),el("span","","·"),el("span","",c.ownership),el("span","","·"),el("span","",c.sourceCount+" sources"));main.append(meta);actions.append(btn("Open bookshelf →","text-btn",()=>collection(project,c)));card.append(main,actions);list.append(card)})
 }catch(error){list.replaceChildren(pending("Collections unavailable",error.message,"The request is tenant-scoped and requires the active registered BRVIN management environment."))}
 }
-form.addEventListener("submit",async e=>{e.preventDefault();save.disabled=true;save.textContent="Creating…";try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:name.input.value,description:desc.input.value,requestId:crypto.randomUUID()})});toast("Collection created");await refresh()}catch(error){toast(error.message)}finally{save.disabled=false;save.textContent="Create collection"}});
+form.addEventListener("submit",async e=>{e.preventDefault();save.disabled=true;save.textContent="Creating…";try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:name.input.value,description:desc.input.value,requestId:(collectionRequestId||(collectionRequestId=crypto.randomUUID()))})});collectionRequestId=null;toast("Collection created");await refresh()}catch(error){toast(error.message)}finally{save.disabled=false;save.textContent="Create collection"}});
 await refresh();
 }
 async function collection(project,c){
@@ -110,7 +111,11 @@ const part=await apiBinary("teachers/"+encodeURIComponent(t.id)+"/projects/"+enc
 uploaded=Number(part.upload?.uploadedBytes??next);
 }
 progress.textContent="PDF uploaded. Starting OCR and indexing…";
+if(uploadInfo.status==="failed"&&uploadInfo.canResume){
+await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources/"+encodeURIComponent(importId)+"/resume",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});
+}else{
 await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources/"+encodeURIComponent(importId)+"/complete",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});
+}
 progress.textContent="BRVIN processing has started. The source will become available only after indexing and quality checks complete.";
 toast("Secure upload completed");form.reset();await refreshSources();
 }catch(error){progress.textContent="Upload stopped: "+error.message;toast(error.message)}finally{submit.disabled=false;submit.textContent="Start secure upload"}
