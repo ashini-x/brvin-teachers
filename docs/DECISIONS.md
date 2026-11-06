@@ -97,3 +97,19 @@ The following must be decided against the actual first pilot, not guessed at rep
 - retention, deletion, backup and recovery requirements.
 
 A deferred item becomes an accepted decision only after its alternatives, trade-offs and implementation impact have been reviewed and documented.
+
+### ADR-010 — Hierarchical human-readable reference identifiers
+
+**Status:** Accepted policy; implementation deferred pending coordinated BRVIN core work.
+
+**Decision:** Assign each teacher/tenant a platform-wide `TCH` reference. Assign projects within a tenant, collections within their originating project, and sources within their originating collection. Use the full hierarchical format `TCH-000001-PRJ-001-COL-001-SRC-001`. Each child counter restarts at `001` beneath its parent; display widths are minimums and expand naturally beyond 999. Numbers are never reused.
+
+**Identity rule:** Keep human-readable references separate from immutable system IDs. Tenant UUIDs and BRVIN's real project/collection/source IDs remain authoritative for database joins, permissions and RPC calls. Reference codes are not secrets or authorization tokens.
+
+**Ownership:** This repository allocates tenant references in its own D1. BRVIN in `parmar-ai` allocates project, collection and source references in the BRVIN registry. The tenant reference is passed to BRVIN as non-secret external owner metadata. Shared grants do not create or renumber records; references retain their original registration lineage. Existing Parmar AI/Fatman/AskMoina records are not backfilled.
+
+**Reason:** Operators need to identify which teacher, classroom/project, bookshelf/collection and source a record belongs to without a single global counter becoming confusing. Parent-scoped sequences keep child numbers short and intelligible at scale.
+
+**Consequence:** Add concurrency-safe per-parent counters, uniqueness constraints and lifecycle/history rules only through a coordinated, reviewed implementation in both repositories. Until then, continue using current BRVIN-generated system IDs and do not manually issue these codes.
+
+**Full policy:** [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md).
