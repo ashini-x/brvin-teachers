@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** Protected Operator Console and tenant-profile foundation implemented in PR #1; production release pending merge/deploy  
+**Status:** Operator Console and tenant profiles deployed; classroom/collection/source integration validated in PR #2, coordinated Core implementation validated in PR #107; production activation pending  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
@@ -19,18 +19,18 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 
 ## Current status
 
-- [x] Separate public repository created.
-- [x] Initial architecture and operating documentation established.
-- [x] Bootstrap Worker and non-sensitive `/health` endpoint deployed.
-- [x] Protected Operator Console implemented in PR #1: Access identity, live teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and audit records.
-- [x] Separate application D1 database created; initial tenant schema and binding are checked in.
-- [ ] Merge/deploy PR #1 and verify application D1 migration and Access identity in production.
-- [ ] Implement the separate BRVIN Core management interface for classrooms, collections, source registration, uploads and processing status.
-- [ ] Confirm first channel and student authentication/operating-cost decisions.
-- [ ] Register the BRVIN Teachers application/environment and private v2 binding.
-- [ ] Complete genuine teacher retrieval, isolation and post-revocation denial.
+- [x] Separate public repository and two-repository architecture established.
+- [x] Shared Worker, Cloudflare Access and GitHub Actions deployment path verified.
+- [x] Application D1 and tenant/audit schema deployed; real teacher profiles are database-backed.
+- [x] Protected Operator Console deployed: teacher directory/search, custom-name creation, generated UUID/reference, workspace overview and rename.
+- [x] Classroom/collection/source screens and consumer API implemented in PR #2; tests, production build and dry-run passed.
+- [x] Separate BRVIN Core management entrypoint, owner metadata, hierarchical reference allocation and scoped source importer implemented in parmar-ai PR #107; Core typecheck/tests/Node tests and both Worker dry-runs passed.
+- [ ] Merge/release the Core management PR, then merge/release the consumer PR.
+- [ ] Register the BRVIN Teachers production application/environment in BRVIN Admin and replace the deliberate Service Binding placeholder with its generated environment UUID.
+- [ ] Verify the private BRVIN v2 retrieval binding and complete real retrieval, tenant isolation and post-revocation denial.
+- [ ] Select the first channel and finish student authentication/operating-cost decisions.
 
-PR #1 adds the operator UI and tenant-profile implementation. Its [validation run](https://github.com/ashini-x/brvin-teachers/actions/runs/42164975951) passed `npm ci`, all unit tests, production build and deployment dry-run; the pull-request deploy job was skipped as intended. The current deployed Worker remains the bootstrap version until PR #1 is merged and its production migration/deploy job succeeds. The application D1 and Access application have been created, but live D1 binding/migration and Access identity propagation still need production verification. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
+PR #1 was merged and deployed. Its production workflow applied the application D1 migration, deployed the Worker, verified public health and confirmed that Cloudflare Access protects `/operator`. PR #2's [validation run](https://github.com/ashini-x/brvin-teachers/actions/runs/42168754952) passed tests, production build and deployment dry-run; its pull-request deploy job was skipped. Core PR #107's [validation run](https://github.com/ashini-x/parmar-ai/actions/runs/42168516646) passed typecheck, tests, Node tests, and both Worker dry-runs; its deploy jobs were skipped. Neither integration PR has been merged or deployed yet. The integration remains inactive until its production environment is registered in BRVIN Admin and the generated environment UUID replaces the fail-closed placeholder. See [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 
@@ -39,13 +39,14 @@ PR #1 adds the operator UI and tenant-profile implementation. Its [validation ru
 3. [Development plan](docs/DEVELOPMENT_PLAN.md) — phases and release gates.
 4. [Pilot brief](docs/PILOT_BRIEF.md) — current real teacher-led Physics onboarding and Phase 0 decisions.
 5. [BRVIN v2 integration](docs/BRVIN_V2_INTEGRATION.md) — exact consumer contract and trust boundary.
-6. [Identifier policy](docs/IDENTIFIER_POLICY.md) — approved hierarchical human-readable references for tenants, projects, collections and sources; implementation is pending.
-7. [Operator Console design](docs/OPERATOR_CONSOLE_DESIGN.md) — custom teacher names, workspaces, automatic identities and the approved ChatGPT-inspired dark UI direction.
-8. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
-9. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
-10. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
-11. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
-12. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
+6. [Identifier policy](docs/IDENTIFIER_POLICY.md) — approved hierarchical human-readable references for tenants, projects, collections and sources.
+7. [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md) — private Core management binding, operations and release/activation steps.
+8. [Operator Console design](docs/OPERATOR_CONSOLE_DESIGN.md) — custom teacher names, workspaces, automatic identities and the approved ChatGPT-inspired dark UI direction.
+9. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
+10. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
+11. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
+12. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
+13. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
 
 ## Working principle
 

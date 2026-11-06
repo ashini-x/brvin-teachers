@@ -34,7 +34,8 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 5. docs/DEVELOPMENT_PLAN.md
 6. docs/IDENTIFIER_POLICY.md when working on tenant, project, collection or source identity/reference handling.
 7. docs/OPERATOR_CONSOLE_DESIGN.md when working on the Operator Console, tenant workspace, admin UX or BRVIN management handoff.
-8. The relevant contract, security, operations or decision document.
+8. docs/BRVIN_MANAGEMENT_INTEGRATION.md when implementing classroom, collection, source, upload, Core management or cross-repository handoff.
+9. The relevant contract, security, operations or decision document.
 
 ### In ashini-x/parmar-ai
 
@@ -44,7 +45,8 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 4. docs/BRVIN_2_RPC_V2_CONTRACT.md — frozen v2 contract.
 5. docs/BRVIN_INTEGRATION_GUIDE.md — same-account consumer setup and verification.
 6. docs/BRVIN_2_ARCHITECTURE_DECISIONS.md — accepted core decisions.
-7. The relevant BRVIN admin or operations runbook.
+7. docs/BRVIN_ADMIN_RUNBOOK.md when registering BRVIN Teachers application/environment or operating knowledge ingestion.
+8. The relevant BRVIN admin or operations runbook.
 
 The master plan identifies the canonical active references. If a link or path changes, inspect the current documentation index rather than reviving old milestone drafts or superseded proposals.
 
@@ -88,3 +90,8 @@ Do not infer that an implementation is deployed because it exists on main; do no
 - [BRVIN integration guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
 - [BRVIN Admin runbook](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_ADMIN_RUNBOOK.md)
 - [BRVIN Operations runbook](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_OPERATIONS_RUNBOOK.md)
+
+
+## 6. Current management handoff
+
+The consumer's classroom/collection/source screens are implemented in PR #2. The private Core `BrvinTeachersManagementApi` is implemented in parmar-ai PR #107. Both pull-request validation workflows passed at the documented branch heads; neither integration PR has been deployed. The consumer Service Binding contains a deliberate non-UUID placeholder until the production application/environment is registered in BRVIN Admin. Read [BRVIN_MANAGEMENT_INTEGRATION.md](BRVIN_MANAGEMENT_INTEGRATION.md) before changing either side.

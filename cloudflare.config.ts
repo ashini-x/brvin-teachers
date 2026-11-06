@@ -10,7 +10,14 @@ export default defineConfig({
     workersDev: true,
     previewUrls: false,
     env: {
-      DB: bindings.d1({ id: "e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf", name: "brvin-teachers-app" })
+      DB: bindings.d1({ id: "e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf", name: "brvin-teachers-app" }),
+      // Replace this deliberately unregistered placeholder after creating the
+      // brvin-teachers / production environment in BRVIN Admin.
+      BRVIN_MANAGEMENT: bindings.worker({
+        worker: "parmar-ai",
+        exportName: "BrvinTeachersManagementApi",
+        props: { applicationEnvironmentId: "BRVIN_TEACHERS_ENVIRONMENT_ID_REQUIRED" }
+      })
     },
     observability: {
       enabled: true,
