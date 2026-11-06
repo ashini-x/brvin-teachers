@@ -66,7 +66,11 @@ test("operator shell has a restrictive CSP", async () => {
   const response = await handleOperatorRequest(request("/operator"), {}, access);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-security-policy"), /frame-ancestors 'none'/);
-  assert.match(await response.text(), /Create teacher/);
+  const html = await response.text();
+  assert.match(html, /Create teacher/);
+  assert.match(html, /core-status-text/);
+  assert.match(html, /Checking management link/);
+  assert.doesNotMatch(html, /Management link pending/);
 });
 
 test("tenant references are generated and duplicate names are allowed", async () => {
@@ -130,4 +134,58 @@ test("teacher classroom APIs fail closed until the trusted BRVIN management bind
   assert.equal(response.status, 503);
   assert.equal(body.error, "BRVIN_MANAGEMENT_NOT_CONFIGURED");
   assert.equal(db.teachers.length, 1);
+});
+
+
+test("BRVIN management status is connected only after the private health RPC succeeds", async () => {
+  const response = await handleOperatorRequest(
+    request("/operator/api/brvin-management/health"),
+    {
+      DB: new FakeD1(),
+      BRVIN_MANAGEMENT: {
+        async health() {
+          return { ok: true, application: "brvin-teachers", management: "ready" };
+        }
+      }
+    },
+    access
+  );
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(body, {
+    ok: true,
+    status: "connected",
+    application: "brvin-teachers",
+    management: "ready"
+  });
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("BRVIN management status fails closed for missing or rejected health binding", async () => {
+  const missing = await handleOperatorRequest(
+    request("/operator/api/brvin-management/health"),
+    { DB: new FakeD1() },
+    access
+  );
+  assert.equal(missing.status, 503);
+  assert.equal((await missing.json()).error, "BRVIN_MANAGEMENT_NOT_CONFIGURED");
+
+  const rejected = await handleOperatorRequest(
+    request("/operator/api/brvin-management/health"),
+    {
+      DB: new FakeD1(),
+      BRVIN_MANAGEMENT: {
+        async health() {
+          return {
+            ok: false,
+            code: "APPLICATION_ENVIRONMENT_NOT_REGISTERED",
+            message: "The BRVIN Teachers application environment is not registered or active."
+          };
+        }
+      }
+    },
+    access
+  );
+  assert.equal(rejected.status, 502);
+  assert.equal((await rejected.json()).error, "APPLICATION_ENVIRONMENT_NOT_REGISTERED");
 });
