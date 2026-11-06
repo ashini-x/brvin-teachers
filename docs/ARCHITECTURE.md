@@ -169,3 +169,9 @@ The first useful deployment must demonstrate:
 Use the approved hierarchical reference-code policy in [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md): one tenant reference (`TCH`), project references scoped to a tenant (`PRJ`), collection references scoped to their originating project (`COL`), and source references scoped to their originating collection (`SRC`). Each child counter restarts at `001` under its parent, so local numbers may repeat while the full path remains unique.
 
 These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application; BRVIN allocates project, collection and source references because it owns those records. The policy is accepted but not implemented; the coordinated two-repository schema/admin work must be completed before production codes are issued.
+
+## 11. Operator Console experience
+
+The central Operator Console is the primary operator-facing control surface for teacher onboarding and workspace operations. Its approved screen flow, custom teacher/project/collection/source names, automatically generated identifiers, workspace navigation, cross-system provisioning/failure states, and responsive ChatGPT-inspired dark visual system are specified in [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
+
+Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. BRVIN creates and allocates its own project, collection and source identities through a future narrow authenticated management interface; the console must not write BRVIN D1 directly or reuse the retrieval RPC for administrative writes. The design is approved but the UI, application D1 and management integration are not implemented.
