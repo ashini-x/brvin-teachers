@@ -39,12 +39,13 @@ These instructions apply to all coding assistants and contributors working in th
 
 ## Engineering and safety
 
-- Make changes on a feature branch and use a pull request for review.
-- Run the relevant formatting, type, unit, integration and security checks. Add tests for every new behavior and regression.
+- Operate autonomously by default. For routine scoped changes, the coding agent may commit directly to `main`; for larger changes, it may use a feature branch and pull request. Do not require a human reviewer or manual approval for routine releases unless the user explicitly changes this operating policy.
+- Before committing, the agent must inspect its diff, check that the change matches the requested scope, run the relevant formatting, type, unit, integration and security checks, and add regression tests for new behavior.
+- Production deployment must go through the repository's GitHub Actions release workflow. A push to `main` is validated first; deployment and the live health check run only after validation succeeds. Do not deploy directly from a coding session or bypass the workflow.
+- Failed automated checks must block or fail the release. For schema, identity, authorization, tenant-isolation, credential or other high-impact changes, add explicit automated negative tests, a migration/rollback plan and updated operations documentation before deployment.
 - Do not commit tokens, API keys, passwords, private keys, service-account JSON, bot tokens, proofs, nonces or production data.
 - Never print secrets or personal student data in logs, test fixtures, CI output or assistant responses.
 - Do not expose production secrets to pull-request or fork workflows.
-- Do not perform unreviewed production mutations. Production deployment must use the approved release path and approval gate.
 - Do not mark an acceptance gate complete without recorded evidence from the actual test.
 
 ## Documentation is part of the change
