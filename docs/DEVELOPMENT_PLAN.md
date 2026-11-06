@@ -21,6 +21,8 @@ Record the approved pilot and measurable acceptance tests before Phase 1 is cons
 
 ## Phase 1 — Repository and application foundation
 
+A Cloudflare Worker resource shell named `brvin-teachers` has been provisioned in the BRVIN account, but it has no code, deployment, D1 binding or public `workers.dev` endpoint. This is only an infrastructure placeholder; Phase 1 implementation is not complete. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+
 Build only the foundation required by the selected pilot:
 
 - workspace, lint/format/typecheck and test commands;
