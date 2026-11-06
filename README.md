@@ -36,6 +36,7 @@ The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.the
 1. [Repository guide](docs/REPOSITORY_GUIDE.md) — two-repository workflow and required reading.
 2. [Architecture](docs/ARCHITECTURE.md) — product boundaries, tenant model and target topology.
 3. [Development plan](docs/DEVELOPMENT_PLAN.md) — phases and release gates.
+4. [Pilot brief](docs/PILOT_BRIEF.md) — current real teacher-led Physics pilot and Phase 0 decisions.
 4. [BRVIN v2 integration](docs/BRVIN_V2_INTEGRATION.md) — exact consumer contract and trust boundary.
 5. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
 6. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
