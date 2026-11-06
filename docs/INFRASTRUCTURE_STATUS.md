@@ -13,10 +13,10 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Worker | `brvin-teachers` |
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Public URL | `https://brvin-teachers.thenewtongs.workers.dev` |
-| Production version | `961500a1-462f-46aa-9fc6-6d02fdafc09a` |
-| Deployment ID | `ed86feab-8ea8-47ec-ac98-4c460ecb90d6` |
-| Deployed | `2026-11-06T05:57:03.276918Z` |
-| Release | [GitHub Actions #42171352464](https://github.com/ashini-x/brvin-teachers/actions/runs/42171352464) |
+| Production version | `5067ed6c-f8b7-47f8-afd0-59942422e6d4` |
+| Deployment ID | `25bf26f3-afad-4bea-812c-e17d254e3ba2` |
+| Deployed | `2026-11-06T06:31:26.715656Z` |
+| Release | [GitHub Actions #42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189) |
 | Compatibility date | `2026-11-06` |
 | Observability | Enabled; invocation logs persisted; query strings redacted |
 | Preview URLs | Disabled |
@@ -24,6 +24,8 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Management binding | `BRVIN_MANAGEMENT` → service `parmar-ai`, entrypoint `BrvinTeachersManagementApi` (declared in the pending activation PR; not yet live with the registered ID) |
 | Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (declared in the pending activation PR; not yet live) |
 | Custom domains/routes | None |
+
+The current deployed Worker version is the main-release baseline. The pending activation PR adds the generated BRVIN identity to both service bindings; do not record either binding as active with the new identity until the production release and live verification complete.
 
 The protected Operator Console is served at `/operator`; public `/health` is non-sensitive. The release workflow applied application D1 migrations, deployed the Worker, passed public health and confirmed Cloudflare Access protects the operator route.
 
@@ -41,7 +43,7 @@ Cloudflare Access application **BRVIN Teachers Operator Console** protects `brvi
 | Location hint | APAC |
 | Migration | `0001_operator_foundation.sql` applied by the production release |
 | Live tables confirmed | `id_sequences`, `teachers`, `tenant_brvin_projects`, `operator_audit_events`, plus D1 system tables |
-| Current teacher rows | 1 (the real teacher workspace shown in the Operator Console) |
+| Current teacher rows | 1 (`TCH-000001`, the real teacher workspace shown in the Operator Console) |
 | Current Core-project mappings | 0 |
 
 This database owns tenant profiles, tenant references, the app-to-BRVIN project mapping and application/operator metadata. It must never contain copies of source PDFs, OCR output, indexed passages or BRVIN grants. No teacher record has been seeded.
@@ -52,7 +54,7 @@ The same Cloudflare account contains:
 - `parmar-ai` — existing control/admin and ingestion Worker, now also hosting the separate named `BrvinTeachersManagementApi` entrypoint.
 - `brvin-service` — private retrieval Worker exposing the frozen `BrvinRetrievalApi`.
 
-The paired Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) passed validation, deployed both existing Workers, and passed live root/health/private BRVIN/Fatman smoke acceptance.
+The paired Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) passed validation, deployed both existing Workers, and passed live root/health/private BRVIN/Fatman smoke acceptance. Read-only Cloudflare account verification confirms the consumer and both Core Workers are in account `b34a6c0b7221454c5db977fe61ddf759`. The `brvin-service` workers.dev subdomain is disabled and its Worker script has no public routes.
 
 Current Core versions:
 - `parmar-ai`: `a6febaa0-7b2e-4387-878b-d4a63d16fb8f`, deployment `f1072878-ee8e-4bec-9872-965816358f03`.
