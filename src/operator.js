@@ -133,6 +133,31 @@ async function createTeacherProject(env, tenant, body) {
   }
 }
 
+async function updateTeacherProject(env,tenant,projectId,body){
+const name=clean(body.name),subject=clean(body.subject),description=typeof body.description==="string"?body.description.trim().slice(0,500):"";
+if(name.length<2||!subject)return json({ok:false,error:"Enter a classroom name and subject."},400);
+const connection=await requireManagement(env);if(connection.error)return connection.error;
+const result=await connection.management.updateTeacherProject({tenantReference:tenant.reference,projectId,name,subject,description});
+if(!result?.ok)return coreFailure(result,"BRVIN could not update this classroom.");
+try{await storeProjectMapping(env.DB,tenant,result.project,"");return json({ok:true,project:result.project})}
+catch{return json({ok:false,error:"PROJECT_MAPPING_RECONCILIATION_REQUIRED",message:"BRVIN updated the classroom, but the application mapping could not be reconciled."},503)}
+}
+
+async function updateTeacherCollection(env,tenant,projectId,collectionId,body){
+const name=clean(body.name),description=typeof body.description==="string"?body.description.trim().slice(0,500):"";
+if(name.length<2)return json({ok:false,error:"Enter a collection name."},400);
+const connection=await requireManagement(env);if(connection.error)return connection.error;
+const result=await connection.management.updateTeacherCollection({tenantReference:tenant.reference,projectId,collectionId,name,description});
+return result?.ok?json({ok:true,collection:result.collection}):coreFailure(result,"BRVIN could not update this collection.");
+}
+
+async function changeTeacherCollectionGrant(env,tenant,projectId,collectionId,grant){
+const connection=await requireManagement(env);if(connection.error)return connection.error;
+const method=grant?"grantTeacherCollection":"revokeTeacherCollection";
+const result=await connection.management[method]({tenantReference:tenant.reference,projectId,collectionId});
+return result?.ok?json({ok:true,projectId,collectionId,grant}):coreFailure(result,"BRVIN could not update this collection grant.");
+}
+
 async function listTeacherCollections(env, tenant, projectId) {
   const connection = await requireManagement(env);
   if (connection.error) return connection.error;
@@ -226,6 +251,12 @@ if(projectsMatch){
     const body=await readBody(req);return body?createTeacherProject(env,tenant,body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
   }
 }
+const projectDetailMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})$/iu);
+if(projectDetailMatch&&req.method==="PATCH"){
+  if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+  const tenant=await getTenantRecord(env.DB,projectDetailMatch[1]);if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  const body=await readBody(req);return body?updateTeacherProject(env,tenant,projectDetailMatch[2],body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
+}
 const collectionsMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections$/iu);
 if(collectionsMatch){
   const tenant=await getTenantRecord(env.DB,collectionsMatch[1]);
@@ -235,6 +266,18 @@ if(collectionsMatch){
     if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
     const body=await readBody(req);return body?createTeacherCollection(env,tenant,collectionsMatch[2],body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
   }
+}
+const collectionShareMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections\/([a-f0-9-]{36})\/share$/iu);
+if(collectionShareMatch&&(req.method==="POST"||req.method==="DELETE")){
+  if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+  const tenant=await getTenantRecord(env.DB,collectionShareMatch[1]);if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  return changeTeacherCollectionGrant(env,tenant,collectionShareMatch[2],collectionShareMatch[3],req.method==="POST");
+}
+const collectionDetailMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections\/([a-f0-9-]{36})$/iu);
+if(collectionDetailMatch&&req.method==="PATCH"){
+  if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+  const tenant=await getTenantRecord(env.DB,collectionDetailMatch[1]);if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  const body=await readBody(req);return body?updateTeacherCollection(env,tenant,collectionDetailMatch[2],collectionDetailMatch[3],body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
 }
 const sourcesMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections\/([a-f0-9-]{36})\/sources$/iu);
 if(sourcesMatch){
