@@ -21,13 +21,14 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 
 - [x] Separate public repository created.
 - [x] Initial architecture and operating documentation established.
+- [x] Cloudflare Worker resource shell provisioned; no code deployed yet.
 - [ ] Pilot teacher, subject, approved BRVIN project/source and first channel selected.
 - [ ] Runtime and database architecture translated into implementation contracts.
 - [ ] First application foundation implemented and tested.
 - [ ] BRVIN application/environment registered and private v2 binding verified.
 - [ ] Genuine teacher-focused retrieval and post-revocation denial acceptance completed.
 
-No Worker, D1 database, channel integration, provider credential, token or deployment is created by this documentation bootstrap. Planned capabilities described below are not deployed capabilities.
+The Cloudflare Worker resource shell exists, but it has no uploaded code or deployment. No D1 database, channel integration, provider credential or CI/CD token has been created. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md). Planned capabilities described below are not deployed capabilities.
 
 ## Start here
 
@@ -39,6 +40,7 @@ No Worker, D1 database, channel integration, provider credential, token or deplo
 6. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
 7. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
 8. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
+9. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
 
 ## Working principle
 
