@@ -1,6 +1,6 @@
 # BRVIN v2 Integration — Consumer Contract
 
-**Status:** Target integration for BRVIN Teachers; not yet configured or deployed  
+**Status:** Private management Service Binding deployed; separate BRVIN v2 retrieval binding not yet configured  
 **Source of truth:** [Frozen BRVIN RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)  
 **Integration guide:** [BRVIN Application Integration Guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
 
@@ -22,7 +22,7 @@ The private retrieval Worker has no public route. Do not add a public URL, expos
 
 ## 2. Trusted identity
 
-Register BRVIN Teachers as an independent application in BRVIN Admin. Register a distinct environment for each deployed environment where required by the BRVIN registry and handoff process.
+The Core management entrypoint and consumer `BRVIN_MANAGEMENT` Service Binding are deployed, but the production registry currently has no `brvin-teachers` application/environment record. Register BRVIN Teachers as an independent application in BRVIN Admin. Register a distinct environment for each deployed environment where required by the BRVIN registry and handoff process. Replace the deliberate `BRVIN_TEACHERS_ENVIRONMENT_ID_REQUIRED` placeholder in the management binding with the generated production UUID before expecting its health call to succeed.
 
 BRVIN Admin generates the immutable applicationEnvironmentId. Obtain the exact value from the non-secret integration handoff and configure it as trusted Worker deployment configuration/entrypoint props. Never invent, guess or hardcode an ID from another application.
 
@@ -121,3 +121,8 @@ Before production acceptance, verify:
 - Cross-teacher fallback, global search or silent authorization bypass.
 
 Any proposed change to these rules requires a reviewed, coordinated change to the BRVIN core contract in parmar-ai.
+
+
+## 9. Current implementation status
+
+The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`; the `BRVIN_MANAGEMENT` binding is deployed in `brvin-teachers`. These are administrative project/collection/source lifecycle operations and are deliberately separate from retrieval v2. The app must still register its production environment and configure `BRVIN_SERVICE` to private `brvin-service` / `BrvinRetrievalApi` using the generated environment UUID. No teacher, source, student or channel has been provisioned yet. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md) and [infrastructure status](INFRASTRUCTURE_STATUS.md).

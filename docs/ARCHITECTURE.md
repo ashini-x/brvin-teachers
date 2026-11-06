@@ -1,6 +1,6 @@
 # BRVIN Teachers — Target Application Architecture
 
-**Status:** Operator Console/tenant profiles deployed; Core management and classroom/source consumer implementation validated in PRs #107 and #2; rollout activation pending  
+**Status:** Operator Console, Core management entrypoint and classroom/collection/source consumer workflows deployed; app/environment registration and student retrieval activation pending  
 **Decision date:** 6 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **BRVIN core repository:** ashini-x/parmar-ai
@@ -168,13 +168,13 @@ The first useful deployment must demonstrate:
 
 Use the approved hierarchical reference-code policy in [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md): one tenant reference (`TCH`), project references scoped to a tenant (`PRJ`), collection references scoped to their originating project (`COL`), and source references scoped to their originating collection (`SRC`). Each child counter restarts at `001` under its parent, so local numbers may repeat while the full path remains unique.
 
-These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application; BRVIN allocates project, collection and source references because it owns those records. The policy is accepted but not implemented; the coordinated two-repository schema/admin work must be completed before production codes are issued.
+These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application's D1; BRVIN allocates project, collection and source references because it owns those records. The TCH allocator and Core PRJ/COL/SRC metadata/sequence implementation are deployed. No production references have yet been issued because no teacher or project has been created in the new workflow.
 
 ## 11. Operator Console experience
 
 The central Operator Console is the primary operator-facing control surface for teacher onboarding and workspace operations. Its approved screen flow, custom teacher/project/collection/source names, automatically generated identifiers, workspace navigation, cross-system provisioning/failure states, and responsive ChatGPT-inspired dark visual system are specified in [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
 
-Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. PR #1 deployed the Access-authenticated shell, teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and operator audit events. PR #2 adds the Classroom, Collection/Bookshelf and PDF Source workflows and their same-account service-binding adapter; its tests, production build and dry-run pass. The coordinated Core management entrypoint is PR #107 in `parmar-ai`; its typecheck, tests, Node tests and both Worker dry-runs pass. The entrypoint creates Core-owned projects/collections/sources, allocates the hierarchical references, and uses the existing private ingestion workflow. These integration PRs are validated but not yet deployed. The Service Binding intentionally contains a fail-closed placeholder until the production application/environment is registered in BRVIN Admin.
+Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. PR #1 deployed the Access-authenticated shell, teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and operator audit events. PR #2 deployed the Classroom, Collection/Bookshelf and PDF Source workflows and their same-account management adapter. Core PR #107 deployed the named `BrvinTeachersManagementApi` entrypoint, ownership metadata and hierarchical reference allocators in `parmar-ai`. Releases #42171352464 (consumer) and #42171109140 (Core) passed production deployment and smoke checks. The `BRVIN_MANAGEMENT` binding is live; the production app/environment remains unregistered in BRVIN Admin, and the source configuration deliberately retains a fail-closed placeholder. The separate retrieval v2 binding is not configured.
 
 
 ## 12. Management integration and rollout

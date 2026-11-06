@@ -1,6 +1,6 @@
 # Security and Trust Boundaries
 
-**Status:** Operator Console Access controls deployed; management ownership checks implemented in PR #107/#2; student/channel and retrieval acceptance remain pending
+**Status:** Operator Console Access controls and Core management ownership checks deployed; BRVIN app/environment registration, retrieval v2 and student/channel acceptance remain pending
 
 Security is a product invariant, not a later hardening phase. The rules below apply before handling real student identities, teacher material or provider credentials.
 
@@ -17,7 +17,7 @@ Security is a product invariant, not a later hardening phase. The rules below ap
 
 - Cloudflare Access is configured for the operator path. The Worker derives the actor from trusted `ctx.access.getIdentity()` and never accepts actor identity from browser input.
 - Mutating API requests require a same-origin `Origin` and JSON content type. Responses are no-store; the operator page applies a restrictive same-origin Content Security Policy and denies framing.
-- PR #1 tests missing Access identity, cross-origin writes, automatic tenant-reference allocation and rename immutability. Production Access identity propagation still requires an authenticated browser smoke test after deployment.
+- PR #1 tests missing Access identity, cross-origin writes, automatic tenant-reference allocation and rename immutability. Production release #42171352464 verified that the protected `/operator` path requires Cloudflare Access identity.
 
 ## 3. Private BRVIN management boundary
 
@@ -25,6 +25,8 @@ Security is a product invariant, not a later hardening phase. The rules below ap
 - The `applicationEnvironmentId` is supplied only by deployment-controlled WorkerEntrypoint props. It is never accepted from browser fields, request headers, URLs or user input.
 - Core checks the registered application slug `brvin-teachers`, application active state, environment active state and registered Worker name `brvin-teachers` on each call.
 - The consumer resolves tenant UUID to TCH reference from app D1 before invoking Core. Core checks application/tenant/project/collection/source ownership and active grants before each operation. The browser never chooses the authoritative tenant reference.
+- The management entrypoint and consumer Service Binding are deployed. The BRVIN registry currently has no `brvin-teachers` application/environment row and the consumer config deliberately retains a placeholder; Core must continue to fail closed until BRVIN Admin generates the production environment UUID and the consumer is redeployed.
+- The separate `BRVIN_SERVICE` retrieval v2 binding is not yet configured; do not enable student retrieval until the registered v2 identity and the actual retrieval/revocation tests pass.
 - Core source data and GCS/OCR/AI Search stay in Core. The management response never gives the consumer GCS upload session URIs or provider credentials.
 - Collection revocation removes both the collection grant and any direct source grants for that collection from the target project. The originating project's grant cannot be revoked by this interface.
 - The separate `brvin-service` retrieval v2 API remains unchanged and must be connected/verified before students are enabled.

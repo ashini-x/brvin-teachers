@@ -1,8 +1,8 @@
 # Operations — Development, CI/CD and Production
 
-**Status:** Operator Console/tenant database deployed; Core management and classroom/source integration validated in PRs #107 and #2; activation pending
+**Status:** Operator Console, Core management and classroom/source integration deployed; BRVIN application registration and retrieval activation pending
 
-The `brvin-teachers` Worker runs PR #1's Access-authenticated Operator Console, and its application D1 migration and `DB` binding are deployed and verified. PR #2 adds classroom/collection/source UI, rename/sharing controls and the consumer adapter; its tests, production build and dry-run passed, but it is not deployed. Core PR #107 adds the separate named management entrypoint, ownership metadata, hierarchical references and source lifecycle integration; its typecheck, tests, Node tests and both Worker dry-runs passed, but it is not deployed. The management Service Binding deliberately uses a fail-closed placeholder until the active `brvin-teachers` production application environment is registered in BRVIN Admin. The separate v2 retrieval binding, students and channels are still pending. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The `brvin-teachers` Worker runs the protected Operator Console, migrated application D1, classroom/collection/source UI and private Core management adapter. Consumer release [#42171352464](https://github.com/ashini-x/brvin-teachers/actions/runs/42171352464) deployed successfully and passed app D1 migration, build, public health and Access-protection smoke checks. Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the named `BrvinTeachersManagementApi` entrypoint to the existing `parmar-ai` Worker and passed paired private BRVIN/Fatman smoke checks. The consumer `BRVIN_MANAGEMENT` Service Binding is live; the registered BRVIN app/environment is still missing, so its deployment config intentionally retains a fail-closed environment-ID placeholder. The separate v2 retrieval binding, real teacher/source and student/channel flows remain pending. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 ## 1. Environments
 
@@ -99,13 +99,13 @@ A successful deployment response or HTTP 200 alone is not acceptance.
 
 ## 8. Recovery and rollback
 
-Before first production release, define:
-- previous known-good Worker version and rollback command/path;
-- compatibility rules for D1 schema changes;
-- how to disable a tenant or channel without affecting others;
-- credential rotation and emergency revocation;
-- BRVIN binding/identity recovery steps;
-- data backup and restore expectations;
+The initial production releases are complete. At the time of the 6 November 2026 release, the known-good consumer Worker version is `961500a1-462f-46aa-9fc6-6d02fdafc09a`; the corresponding deployed Core versions are recorded in [INFRASTRUCTURE_STATUS.md](INFRASTRUCTURE_STATUS.md). Use GitHub Actions for all subsequent releases and the Cloudflare Worker deployment history for rollback.
+
+Before enabling real teachers/students, define and test:
+- how to disable one tenant or channel without affecting others;
+- credential rotation and emergency revocation for any future channel/provider credentials;
+- BRVIN binding/environment-ID recovery and retrieval-grant revocation;
+- application D1 backup/restore and migration compatibility;
 - incident communication and audit procedure.
 
 Prefer backward-compatible expand/contract migrations. Do not delete or rename production fields in the same release that first stops using them unless rollback behavior is explicitly safe.

@@ -1,6 +1,6 @@
 # Human-Readable Reference Identifier Policy
 
-**Status:** Tenant references implemented/deployed in application D1; Core project/collection/source metadata and allocators implemented in PR #107, production deployment pending  
+**Status:** TCH allocator and Core PRJ/COL/SRC metadata/allocators deployed; no real production teacher or knowledge reference has yet been issued  
 **Decision date:** 6 November 2026  
 **Applies to:** New BRVIN Teachers tenant and teacher-knowledge records only  
 **Repositories:** `ashini-x/brvin-teachers` and `ashini-x/parmar-ai`
@@ -124,7 +124,7 @@ When implementation is authorized:
 
 ## 9. Scope and implementation status
 
-Tenant reference generation (`TCH-...`) is implemented in the deployed BRVIN Teachers application D1. PR #107 implements Core-owned project, collection and source reference columns, per-parent counters and the management API operations that allocate these references. Its Core typecheck/tests/build validation passed; its production deployment is pending. PR #2 implements the consumer screens that display the project/collection/source references and has passed tests/build/dry-run; its deployment is pending. No production tenant/project/collection/source has been created through these new flows.
+Tenant reference generation (`TCH-...`) is implemented in the deployed BRVIN Teachers application D1. Core PR #107's project, collection and source reference columns, per-parent counters and management operations are deployed. Consumer PR #2's screens that display these references are also deployed. The production BRVIN registry still has no `brvin-teachers` application/environment record; the management service therefore fails closed until that identity is registered and its UUID is deployed into the consumer config. The app D1 contains zero teachers and zero project mappings; no production tenant/project/collection/source has been created and no reference code has been issued.
 
 Before implementation, the two repositories must agree on:
 - the exact BRVIN D1 schema/migration for project, collection and source references and per-parent counters;
@@ -134,4 +134,4 @@ Before implementation, the two repositories must agree on:
 - safe allocation, concurrency, deletion, archival, sharing and isolation tests;
 - migration/rollback and compatibility behavior.
 
-Until the coordinated Core and consumer releases are merged/deployed and the registered application environment is active, do not use the new reference hierarchy for manual production provisioning. Never hand-invent reference codes or change the frozen v2 retrieval contract to carry these display codes.
+The coordinated Core and consumer releases are deployed, but the production application environment is not registered and no real records have been created. Use the new reference hierarchy only through the deployed owner-side creation operations after activating the registered environment. Never hand-invent reference codes, seed synthetic production records or change the frozen v2 retrieval contract to carry these display codes.

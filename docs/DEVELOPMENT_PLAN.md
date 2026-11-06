@@ -1,6 +1,6 @@
 # BRVIN Teachers — Development Plan
 
-**Status:** Bootstrap runtime deployed; full Phase 1 application foundation remains in progress  
+**Status:** Operator Console and Core management foundation deployed; first teacher/student runtime remains in progress  
 **Rule:** A phase is complete only when its stated evidence is recorded. A planned task is not a deployed capability.
 
 ## Phase 0 — Select and validate the first pilot
@@ -23,9 +23,13 @@ Record the approved pilot and measurable acceptance tests before Phase 1 is cons
 
 ## Phase 1 — Repository and application foundation
 
-The initial `brvin-teachers` runtime Worker and a non-sensitive `/health` endpoint are implemented and deployed. GitHub Actions run [#4](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916) verified the committed npm lockfile with clean `npm ci` installs, all three tests, Cloudflare build, deployment dry-run, production deployment and live health verification. The current version is a bootstrap only; Phase 1 is **not complete** because the tenant/student/channel domain, application D1 schema/migrations, secure operator access and full pilot foundation are not yet implemented. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+**Status:** Shared Worker, application D1/tenant profile, protected Operator Console, Core management integration and classroom/source administration deployed. Remaining activation prerequisites: production BRVIN app/environment registration and the separate retrieval v2 Service Binding.
 
-Build only the foundation required by the selected pilot:
+The protected Operator Console, tenant-profile D1 schema and application Access controls are deployed. Consumer release [#42171352464](https://github.com/ashini-x/brvin-teachers/actions/runs/42171352464) applied D1 migrations, deployed the Worker and passed health/Access smoke checks. Classroom/project, collection/bookshelf and PDF source workflows are now deployed, along with the private management binding to Core. Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the named management entrypoint and passed paired production smoke tests. Phase 1's app/operator slice is substantially delivered, but the complete pilot is not ready: register the production app/environment in BRVIN Admin, configure the separate retrieval v2 binding, then implement the real teacher/student/channel/model workflow. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+
+The Operator Console and teacher profile foundation are deployed, as are classroom/collection/source administration and the Core management binding. Complete the BRVIN application/environment registration and separate v2 retrieval binding only after the real pilot and approved source/channel decisions are confirmed. Do not create fake production records.
+
+Build only the remaining capabilities required by the selected pilot:
 
 - workspace, lint/format/typecheck and test commands;
 - one runtime Worker and application D1 migration framework;
@@ -46,7 +50,8 @@ No provider bot token or production BRVIN identity is required just to create th
 - authenticate the channel webhook or web session;
 - resolve tenant/student server-side;
 - implement the tenant's model orchestration and answer response;
-- register BRVIN Teachers and the exact deployed environment in BRVIN Admin;
+- register BRVIN Teachers and the exact deployed environment in BRVIN Admin, then replace the management binding's fail-closed placeholder with the generated UUID;
+- configure and verify the separate `BRVIN_SERVICE` v2 retrieval binding;
 - add the BRVIN_SERVICE private Service Binding to brvin-service / BrvinRetrievalApi;
 - configure the generated applicationEnvironmentId through trusted Worker deployment props;
 - implement the frozen v2 client with strict types and bounded inputs;
