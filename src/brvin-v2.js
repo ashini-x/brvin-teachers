@@ -1,6 +1,6 @@
-const TENANT_UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/iu;
+const TENANT_UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/u;
 const CHALLENGE_ID = TENANT_UUID;
-const HEX_256 = /^[a-f0-9]{64}$/iu;
+const HEX_256 = /^[a-f0-9]{64}$/u;
 const MAX_PROJECT_ID_LENGTH = 128;
 const MAX_REQUEST_ID_LENGTH = 128;
 const MAX_QUERY_LENGTH = 2000;
@@ -31,8 +31,8 @@ function validRequestId(value) {
 
 function parseRetrievalInput(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
-  if (!validProjectId(input.projectId) || !Array.isArray(input.queries)) return null;
-  if (input.pageNumbers !== undefined && !Array.isArray(input.pageNumbers)) return null;
+  if (!validProjectId(input.projectId) || !Array.isArray(input.queries) || input.queries.length > MAX_QUERIES) return null;
+  if (input.pageNumbers !== undefined && (!Array.isArray(input.pageNumbers) || input.pageNumbers.length > MAX_PAGE_NUMBERS)) return null;
 
   const queries = [];
   for (const value of input.queries) {
