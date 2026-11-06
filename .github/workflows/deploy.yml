@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: brvin-teachers-${ github.ref }}
+  group: brvin-teachers-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   validate:
