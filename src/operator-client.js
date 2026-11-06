@@ -60,11 +60,16 @@ classroomRequestId=null;toast("Classroom created");classrooms();
 async function classroom(project){
 choose("Classrooms");grid.replaceChildren();
 const top=el("div","workspace-card");top.append(btn("← Classrooms","text-btn",classrooms),el("h3","",project.name),el("p","",project.reference+" · "+project.subject),el("div","note","This project is the retrieval boundary. Only its explicitly granted collections and sources can be retrieved."));
+const editCard=el("section","workspace-card");editCard.append(el("h3","","Edit classroom"),el("p","","Change its display name or subject; its BRVIN ID and reference stay the same."));
+const editForm=el("form","class-form"),editName=field("Classroom name","edit-class-name"),editSubject=field("Subject","edit-class-subject"),editDescription=field("Description","edit-class-description");
+editName.input.value=project.name;editSubject.input.value=project.subject;editDescription.input.value=project.description||"";editDescription.input.maxLength=500;
+const editSave=el("button","primary","Save classroom");editSave.type="submit";editForm.append(editName.wrap,editSubject.wrap,editDescription.wrap,editSave);editCard.append(editForm);
 const createCard=el("section","workspace-card");createCard.append(el("h3","","Create collection"),el("p","","A collection is a named bookshelf inside this classroom."));
 const form=el("form","class-form"),name=field("Collection name","collection-name"),desc=field("Description","collection-description");
 name.input.placeholder="e.g. Teacher Notes";desc.input.placeholder="e.g. Chapter notes and worked examples";desc.input.maxLength=500;
 const save=el("button","primary","Create collection");save.type="submit";form.append(name.wrap,desc.wrap,save);createCard.append(form);
-const list=el("div","collection-list");grid.append(top,createCard,list);list.append(el("div","loading","Loading collections…"));
+const list=el("div","collection-list");grid.append(top,editCard,createCard,list);list.append(el("div","loading","Loading collections…"));
+editForm.addEventListener("submit",async e=>{e.preventDefault();editSave.disabled=true;editSave.textContent="Saving…";try{const updated=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id),{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({name:editName.input.value,subject:editSubject.input.value,description:editDescription.input.value})});toast("Classroom details saved; reference unchanged.");await classrooms()}catch(error){toast(error.message)}finally{editSave.disabled=false;editSave.textContent="Save classroom"}});
 async function refresh(){
 try{
 const result=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections");list.replaceChildren();
@@ -78,13 +83,39 @@ await refresh();
 async function collection(project,c){
 choose("Classrooms");grid.replaceChildren();
 const top=el("div","workspace-card");top.append(btn("← "+project.name,"text-btn",()=>classroom(project)),el("h3","",c.name),el("p","",c.reference+" · "+c.ownership+" collection"),el("div","note","PDF sources stay in BRVIN private storage. OCR and indexing run in the existing BRVIN workflow."));
-const upload=el("section","workspace-card");upload.append(el("h3","","Add PDF source"),el("p","","Choose an approved PDF. Its page count is entered below; Google Cloud OCR may incur usage charges."));
+const manage=el("section","workspace-card");
+if(c.ownership==="owned"){
+manage.append(el("h3","","Edit bookshelf"),el("p","","Change the collection display name without changing its origin or reference."));
+const editForm=el("form","class-form"),editName=field("Collection name","edit-collection-name"),editDescription=field("Description","edit-collection-description");
+editName.input.value=c.name;editDescription.input.value=c.description||"";editDescription.input.maxLength=500;
+const editSave=el("button","primary","Save bookshelf");editSave.type="submit";editForm.append(editName.wrap,editDescription.wrap,editSave);manage.append(editForm);
+editForm.addEventListener("submit",async e=>{e.preventDefault();editSave.disabled=true;editSave.textContent="Saving…";try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id),{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({name:editName.input.value,description:editDescription.input.value})});c.name=editName.input.value;c.description=editDescription.input.value;toast("Bookshelf updated; reference unchanged.");await collection(project,c)}catch(error){toast(error.message)}finally{editSave.disabled=false;editSave.textContent="Save bookshelf"}});
+const shareHead=el("h3","","Share bookshelf"),shareText=el("p","","Share this collection with another classroom belonging to the same teacher. Its source references stay tied to this bookshelf.");
+manage.append(shareHead,shareText);
+const shareForm=el("form","class-form"),shareWrap=el("div","field-group"),shareLabel=el("label","","Classroom"),shareSelect=el("select","field-input");shareLabel.htmlFor="share-project";shareSelect.id="share-project";shareWrap.append(shareLabel,shareSelect);const shareButton=el("button","primary","Share collection");shareButton.type="submit";shareForm.append(shareWrap,shareButton);manage.append(shareForm);
+shareForm.addEventListener("submit",async e=>{e.preventDefault();if(!shareSelect.value)return;shareButton.disabled=true;shareButton.textContent="Sharing…";try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(shareSelect.value)+"/collections/"+encodeURIComponent(c.id)+"/share",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});toast("Collection shared with the selected classroom.");await collection(project,c)}catch(error){toast(error.message)}finally{shareButton.disabled=false;shareButton.textContent="Share collection"}});
+}else{
+manage.append(el("h3","","Shared bookshelf"),el("p","","This collection belongs to another classroom in the same teacher workspace. It retains its original name and reference."));
+const revoke=el("button","secondary","Remove from this classroom");revoke.type="button";revoke.addEventListener("click",async()=>{revoke.disabled=true;try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/share",{method:"DELETE",headers:{"content-type":"application/json"},body:"{}"});toast("Collection access removed from this classroom.");await classrooms()}catch(error){toast(error.message);revoke.disabled=false}});manage.append(revoke);
+}
+const upload=el("section","workspace-card");
+if(c.ownership==="owned")upload.append(el("h3","","Add PDF source"),el("p","","Choose an approved PDF. Its page count is entered below; Google Cloud OCR may incur usage charges."));
+else upload.append(el("h3","","Source uploads restricted"),el("p","","Upload is available only from the collection's originating classroom. You can still view its sources here."));
+
 const form=el("form","upload-form"),titleField=field("Source title","source-title"),fileWrap=el("div","field-group"),fileLabel=el("label","","PDF file");fileLabel.htmlFor="source-file";const file=el("input","field-input");file.id="source-file";file.type="file";file.accept="application/pdf,.pdf";file.required=true;fileWrap.append(fileLabel,file);
 const page=field("PDF page count","source-pages","number");page.input.min="1";page.input.max="2000";page.input.required=true;
 const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";check.required=true;const checkText=el("span","","I understand that Google Cloud OCR may incur usage charges.");checkWrap.append(check,checkText);
 const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);upload.append(form);
 const sourceList=el("div","source-list"),heading=el("div","panel-head"),refreshBtn=btn("↻ Refresh status","text-btn",refreshSources);heading.append(el("h3","","Sources"),refreshBtn);sourceList.append(heading);
-grid.append(top,upload,sourceList);
+grid.append(top,manage,upload,sourceList);
+if(c.ownership==="owned"){
+try{
+const projects=(await api("teachers/"+encodeURIComponent(t.id)+"/projects")).projects||[];
+const targets=projects.filter(p=>p.id!==project.id);
+targets.forEach(p=>{const option=el("option","",p.name+" · "+p.reference);option.value=p.id;shareSelect.append(option)});
+if(!targets.length){shareSelect.disabled=true;shareButton.disabled=true;shareSelect.append(el("option","","No other classrooms yet"))}
+}catch(error){shareSelect.disabled=true;shareButton.disabled=true;toast("Could not load classrooms for sharing: "+error.message)}
+}
 async function refreshSources(){
 sourceList.querySelectorAll(".source-row,.empty,.loading,.error").forEach(x=>x.remove());
 try{
@@ -94,7 +125,7 @@ else result.sources.forEach(source=>{const row=el("article","teacher source-row"
 }catch(error){sourceList.append(el("div","error",error.message))}
 }
 form.addEventListener("submit",async e=>{
-e.preventDefault();const selected=file.files&&file.files[0];if(!selected)return;
+e.preventDefault();const selected=file.files&&file.files[0];if(!selected||c.ownership!=="owned")return;
 if(selected.type!=="application/pdf"&&!selected.name.toLowerCase().endsWith(".pdf")){toast("Select a PDF file.");return}
 if(selected.size<8||selected.size>1024*1024*1024){toast("PDF must be between 8 bytes and 1 GB.");return}
 const pageCount=Number(page.input.value);if(!Number.isSafeInteger(pageCount)||pageCount<1||pageCount>2000){toast("Enter a valid PDF page count.");return}
