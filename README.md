@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** Documentation foundation created; implementation not started  
+**Status:** Bootstrap runtime deployed; pilot application implementation not started  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
@@ -21,14 +21,15 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 
 - [x] Separate public repository created.
 - [x] Initial architecture and operating documentation established.
-- [x] Cloudflare Worker resource shell provisioned; no code deployed yet.
+- [x] Bootstrap Worker and non-sensitive `/health` endpoint deployed.
+- [x] GitHub Actions CI/CD successfully tested against Cloudflare production deployment.
 - [ ] Pilot teacher, subject, approved BRVIN project/source and first channel selected.
 - [ ] Runtime and database architecture translated into implementation contracts.
-- [ ] First application foundation implemented and tested.
+- [ ] Full pilot foundation implemented (tenant model, D1 migrations, authentication and selected channel).
 - [ ] BRVIN application/environment registered and private v2 binding verified.
 - [ ] Genuine teacher-focused retrieval and post-revocation denial acceptance completed.
 
-The Cloudflare Worker resource shell exists, but it has no uploaded code or deployment. No D1 database, channel integration, provider credential or CI/CD token has been created. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md). Planned capabilities described below are not deployed capabilities.
+The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.thenewtongs.workers.dev/health](https://brvin-teachers.thenewtongs.workers.dev/health). GitHub Actions run #3 passed unit tests, build, deployment dry-run, production deployment and the live health check. This proves the GitHub-to-Cloudflare deployment path works. It does **not** mean the teaching platform is implemented: no application D1 database, tenant/student model, channel integration, BRVIN Service Binding or real retrieval flow exists yet. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 
