@@ -113,3 +113,19 @@ A deferred item becomes an accepted decision only after its alternatives, trade-
 **Consequence:** Add concurrency-safe per-parent counters, uniqueness constraints and lifecycle/history rules only through a coordinated, reviewed implementation in both repositories. Until then, continue using current BRVIN-generated system IDs and do not manually issue these codes.
 
 **Full policy:** [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md).
+
+### ADR-011 — Custom-name Operator Console with ChatGPT-inspired dark visual system
+
+**Status:** Accepted UX/product design; implementation not started.
+
+**Decision:** Build one central, protected BRVIN Teachers Operator Console with a searchable teacher directory and a dedicated workspace for each tenant. Operators may enter arbitrary teacher display names (e.g. Aditya Ranjan or Radhika Goel); the application generates the immutable tenant UUID and tenant reference. Names are not unique identifiers. A separate optional student-facing display name may be configured. Teacher, project, collection and source names are editable metadata; each owning backend generates the corresponding system ID and reference.
+
+The screen hierarchy is Overview → Teachers → Teacher workspace → Classroom/project → Bookshelf/collection → Source/document. The workspace is the day-to-day operating surface; BRVIN Admin remains the core knowledge-governance and advanced administration surface. A narrow authenticated BRVIN management interface is required for project/collection/source creation and source operations. The console must not access BRVIN D1, GCS or AI Search directly, and admin writes must not be added to the retrieval v2 RPC.
+
+**Visual direction:** Use a restrained ChatGPT-inspired dark interface: charcoal surfaces, readable neutral typography, subtle borders, compact content-first cards/lists, consistent outline icons and minimal purposeful transitions. Do not use the previous Apple-inspired direction, glassmorphism, glossy gradients, decorative orbs, ambient glow or excessive shadows. Do not use OpenAI logos or claim affiliation; BRVIN retains its own identity.
+
+**Cross-system behavior:** Tenant creation occurs in the consumer D1; knowledge objects are created by BRVIN in its own registry. Model the two-step provisioning as an idempotent resumable workflow with explicit partial-failure states; never claim atomic cross-database success or duplicate objects on retry.
+
+**Reason:** Give operators one predictable, beginner-friendly place to create custom-named teacher workspaces and manage each knowledge hierarchy while preserving system ownership and tenant isolation.
+
+**Full specification:** [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
