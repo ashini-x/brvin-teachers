@@ -1,6 +1,6 @@
 # BRVIN Teachers — Development Plan
 
-**Status:** Planning baseline; no application implementation started  
+**Status:** Bootstrap runtime deployed; full Phase 1 application foundation remains in progress  
 **Rule:** A phase is complete only when its stated evidence is recorded. A planned task is not a deployed capability.
 
 ## Phase 0 — Select and validate the first pilot
@@ -21,7 +21,7 @@ Record the approved pilot and measurable acceptance tests before Phase 1 is cons
 
 ## Phase 1 — Repository and application foundation
 
-A Cloudflare Worker resource shell named `brvin-teachers` has been provisioned in the BRVIN account, but it has no code, deployment, D1 binding or public `workers.dev` endpoint. This is only an infrastructure placeholder; Phase 1 implementation is not complete. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The initial `brvin-teachers` runtime Worker and a non-sensitive `/health` endpoint are implemented and deployed. GitHub Actions run [#3](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860) passed tests, Cloudflare build, deployment dry-run, production deployment and live health verification. The current version is a bootstrap only; Phase 1 is **not complete** because the tenant/student/channel domain, application D1 schema/migrations, secure operator access and full pilot foundation are not yet implemented. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 Build only the foundation required by the selected pilot:
 
@@ -36,7 +36,7 @@ Build only the foundation required by the selected pilot:
 - CI that validates pull requests without production secrets;
 - documented local development and test setup.
 
-No provider bot token or production BRVIN identity is required just to create the repository foundation. Do not create unnecessary Workers, databases, Queues or Durable Objects.
+No provider bot token or production BRVIN identity is required just to create the repository foundation. Do not create unnecessary Workers, databases, Queues or Durable Objects. The existing bootstrap Worker is the one shared runtime; extend it rather than creating another Worker for each channel or teacher.
 
 ## Phase 2 — First real channel and BRVIN v2 consumer
 
