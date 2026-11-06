@@ -93,6 +93,12 @@ editForm.addEventListener("submit",async e=>{e.preventDefault();editSave.disable
 const shareHead=el("h3","","Share bookshelf"),shareText=el("p","","Share this collection with another classroom belonging to the same teacher. Its source references stay tied to this bookshelf.");
 manage.append(shareHead,shareText);
 const shareForm=el("form","class-form"),shareWrap=el("div","field-group"),shareLabel=el("label","","Classroom"),shareSelect=el("select","field-input");shareLabel.htmlFor="share-project";shareSelect.id="share-project";shareWrap.append(shareLabel,shareSelect);const shareButton=el("button","primary","Share collection");shareButton.type="submit";shareForm.append(shareWrap,shareButton);manage.append(shareForm);
+try{
+const projects=(await api("teachers/"+encodeURIComponent(t.id)+"/projects")).projects||[];
+const targets=projects.filter(p=>p.id!==project.id);
+targets.forEach(p=>{const option=el("option","",p.name+" · "+p.reference);option.value=p.id;shareSelect.append(option)});
+if(!targets.length){shareSelect.disabled=true;shareButton.disabled=true;shareSelect.append(el("option","","No other classrooms yet"))}
+}catch(error){shareSelect.disabled=true;shareButton.disabled=true;toast("Could not load classrooms for sharing: "+error.message)}
 shareForm.addEventListener("submit",async e=>{e.preventDefault();if(!shareSelect.value)return;shareButton.disabled=true;shareButton.textContent="Sharing…";try{await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(shareSelect.value)+"/collections/"+encodeURIComponent(c.id)+"/share",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});toast("Collection shared with the selected classroom.");await collection(project,c)}catch(error){toast(error.message)}finally{shareButton.disabled=false;shareButton.textContent="Share collection"}});
 }else{
 manage.append(el("h3","","Shared bookshelf"),el("p","","This collection belongs to another classroom in the same teacher workspace. It retains its original name and reference."));
@@ -108,14 +114,7 @@ const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";
 const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);upload.append(form);
 const sourceList=el("div","source-list"),heading=el("div","panel-head"),refreshBtn=btn("↻ Refresh status","text-btn",refreshSources);heading.append(el("h3","","Sources"),refreshBtn);sourceList.append(heading);
 grid.append(top,manage,upload,sourceList);
-if(c.ownership==="owned"){
-try{
-const projects=(await api("teachers/"+encodeURIComponent(t.id)+"/projects")).projects||[];
-const targets=projects.filter(p=>p.id!==project.id);
-targets.forEach(p=>{const option=el("option","",p.name+" · "+p.reference);option.value=p.id;shareSelect.append(option)});
-if(!targets.length){shareSelect.disabled=true;shareButton.disabled=true;shareSelect.append(el("option","","No other classrooms yet"))}
-}catch(error){shareSelect.disabled=true;shareButton.disabled=true;toast("Could not load classrooms for sharing: "+error.message)}
-}
+
 async function refreshSources(){
 sourceList.querySelectorAll(".source-row,.empty,.loading,.error").forEach(x=>x.remove());
 try{
