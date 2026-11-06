@@ -1,6 +1,6 @@
 # BRVIN Teachers — First Pilot Brief
 
-**Status:** Phase 0 in progress — pilot teacher identified; source and channel setup pending  
+**Status:** Phase 0 in progress — first real teacher onboarding in progress; source and channel setup pending  
 **Last updated:** 6 November 2026  
 **Purpose:** Define the smallest genuine teacher-led pilot before Phase 1 data-model implementation.
 
@@ -8,13 +8,13 @@
 
 | Field | Current decision |
 |---|---|
-| Pilot teacher | The user participating in this project as a real-life teacher |
-| Teacher consent | Confirmed in the project conversation |
-| Public documentation label | `Self-pilot teacher — Physics` |
-| Operating model | Operator-managed pilot; no teacher self-service builder |
+| Pilot teacher | The real teacher participating in the first BRVIN Teachers onboarding exercise |
+| Teacher participation | Confirmed; the teacher is directly participating in onboarding and will approve the teaching material |
+| Public documentation label | `First teacher pilot — Physics` (role label only; no personal details) |
+| Operating model | Standard operator-managed teacher onboarding; this is the same process intended for future teachers |
 | Pilot size | One teacher and a small, teacher-approved student test group |
 
-Do not publish the teacher's personal identity or student details in this repository. Use the label above in the BRVIN Admin project until the teacher chooses another display label.
+Do not publish the teacher's personal identity or student details in this repository. In BRVIN Admin, enter the teacher's real professional/display name in the Teacher / owner label field. The repository uses a role label only; this is not a synthetic teacher or a special internal account.
 
 ## 2. Subject and teaching workflow
 
@@ -32,12 +32,12 @@ Create the following records in the existing BRVIN Admin workspace in `ashini-x/
 
 | Record | Proposed value |
 |---|---|
-| Teacher / owner label | `Self-pilot teacher — Physics` |
-| Knowledge project | `Self-pilot teacher — Physics` |
+| Teacher / owner label | The teacher's actual professional/display name, followed by `— Physics` |
+| Knowledge project | `Physics — Newton's Laws of Motion` |
 | Project description | `Teacher-approved three-page physics pilot covering Newton's laws, force, mass, acceleration, inertia, action-reaction and worked examples.` |
 | Collection | `Physics — Newton's Laws of Motion` |
 | Collection description | `Approved source material for the first BRVIN Teachers physics pilot.` |
-| Source title | `Newton's Laws of Motion — Teacher Pilot Notes` |
+| Source title | `Newton's Laws of Motion — Teacher-approved notes (3 pages)` |
 | Source type | One original or otherwise legitimately licensed three-page PDF approved by the teacher |
 
 BRVIN remains the authority for PDF storage, OCR, indexing, readiness, grants and retrieval. Do not create a separate BRVIN knowledge database or copy the source into the consumer app.
@@ -96,7 +96,7 @@ Quality, latency and cost thresholds must be agreed before wider student access.
 
 - [ ] Confirm Newton's Laws of Motion as the exact three-page topic.
 - [ ] Obtain or prepare the teacher-approved three-page PDF.
-- [ ] Create the BRVIN knowledge project.
+- [ ] Create the BRVIN knowledge project using the teacher's real professional/display name as its owner label.
 - [ ] Create the collection and upload the PDF.
 - [ ] Verify `READY` and 3/3 indexed pages.
 - [ ] Assign the collection/source to the pilot project.
