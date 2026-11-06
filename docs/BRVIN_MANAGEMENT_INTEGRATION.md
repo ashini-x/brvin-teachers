@@ -17,6 +17,8 @@ The existing `brvin-service` Worker and frozen `BrvinRetrievalApi` remain retrie
 
 ## 2. Trusted application identity
 
+The Operator Console's bottom-left BRVIN Core badge is a live management-health indicator, not the retrieval connection proof status. It calls the Access-protected, no-store `GET /operator/api/brvin-management/health` endpoint. The endpoint invokes `BRVIN_MANAGEMENT.health()` and reports `Management connected` only when Core confirms the registered active application environment. Missing, rejected or unreachable management RPCs report `Management unavailable`. The independent BRVIN Admin proof check still verifies `BRVIN_SERVICE` / `proveConnectionV2`; do not conflate the two connections.
+
 The consumer deployment configuration binds:
 
 - Worker service: `parmar-ai`
