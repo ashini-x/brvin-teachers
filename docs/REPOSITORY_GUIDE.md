@@ -1,0 +1,87 @@
+# Repository Guide — Coordinating BRVIN Teachers and BRVIN Core
+
+**Last reviewed:** 6 November 2026  
+**Application repository:** ashini-x/brvin-teachers  
+**Core repository:** ashini-x/parmar-ai
+
+## 1. Why there are two repositories
+
+The repositories represent separate product and trust boundaries, not two copies of one codebase.
+
+| Concern | Owner |
+|---|---|
+| BRVIN Teachers tenant, student, channel and session identities | brvin-teachers |
+| Teacher profiles, configuration and feature entitlements | brvin-teachers |
+| Application AI orchestration and final answer | brvin-teachers |
+| Shared teaching modules and channel adapters | brvin-teachers |
+| BRVIN Teachers Operator Console | brvin-teachers |
+| Teacher knowledge projects, collections and source registry | BRVIN in parmar-ai |
+| PDF ingestion, private storage, OCR, indexing and readiness | BRVIN in parmar-ai |
+| Application/environment registration and app-project grants | BRVIN in parmar-ai |
+| Private retrieval, quotas, audit and connection proof | BRVIN in parmar-ai |
+| Existing Parmar AI, Fatman and AskMoina production behavior | parmar-ai |
+
+BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem or a replacement for Parmar AI.
+
+## 2. Mandatory reading order for a new session
+
+### In this repository
+
+1. AGENTS.md
+2. README.md
+3. docs/REPOSITORY_GUIDE.md
+4. docs/ARCHITECTURE.md
+5. docs/DEVELOPMENT_PLAN.md
+6. The relevant contract, security, operations or decision document.
+
+### In ashini-x/parmar-ai
+
+1. docs/BRVIN_2_MASTER_PLAN.md — canonical current BRVIN state and continuation.
+2. docs/BRVIN_2_PRODUCT_SCOPE_AND_FINAL_MILESTONES.md — approved BRVIN scope and milestone acceptance.
+3. docs/BRVIN_SYSTEM_REFERENCE.md — as-built infrastructure and trust boundaries.
+4. docs/BRVIN_2_RPC_V2_CONTRACT.md — frozen v2 contract.
+5. docs/BRVIN_INTEGRATION_GUIDE.md — same-account consumer setup and verification.
+6. docs/BRVIN_2_ARCHITECTURE_DECISIONS.md — accepted core decisions.
+7. The relevant BRVIN admin or operations runbook.
+
+The master plan identifies the canonical active references. If a link or path changes, inspect the current documentation index rather than reviving old milestone drafts or superseded proposals.
+
+## 3. Rules for cross-repository changes
+
+A normal BRVIN Teachers feature should stay in this repository.
+
+A cross-repository change is required only when the feature depends on a BRVIN-owned contract or capability that does not already exist. In that case:
+
+1. Identify the missing capability and why the existing contract cannot satisfy it.
+2. Inspect the current implementation and frozen contract in parmar-ai.
+3. Propose the smallest backward-compatible BRVIN change.
+4. Implement and test the BRVIN change in a separate branch/PR in parmar-ai.
+5. Coordinate the consumer update in this repository against the exact contract revision.
+6. Validate both sides, including authorization, failure and revocation behavior.
+7. Update the canonical docs in both repositories.
+8. Deploy in the sequence required by the compatibility plan; do not deploy an incompatible consumer first.
+
+Never use a BRVIN core change as a shortcut for missing tenant authorization in the consumer. BRVIN app-project grants are application-wide; this application must still enforce the authenticated student's server-side tenant/project mapping.
+
+## 4. Session handoff and status discipline
+
+At the start of every session, establish:
+- current commit and branch in both repositories;
+- whether there are uncommitted changes or open PRs relevant to the task;
+- latest CI and production deployment status;
+- exact task and acceptance criteria;
+- which repository is expected to change.
+
+After each accepted change, update documentation in the same PR. The top-level README should remain a concise current index, not an append-only diary.
+
+Do not infer that an implementation is deployed because it exists on main; do not infer that deployment is healthy because CI passed. Record code, CI, deployment and production verification separately.
+
+## 5. Canonical external references
+
+- [BRVIN Teachers architecture in core planning docs](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_TEACHERS_ARCHITECTURE.md)
+- [BRVIN core master plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_MASTER_PLAN.md)
+- [BRVIN system reference](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_SYSTEM_REFERENCE.md)
+- [BRVIN frozen RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)
+- [BRVIN integration guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
+- [BRVIN Admin runbook](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_ADMIN_RUNBOOK.md)
+- [BRVIN Operations runbook](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_OPERATIONS_RUNBOOK.md)
