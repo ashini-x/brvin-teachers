@@ -5,7 +5,7 @@ These instructions apply to all coding assistants and contributors working in th
 ## Before work
 
 1. Read this file and docs/REPOSITORY_GUIDE.md.
-2. Read the relevant application documents in docs/.
+2. Read the relevant application documents in docs/. For Operator Console or admin UI work, read docs/OPERATOR_CONSOLE_DESIGN.md and docs/IDENTIFIER_POLICY.md.
 3. Inspect the latest state of **both** repositories:
    - ashini-x/brvin-teachers — this application.
    - ashini-x/parmar-ai — existing BRVIN core and Parmar AI.
