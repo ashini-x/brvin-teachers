@@ -57,8 +57,10 @@ The private WorkerEntrypoint exposes these operations:
 | `health()` | Confirm that the trusted application environment is registered and active |
 | `listTeacherProjects({tenantReference})` | List the active projects owned by the teacher and granted to BRVIN Teachers |
 | `createTeacherProject(...)` | Create a subject classroom, allocate PRJ reference and create app-project grant |
+| `updateTeacherProject(...)` | Rename a classroom/change its subject or description without changing its ID/reference |
 | `listTeacherCollections(...)` | List collections explicitly granted to a teacher's project |
 | `createTeacherCollection(...)` | Create a collection/bookshelf and grant it to its originating project |
+| `updateTeacherCollection(...)` | Rename an owned bookshelf without changing its origin or reference |
 | `grantTeacherCollection(...)` | Share an owned collection with another project belonging to the same teacher |
 | `revokeTeacherCollection(...)` | Revoke that project's collection and direct source grants |
 | `listTeacherSources(...)` | List source records in an authorized collection |
@@ -68,7 +70,7 @@ The private WorkerEntrypoint exposes these operations:
 | `resumeTeacherSourceUpload(...)` | Resume an eligible failed import using its saved state |
 | `getTeacherSourceStatus(...)` | Read live import/index/QA status |
 
-The methods validate tenant ownership, project grants, collection grants and source origin at Core. The consumer performs its own teacher-record lookup before calling the binding.
+The methods validate tenant ownership, project grants, collection grants and source origin at Core. The consumer performs its own teacher-record lookup before calling the binding. Classroom and collection renames modify display data only; internal IDs and references do not change. Only the originating classroom may rename a collection or add new PDF sources to it. A receiving classroom can view a shared collection and its ready sources, and can revoke its own grant without changing the source's origin.
 
 Project/collection creates use a stable request ID and a SHA-256 hash of the submitted details. Repeating the same request is idempotent; reusing the request ID with different details returns a conflict. The UI holds a request ID constant while a create is being retried.
 
@@ -105,8 +107,11 @@ The originating project's collection grant cannot be revoked through this API. R
 All routes below are under the Cloudflare Access-protected `/operator` surface and resolve the teacher from app D1 before calling Core:
 
 - `GET/POST /operator/api/teachers/:tenantId/projects`
+- `PATCH /operator/api/teachers/:tenantId/projects/:projectId`
 - `GET/POST /operator/api/teachers/:tenantId/projects/:projectId/collections`
-- `GET/POST /operator/api/teachers/:tenantId/projects/:projectId/collections/:collectionId/sources`
+- `PATCH /operator/api/teachers/:tenantId/projects/:projectId/collections/:collectionId`
+- `POST/DELETE /operator/api/teachers/:tenantId/projects/:targetProjectId/collections/:collectionId/share`
+- `GET/POST /operator/api/teachers/:tenantId/projects/:projectId/collections/:collectionId/sources` (PDF upload start is allowed only from the originating classroom)
 - `POST .../sources/:importId/chunk`
 - `POST .../sources/:importId/complete`
 - `POST .../sources/:importId/resume`
