@@ -1,6 +1,6 @@
 # Human-Readable Reference Identifier Policy
 
-**Status:** Accepted architecture policy; implementation not started  
+**Status:** Tenant references implemented/deployed in application D1; Core project/collection/source metadata and allocators implemented in PR #107, production deployment pending  
 **Decision date:** 6 November 2026  
 **Applies to:** New BRVIN Teachers tenant and teacher-knowledge records only  
 **Repositories:** `ashini-x/brvin-teachers` and `ashini-x/parmar-ai`
@@ -124,7 +124,7 @@ When implementation is authorized:
 
 ## 9. Scope and implementation status
 
-This is an approved naming and allocation policy, not an implemented feature. The current BRVIN Admin and BRVIN Teachers bootstrap do not yet create or display this full code hierarchy.
+Tenant reference generation (`TCH-...`) is implemented in the deployed BRVIN Teachers application D1. PR #107 implements Core-owned project, collection and source reference columns, per-parent counters and the management API operations that allocate these references. Its Core typecheck/tests/build validation passed; its production deployment is pending. PR #2 implements the consumer screens that display the project/collection/source references and has passed tests/build/dry-run; its deployment is pending. No production tenant/project/collection/source has been created through these new flows.
 
 Before implementation, the two repositories must agree on:
 - the exact BRVIN D1 schema/migration for project, collection and source references and per-parent counters;
@@ -134,4 +134,4 @@ Before implementation, the two repositories must agree on:
 - safe allocation, concurrency, deletion, archival, sharing and isolation tests;
 - migration/rollback and compatibility behavior.
 
-Until that implementation is reviewed and deployed, continue using BRVIN-generated internal IDs and existing Admin workflows. Do not hand-invent reference codes in production or change the frozen v2 retrieval contract to carry these display codes.
+Until the coordinated Core and consumer releases are merged/deployed and the registered application environment is active, do not use the new reference hierarchy for manual production provisioning. Never hand-invent reference codes or change the frozen v2 retrieval contract to carry these display codes.
