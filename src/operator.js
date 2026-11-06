@@ -84,19 +84,20 @@ async function listTeacherProjects(env, tenant) {
   if (!result?.ok) return coreFailure(result, "BRVIN could not list classrooms.");
   const projects = Array.isArray(result.projects) ? result.projects : [];
   try {
+    await env.DB.prepare(
+      "UPDATE tenant_brvin_projects SET provisioning_status='revoked',updated_at=? WHERE tenant_id=? AND provisioning_status<>'revoked'"
+    ).bind(Date.now(), tenant.id).run();
     for (const project of projects) await storeProjectMapping(env.DB, tenant, project, "");
-    const mapped = await env.DB.prepare(
-      "SELECT brvin_project_id,project_ref,name,subject,provisioning_status,created_at,updated_at " +
-      "FROM tenant_brvin_projects WHERE tenant_id=? ORDER BY created_at DESC"
-    ).bind(tenant.id).all();
-    return json({ ok: true, projects: (mapped.results || []).map(row => ({
-      id: String(row.brvin_project_id),
-      reference: String(row.project_ref),
-      name: String(row.name),
-      subject: String(row.subject),
-      status: String(row.provisioning_status),
-      createdAt: Number(row.created_at),
-      updatedAt: Number(row.updated_at)
+    return json({ ok: true, projects: projects.map(project => ({
+      id: String(project.id),
+      reference: String(project.reference),
+      name: String(project.name),
+      subject: String(project.subject),
+      description: String(project.description ?? ""),
+      status: String(project.status),
+      collectionCount: Number(project.collectionCount ?? 0),
+      sourceCount: Number(project.sourceCount ?? 0),
+      updatedAt: Number(project.updatedAt ?? 0)
     })) });
   } catch {
     return json({ ok: false, error: "PROJECT_MAPPING_RECONCILIATION_REQUIRED", message: "BRVIN listed the project, but the application mapping could not be reconciled. Retry this request." }, 503);

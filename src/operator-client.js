@@ -111,7 +111,7 @@ else upload.append(el("h3","","Source uploads restricted"),el("p","","Upload is 
 const form=el("form","upload-form"),titleField=field("Source title","source-title"),fileWrap=el("div","field-group"),fileLabel=el("label","","PDF file");fileLabel.htmlFor="source-file";const file=el("input","field-input");file.id="source-file";file.type="file";file.accept="application/pdf,.pdf";file.required=true;fileWrap.append(fileLabel,file);
 const page=field("PDF page count","source-pages","number");page.input.min="1";page.input.max="2000";page.input.required=true;
 const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";check.required=true;const checkText=el("span","","I understand that Google Cloud OCR may incur usage charges.");checkWrap.append(check,checkText);
-const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);upload.append(form);
+const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);if(c.ownership==="owned")upload.append(form);
 const sourceList=el("div","source-list"),heading=el("div","panel-head"),refreshBtn=btn("↻ Refresh status","text-btn",refreshSources);heading.append(el("h3","","Sources"),refreshBtn);sourceList.append(heading);
 grid.append(top,manage,upload,sourceList);
 
