@@ -36,13 +36,14 @@ The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.the
 1. [Repository guide](docs/REPOSITORY_GUIDE.md) — two-repository workflow and required reading.
 2. [Architecture](docs/ARCHITECTURE.md) — product boundaries, tenant model and target topology.
 3. [Development plan](docs/DEVELOPMENT_PLAN.md) — phases and release gates.
-4. [Pilot brief](docs/PILOT_BRIEF.md) — current real teacher-led Physics pilot and Phase 0 decisions.
-4. [BRVIN v2 integration](docs/BRVIN_V2_INTEGRATION.md) — exact consumer contract and trust boundary.
-5. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
-6. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
-7. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
-8. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
-9. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
+4. [Pilot brief](docs/PILOT_BRIEF.md) — current real teacher-led Physics onboarding and Phase 0 decisions.
+5. [BRVIN v2 integration](docs/BRVIN_V2_INTEGRATION.md) — exact consumer contract and trust boundary.
+6. [Identifier policy](docs/IDENTIFIER_POLICY.md) — approved hierarchical human-readable references for tenants, projects, collections and sources; implementation is pending.
+7. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
+8. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
+9. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
+10. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
+11. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
 
 ## Working principle
 
