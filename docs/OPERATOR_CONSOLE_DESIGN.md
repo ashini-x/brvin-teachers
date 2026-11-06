@@ -1,12 +1,12 @@
 # BRVIN Teachers — Operator Console UX and Visual Design
 
-**Status:** Approved design direction; implementation not started  
+**Status:** Approved design direction; operator-console foundation implemented in PR #1; BRVIN management integration pending  
 **Decision date:** 6 November 2026  
 **Product:** BRVIN Teachers Operator Console  
 **Implementation repository:** `ashini-x/brvin-teachers`  
 **BRVIN core repository:** `ashini-x/parmar-ai`
 
-This is the canonical UI/UX design brief for the central operator console. It refines the approved multi-tenant architecture and identifier policy. It is a design specification, not evidence that any dashboard screen or management API has been implemented.
+This is the canonical UI/UX design and implementation reference for the central operator console. PR #1 implements the shell and teacher-profile slice; this does not imply that BRVIN management or classroom/source workflows are live.
 
 ## 1. Product experience
 
@@ -296,4 +296,4 @@ Do not render unimplemented sections as if they work. Build a complete, reliable
 
 ## 11. Implementation status
 
-This document records the approved UX direction only. The deployed BRVIN Teachers Worker is still a bootstrap runtime. The application D1, authenticated Operator Console, custom-name teacher creation, BRVIN management interface and all knowledge CRUD screens remain unimplemented. Build these through the normal two-repository design, test, migration and release process; do not claim they are live until verified.
+PR #1 implements the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and honest pending states. The initial application D1 migration and binding are checked in. PR validation passed tests, build and dry-run; production deployment is pending. BRVIN management, project/collection/source CRUD, PDF upload, OCR/indexing visibility, student/channel workflows, configuration, usage and full activity screens remain unimplemented.

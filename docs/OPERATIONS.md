@@ -1,8 +1,8 @@
 # Operations — Development, CI/CD and Production
 
-**Status:** Bootstrap Worker deployed; GitHub Actions → Cloudflare deployment verified
+**Status:** Operator Console foundation validated in PR #1; production release pending
 
-The `brvin-teachers` Worker is deployed at `https://brvin-teachers.thenewtongs.workers.dev` with only a minimal `/health` and root status response. The GitHub Actions workflow uses the `production` environment and successfully deployed the Worker using the repository's Cloudflare API token and account ID variable. The application D1 database and BRVIN Service Binding are not yet configured. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The currently deployed `brvin-teachers` Worker remains on its bootstrap version. PR #1 adds the Access-authenticated `/operator` console, application D1 binding and initial tenant schema. Its pull-request validation passed tests, production build and dry-run; production deployment has not yet run. The separate application D1 and Access application have been created. The BRVIN Service Binding and management integration remain pending. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 ## 1. Environments
 
@@ -41,7 +41,7 @@ Start with one runtime Worker and one application D1 database. Add Durable Objec
 
 ## 4. Deployment credentials
 
-CI deployment is already configured and has passed an end-to-end smoke test. The token is stored in GitHub, not in this repository. Its confirmed scope should remain limited to the existing `brvin-teachers` Worker with Workers Editor. Do not broaden it for ordinary releases. The repository now commits `package-lock.json`, and both validation and deployment use `npm ci` to install the exact dependency tree from that lockfile. When intentionally adding or upgrading dependencies, use `npm install` in development to update both `package.json` and `package-lock.json`, review the diff, and commit both files together. CI must continue using `npm ci`.
+CI deployment is already configured and has passed an end-to-end Worker smoke test. PR #1 adds a D1 migration step before deployment. The token is stored in GitHub, not in this repository. Keep its Workers Editor scope limited to the `brvin-teachers` Worker. The migration additionally requires D1 migration-write permission scoped only to `brvin-teachers-app`; do not grant broad D1 or account administration. The repository now commits `package-lock.json`, and both validation and deployment use `npm ci` to install the exact dependency tree from that lockfile. When intentionally adding or upgrading dependencies, use `npm install` in development to update both `package.json` and `package-lock.json`, review the diff, and commit both files together. CI must continue using `npm ci`.
 
 If later changes require additional deployment capabilities:
 - create a dedicated Cloudflare API token for this repository's deployment workflow;
@@ -50,7 +50,7 @@ If later changes require additional deployment capabilities:
 - store the token as a GitHub Actions secret in a protected production Environment;
 - store non-secret account identifiers as repository/environment variables where appropriate;
 - keep required-reviewer gates disabled for routine unattended releases; introduce an approval gate only if the operating policy changes or a specific high-risk operation genuinely requires it;
-- grant D1 migration permissions only if a workflow actually applies remote D1 migrations;
+- grant D1 migration-write permission scoped only to `brvin-teachers-app`, because the main-release workflow applies checked-in migrations to that database;
 - add custom-domain route permissions only if a custom route is configured;
 - do not permanently grant broad account administration to routine deployment automation.
 

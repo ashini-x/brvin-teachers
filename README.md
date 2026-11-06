@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** Bootstrap runtime deployed; pilot application implementation not started  
+**Status:** Protected Operator Console and tenant-profile foundation implemented in PR #1; production release pending merge/deploy  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
@@ -22,14 +22,15 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 - [x] Separate public repository created.
 - [x] Initial architecture and operating documentation established.
 - [x] Bootstrap Worker and non-sensitive `/health` endpoint deployed.
-- [x] GitHub Actions CI/CD verified end to end with committed `package-lock.json`, clean `npm ci` installs and post-deployment health checks.
-- [ ] Pilot teacher, subject, approved BRVIN project/source and first channel selected.
-- [ ] Runtime and database architecture translated into implementation contracts.
-- [ ] Full pilot foundation implemented (tenant model, D1 migrations, authentication and selected channel).
-- [ ] BRVIN application/environment registered and private v2 binding verified.
-- [ ] Genuine teacher-focused retrieval and post-revocation denial acceptance completed.
+- [x] Protected Operator Console implemented in PR #1: Access identity, live teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and audit records.
+- [x] Separate application D1 database created; initial tenant schema and binding are checked in.
+- [ ] Merge/deploy PR #1 and verify application D1 migration and Access identity in production.
+- [ ] Implement the separate BRVIN Core management interface for classrooms, collections, source registration, uploads and processing status.
+- [ ] Confirm first channel and student authentication/operating-cost decisions.
+- [ ] Register the BRVIN Teachers application/environment and private v2 binding.
+- [ ] Complete genuine teacher retrieval, isolation and post-revocation denial.
 
-The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.thenewtongs.workers.dev/health](https://brvin-teachers.thenewtongs.workers.dev/health). GitHub Actions [run #4](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916) passed the committed-lockfile `npm ci` install, all three unit tests, production build, deployment dry-run, production deployment and live health check. The current Worker version is `dc86a9d6-ee31-4165-a9fe-34a22a792955`. This proves the unattended GitHub-to-Cloudflare deployment path works. It does **not** mean the teaching platform is implemented: no application D1 database, tenant/student model, channel integration, BRVIN Service Binding or real retrieval flow exists yet. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
+PR #1 adds the operator UI and tenant-profile implementation. Its [validation run](https://github.com/ashini-x/brvin-teachers/actions/runs/42164975951) passed `npm ci`, all unit tests, production build and deployment dry-run; the pull-request deploy job was skipped as intended. The current deployed Worker remains the bootstrap version until PR #1 is merged and its production migration/deploy job succeeds. The application D1 and Access application have been created, but live D1 binding/migration and Access identity propagation still need production verification. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 

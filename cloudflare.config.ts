@@ -1,4 +1,4 @@
-import { defineConfig } from "cf/config";
+import { bindings, defineConfig } from "cf/config";
 import * as entrypoint from "./src/index.ts" with { type: "cf-worker" };
 
 export default defineConfig({
@@ -9,18 +9,15 @@ export default defineConfig({
     compatibilityDate: "2026-11-06",
     workersDev: true,
     previewUrls: false,
+    env: {
+      DB: bindings.d1({ id: "e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf", name: "brvin-teachers-app" })
+    },
     observability: {
       enabled: true,
       headSamplingRate: 1,
       redactQueryString: true,
-      logs: {
-        enabled: true,
-        invocationLogs: true,
-        persist: true
-      },
-      traces: {
-        enabled: false
-      }
+      logs: { enabled: true, invocationLogs: true, persist: true },
+      traces: { enabled: false }
     }
   }
 });

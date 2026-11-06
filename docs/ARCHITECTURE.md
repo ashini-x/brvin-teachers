@@ -1,6 +1,6 @@
 # BRVIN Teachers — Target Application Architecture
 
-**Status:** Approved architecture; implementation not started  
+**Status:** Operator Console and tenant-profile foundation implemented in PR #1; BRVIN management and teaching workflows pending  
 **Decision date:** 6 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **BRVIN core repository:** ashini-x/parmar-ai
@@ -174,4 +174,4 @@ These codes are operator-facing references only. Tenant and BRVIN records retain
 
 The central Operator Console is the primary operator-facing control surface for teacher onboarding and workspace operations. Its approved screen flow, custom teacher/project/collection/source names, automatically generated identifiers, workspace navigation, cross-system provisioning/failure states, and responsive ChatGPT-inspired dark visual system are specified in [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
 
-Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. BRVIN creates and allocates its own project, collection and source identities through a future narrow authenticated management interface; the console must not write BRVIN D1 directly or reuse the retrieval RPC for administrative writes. The design is approved but the UI, application D1 and management integration are not implemented.
+Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. BRVIN creates and allocates its own project, collection and source identities through a future narrow authenticated management interface; the console must not write BRVIN D1 directly or reuse the retrieval RPC for administrative writes. PR #1 implements the Access-authenticated shell, live teacher directory/search, custom teacher-name creation, generated tenant UUID/reference, workspace overview, rename preserving IDs and operator audit events. The initial application D1 schema and Worker binding are checked in; production migration/deploy and authenticated browser verification are still pending. The BRVIN management interface, project/collection/source creation, upload and retrieval remain unimplemented.
