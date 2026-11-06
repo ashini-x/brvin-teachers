@@ -1,12 +1,12 @@
 # BRVIN Teachers — Operator Console UX and Visual Design
 
-**Status:** Approved design direction; operator-console foundation implemented in PR #1; BRVIN management integration pending  
+**Status:** Operator Console deployed; classroom/collection/source screens implemented and validated in PR #2; production integration activation pending  
 **Decision date:** 6 November 2026  
 **Product:** BRVIN Teachers Operator Console  
 **Implementation repository:** `ashini-x/brvin-teachers`  
 **BRVIN core repository:** `ashini-x/parmar-ai`
 
-This is the canonical UI/UX design and implementation reference for the central operator console. PR #1 implements the shell and teacher-profile slice; this does not imply that BRVIN management or classroom/source workflows are live.
+This is the canonical UI/UX design and implementation reference for the central operator console. PR #1 deployed the shell and teacher-profile slice. PR #2 implements classroom, bookshelf/collection and PDF source workflows, but its integration is not deployed until both coordinated PRs merge and the production BRVIN environment identity is configured.
 
 ## 1. Product experience
 
@@ -296,4 +296,4 @@ Do not render unimplemented sections as if they work. Build a complete, reliable
 
 ## 11. Implementation status
 
-PR #1 implements the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and honest pending states. The initial application D1 migration and binding are checked in. PR validation passed tests, build and dry-run; production deployment is pending. BRVIN management, project/collection/source CRUD, PDF upload, OCR/indexing visibility, student/channel workflows, configuration, usage and full activity screens remain unimplemented.
+PR #1 deployed the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and operator audit records. PR #2 implements classroom/project creation/listing, collection/bookshelf creation/listing, source listing, SHA-256 fingerprinting, explicit OCR-cost acknowledgement, resumable 8 MiB PDF chunks, and use of Core's real processing status. PR #2 validation passed tests, production build and dry-run. The coordinated Core management entrypoint is PR #107 in `parmar-ai` and passed typecheck, tests, Node tests and both Worker dry-runs. Neither integration PR is deployed yet; the app binding still contains a deliberate placeholder. Student, channel, configuration, usage and full activity workflows remain unimplemented.
