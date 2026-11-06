@@ -1,8 +1,8 @@
 # Operations — Development, CI/CD and Production
 
-**Status:** Operating standard; no deployment resources configured yet
+**Status:** Operating standard; Worker resource shell provisioned, runtime deployment not configured
 
-This document describes the intended operating model. It does not claim that a Worker, D1 database, GitHub Actions workflow, Cloudflare token or production environment currently exists.
+A Cloudflare Worker resource named `brvin-teachers` exists in the same account as BRVIN's `brvin-service`. It has no uploaded code or deployed version, `workers.dev` is disabled, and it has no bindings or D1 database. No GitHub Actions deployment token or workflow exists yet. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 ## 1. Environments
 
