@@ -139,7 +139,11 @@ test("preserves Core's structured authorization failure without retrying", async
     queries: ["force and motion"],
   });
 
-  assert.deepEqual(result, coreFailure);
+  assert.equal(result.ok, false);
+  assert.equal(result.code, coreFailure.code);
+  assert.equal(result.message, coreFailure.message);
+  assert.equal(result.retryable, false);
+  assert.match(result.requestId, /^[a-f0-9-]{36}$/u);
   assert.equal(retrievalCalls, 1);
 });
 
@@ -233,12 +237,12 @@ test("does not retry a thrown retrieval call and returns a safe unavailable resu
     queries: ["force"],
   });
 
-  assert.deepEqual(result, {
-    ok: false,
-    code: "BRVIN_UNAVAILABLE",
-    message: "The private BRVIN retrieval service is temporarily unavailable.",
-    retryable: true,
-  });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, "BRVIN_UNAVAILABLE");
+  assert.equal(result.message, "The private BRVIN RPC call could not be completed.");
+  assert.equal(result.retryable, false);
+  assert.match(result.requestId, /^[a-f0-9-]{36}$/u);
+  assert.match(result.userMessage, /Do not automatically repeat/u);
   assert.equal(calls, 1);
 });
 

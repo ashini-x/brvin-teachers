@@ -1,3 +1,5 @@
+import { createBrvinConnector } from "./brvin-connector/src/index.ts";
+
 const TENANT_UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/u;
 const CHALLENGE_ID = TENANT_UUID;
 const HEX_256 = /^[a-f0-9]{64}$/u;
@@ -144,7 +146,11 @@ export async function listTeacherKnowledgeProjects(env, tenantId) {
 
     if (mappedIds.size === 0) return { ok: true, data: [] };
 
-    const core = await env.BRVIN_SERVICE.listAuthorizedProjectsV2();
+    const connector = createBrvinConnector(env.BRVIN_SERVICE, {
+      timeoutMs: 15_000,
+      maxResponseBytes: 8 * 1024 * 1024,
+    });
+    const core = await connector.listAuthorizedProjects();
     if (!core || core.ok !== true || !Array.isArray(core.data)) {
       if (core?.ok === false) return core;
       return failure("BRVIN_UNAVAILABLE", "BRVIN returned an invalid authorised-project response.", true);
@@ -186,7 +192,11 @@ export async function retrieveTeacherKnowledge(env, input) {
     }
     // Core rechecks the trusted environment, active project grant, source grants,
     // readiness and quota on every request. No result is cached or retried here.
-    return await env.BRVIN_SERVICE.retrieveProjectContextV2(retrieval);
+    const connector = createBrvinConnector(env.BRVIN_SERVICE, {
+      timeoutMs: 15_000,
+      maxResponseBytes: 8 * 1024 * 1024,
+    });
+    return await connector.retrieveProjectContext(retrieval);
   } catch {
     return failure("BRVIN_UNAVAILABLE", "The private BRVIN retrieval service is temporarily unavailable.", true);
   }

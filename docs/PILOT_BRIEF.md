@@ -1,6 +1,6 @@
 # BRVIN Teachers — First Pilot Brief
 
-**Status:** Phase 0 in progress — first real teacher onboarding in progress; source and channel setup pending  
+**Status:** First real teacher profile created; BRVIN production environment registered; project/collection/PDF upload awaits private binding release and verification  
 **Last updated:** 6 November 2026  
 **Purpose:** Define the smallest genuine teacher-led pilot before Phase 1 data-model implementation.
 
@@ -8,19 +8,19 @@
 
 | Field | Current decision |
 |---|---|
-| Pilot teacher | The real teacher participating in the first BRVIN Teachers onboarding exercise |
+| Pilot teacher | The real teacher profile already created in BRVIN Teachers (`TCH-000001`) |
 | Teacher participation | Confirmed; the teacher is directly participating in onboarding and will approve the teaching material |
 | Public documentation label | `First teacher onboarding — Physics` (role label only; no personal details) |
 | Operating model | Standard operator-managed teacher onboarding; this is the same process intended for future teachers |
 | Pilot size | One teacher and a small, teacher-approved student test group |
 
-Do not publish the teacher's personal identity or student details in this repository. In BRVIN Admin, enter the teacher's real professional/display name in the Teacher / owner label field. The repository uses a role label only; this is not a synthetic teacher or a special internal account.
+Do not publish the teacher's personal identity or student details in this repository. The actual display name is already stored in the BRVIN Teachers teacher profile and will be associated with the Core project through the Operator Console. The repository uses a role label only; this is not a synthetic teacher or a special internal account.
 
 ## 2. Subject and teaching workflow
 
-- Subject: Physics.
+- Subject: Physics (Class IX Science topic).
 - Initial topic candidate: **Newton's Laws of Motion**.
-- Target knowledge source: one teacher-approved, exactly three-page PDF.
+- Target knowledge source: the prepared three-page Class IX *Force and Laws of Motion* handout; teacher review and approval are still pending.
 - Intended student workflow: a student asks a conceptual or numerical question about the three-page topic; the assistant explains the relevant principle, works through a suitable example and cites the source title and physical PDF page where supported.
 - Topic scope and final learning outcomes must be confirmed by the teacher before the source is treated as approved pilot material.
 
@@ -28,21 +28,21 @@ This is a deliberately narrow pilot. It does not authorize a general-purpose phy
 
 ## 3. BRVIN knowledge setup
 
-Create the following records in the existing BRVIN Admin workspace in `ashini-x/parmar-ai`:
+After the private management binding is live, create the following records from the existing teacher's workspace in the BRVIN Teachers Operator Console. The Console calls the Core management entrypoint; BRVIN Core remains the owner of project, collection and source records. Do not create a duplicate project manually in BRVIN Admin.
 
 | Record | Proposed value |
 |---|---|
-| Teacher / owner label | The teacher's actual professional/display name, followed by `— Physics` |
+| Teacher / owner label | The existing teacher workspace; retain the real display name already entered |
 | Knowledge project | `Physics — Newton's Laws of Motion` |
 | Project description | `Teacher-approved three-page physics pilot covering Newton's laws, force, mass, acceleration, inertia, action-reaction and worked examples.` |
 | Collection | `Physics — Newton's Laws of Motion` |
 | Collection description | `Approved source material for the first BRVIN Teachers physics pilot.` |
-| Source title | `Newton's Laws of Motion — Teacher-approved notes (3 pages)` |
-| Source type | One original or otherwise legitimately licensed three-page PDF approved by the teacher |
+| Source title | `Force and Laws of Motion — Class IX pilot handout (3 pages)` |
+| Source type | Prepared attributed CC BY-SA 4.0 adaptation; obtain teacher approval before upload |
 
 BRVIN remains the authority for PDF storage, OCR, indexing, readiness, grants and retrieval. Do not create a separate BRVIN knowledge database or copy the source into the consumer app.
 
-After ingestion, verify that the source is `READY` and all three pages are indexed. Then grant the pilot project access to the collection (or use a narrow direct-book grant if the actual Admin workflow makes that more appropriate). Do not grant the project to an application yet; the consumer application has not been registered.
+After ingestion, verify that the source is `READY` and all three pages are indexed. The management API creates the BRVIN Teachers application-project grant when it creates the teacher-owned project. Then assign the collection/source to that project through the teacher workspace. Do not create duplicate Core projects or manually change grants unless the operator workflow explicitly requires it.
 
 Google Cloud Vision OCR may incur usage costs; acknowledge the upload prompt only after reviewing the intended PDF and its page count.
 
@@ -95,9 +95,12 @@ Quality, latency and cost thresholds must be agreed before wider student access.
 ## 9. Remaining Phase 0 decisions
 
 - [ ] Confirm Newton's Laws of Motion as the exact three-page topic.
-- [ ] Obtain or prepare the teacher-approved three-page PDF.
-- [ ] Create the BRVIN knowledge project using the teacher's real professional/display name as its owner label.
-- [ ] Create the collection and upload the PDF.
+- [x] Prepare an attributed three-page open-license adaptation; teacher approval remains pending.
+- [x] Create the real teacher profile in BRVIN Teachers (`TCH-000001`).
+- [x] Register BRVIN Teachers and its active production environment in BRVIN Admin.
+- [ ] Release and verify the two private BRVIN bindings.
+- [ ] Create the Physics knowledge project and collection from the existing teacher workspace.
+- [ ] Obtain teacher approval and upload the prepared PDF.
 - [ ] Verify `READY` and 3/3 indexed pages.
 - [ ] Assign the collection/source to the pilot project.
 - [ ] Select the first channel.

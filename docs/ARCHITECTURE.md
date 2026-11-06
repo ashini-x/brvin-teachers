@@ -1,6 +1,6 @@
 # BRVIN Teachers — Target Application Architecture
 
-**Status:** Operator Console, Core management entrypoint and classroom/collection/source consumer workflows deployed; app/environment registration and student retrieval activation pending  
+**Status:** Operator Console and teacher workspace deployed; production BRVIN app/environment registered; private binding activation staged; student/channel runtime remains deferred  
 **Decision date:** 6 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **BRVIN core repository:** ashini-x/parmar-ai
@@ -174,7 +174,7 @@ These codes are operator-facing references only. Tenant and BRVIN records retain
 
 The central Operator Console is the primary operator-facing control surface for teacher onboarding and workspace operations. Its approved screen flow, custom teacher/project/collection/source names, automatically generated identifiers, workspace navigation, cross-system provisioning/failure states, and responsive ChatGPT-inspired dark visual system are specified in [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
 
-Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. PR #1 deployed the Access-authenticated shell, teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and operator audit events. PR #2 deployed the Classroom, Collection/Bookshelf and PDF Source workflows and their same-account management adapter. Core PR #107 deployed the named `BrvinTeachersManagementApi` entrypoint, ownership metadata and hierarchical reference allocators in `parmar-ai`. Releases #42171352464 (consumer) and #42171109140 (Core) passed production deployment and smoke checks. The `BRVIN_MANAGEMENT` binding is live; the production app/environment remains unregistered in BRVIN Admin, and the source configuration deliberately retains a fail-closed placeholder. The separate retrieval v2 binding is not configured.
+Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. PR #1 deployed the Access-authenticated shell, teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and audit events. PR #2 deployed classroom/collection/source workflows and the same-account management adapter; Core PR #107 deployed `BrvinTeachersManagementApi`. Consumer release #42174893189 deployed the tenant-scoped v2 helper and content-free connection-probe route. The first real teacher profile exists in application D1 and BRVIN Admin has an active production app/environment. This PR stages the generated trusted environment ID on both private bindings and vendors the pinned v2 connector. No student-facing channel, authentication or model runtime is implemented.
 
 
 ## 12. Management integration and rollout
