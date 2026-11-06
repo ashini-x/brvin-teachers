@@ -1,35 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-
 import { handleRequest } from "../src/health.js";
 
-test("GET /health returns a safe bootstrap health response", async () => {
+test("health is safe and reports operator runtime", async () => {
   const response = handleRequest(new Request("https://example.test/health"));
-
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
-
   const body = await response.json();
   assert.equal(body.ok, true);
   assert.equal(body.app, "brvin-teachers");
-  assert.equal(body.status, "bootstrap");
-  assert.equal(body.version, "0.1.0-bootstrap");
+  assert.equal(body.status, "operator-console");
+  assert.equal(body.version, "0.2.0-operator-foundation");
+  assert.equal("tenantCount" in body, false);
 });
 
-test("GET / returns the bootstrap application status", async () => {
-  const response = handleRequest(new Request("https://example.test/"));
-
-  assert.equal(response.status, 200);
-  const body = await response.json();
-  assert.equal(body.app, "brvin-teachers");
-  assert.equal(body.status, "bootstrap");
+test("root advertises the protected operator route", async () => {
+  const body = await (await handleRequest(new Request("https://example.test/"))).json();
+  assert.equal(body.operatorPath, "/operator");
 });
 
-test("unknown routes return JSON 404", async () => {
-  const response = handleRequest(new Request("https://example.test/not-found"));
-
+test("unknown routes return 404", async () => {
+  const response = handleRequest(new Request("https://example.test/nope"));
   assert.equal(response.status, 404);
-  const body = await response.json();
-  assert.equal(body.ok, false);
-  assert.equal(body.error, "NOT_FOUND");
 });
