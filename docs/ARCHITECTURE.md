@@ -1,6 +1,6 @@
 # BRVIN Teachers — Target Application Architecture
 
-**Status:** Operator Console/tenant profiles deployed; Core management and classroom/source consumer implementation validated in PRs #107 and #2; rollout activation pending  
+**Status:** Operator Console, Core management entrypoint and classroom/collection/source consumer workflows deployed; app/environment registration and student retrieval activation pending  
 **Decision date:** 6 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **BRVIN core repository:** ashini-x/parmar-ai
@@ -168,7 +168,7 @@ The first useful deployment must demonstrate:
 
 Use the approved hierarchical reference-code policy in [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md): one tenant reference (`TCH`), project references scoped to a tenant (`PRJ`), collection references scoped to their originating project (`COL`), and source references scoped to their originating collection (`SRC`). Each child counter restarts at `001` under its parent, so local numbers may repeat while the full path remains unique.
 
-These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application; BRVIN allocates project, collection and source references because it owns those records. The policy is accepted but not implemented; the coordinated two-repository schema/admin work must be completed before production codes are issued.
+These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application's D1; BRVIN allocates project, collection and source references because it owns those records. The TCH allocator and Core PRJ/COL/SRC metadata/sequence implementation are deployed. No production references have yet been issued because no teacher or project has been created in the new workflow.
 
 ## 11. Operator Console experience
 
