@@ -33,9 +33,9 @@ Create the following records in the existing BRVIN Admin workspace in `ashini-x/
 | Record | Proposed value |
 |---|---|
 | Teacher / owner label | `Self-pilot teacher — Physics` |
-| Knowledge project | `Physics — Newton's Laws of Motion (Pilot)` |
+| Knowledge project | `Self-pilot teacher — Physics` |
 | Project description | `Teacher-approved three-page physics pilot covering Newton's laws, force, mass, acceleration, inertia, action-reaction and worked examples.` |
-| Collection | `Physics — Newton's Laws — Pilot Sources` |
+| Collection | `Physics — Newton's Laws of Motion` |
 | Collection description | `Approved source material for the first BRVIN Teachers physics pilot.` |
 | Source title | `Newton's Laws of Motion — Teacher Pilot Notes` |
 | Source type | One original or otherwise legitimately licensed three-page PDF approved by the teacher |
