@@ -46,6 +46,8 @@ No provider bot token or production BRVIN identity is required just to create th
 
 ## Phase 2 — First real channel and BRVIN v2 consumer
 
+**Preparation status — 6 November 2026:** The tenant-scoped v2 project-list/retrieval helpers and the content-free connection-probe route are implemented on feature branch `feat/brvin-v2-retrieval-binding`, with mocked contract and security tests added. PR validation is pending; this code is not merged or deployed. The actual `BRVIN_SERVICE` Service Binding is intentionally not configured yet: Phase 0 still requires teacher approval of the source, channel, student authentication, answer/citation behavior and usage budget. Do not create or register production identities, teachers, sources or grants until those gates are satisfied.
+
 - implement one selected channel end-to-end;
 - authenticate the channel webhook or web session;
 - resolve tenant/student server-side;
