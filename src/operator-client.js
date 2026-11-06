@@ -1,5 +1,8 @@
+import { sha256File } from "./sha256.js";
 export const OPERATOR_CLIENT_JS = `(() => {
 "use strict";
+const sha256File = ${sha256File.toString()};
+
 const $=id=>document.getElementById(id),content=$("content"),dialog=$("create-dialog"),form=$("create-form");let teachers=[],toastTimer=null;
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n}
 function btn(text,cls,action){const n=el("button",cls,text);n.type="button";if(action)n.addEventListener("click",action);return n}
@@ -130,7 +133,7 @@ if(selected.size<8||selected.size>1024*1024*1024){toast("PDF must be between 8 b
 const pageCount=Number(page.input.value);if(!Number.isSafeInteger(pageCount)||pageCount<1||pageCount>2000){toast("Enter a valid PDF page count.");return}
 submit.disabled=true;submit.textContent="Preparing PDF…";progress.hidden=false;progress.textContent="Calculating the PDF fingerprint…";
 try{
-const buffer=await selected.arrayBuffer(),digest=await crypto.subtle.digest("SHA-256",buffer),sha=Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();
+const sha=await sha256File(selected,(done,total)=>{progress.textContent="Calculating PDF fingerprint · "+Math.floor(done/total*100)+"%";});
 const started=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({title:titleField.input.value||selected.name.replace(/\.pdf$/iu,""),filename:selected.name,sha256:sha,size:selected.size,pageCount,costConfirmed:check.checked})});
 const uploadInfo=started.upload||{},importId=uploadInfo.importId;if(typeof importId!=="string")throw new Error("BRVIN did not return an upload identifier.");
 let uploaded=Number(uploadInfo.uploadedBytes||0);const chunkSize=8*1024*1024;
