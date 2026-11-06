@@ -39,11 +39,12 @@ The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.the
 4. [Pilot brief](docs/PILOT_BRIEF.md) — current real teacher-led Physics onboarding and Phase 0 decisions.
 5. [BRVIN v2 integration](docs/BRVIN_V2_INTEGRATION.md) — exact consumer contract and trust boundary.
 6. [Identifier policy](docs/IDENTIFIER_POLICY.md) — approved hierarchical human-readable references for tenants, projects, collections and sources; implementation is pending.
-7. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
-8. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
-9. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
-10. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
-11. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
+7. [Operator Console design](docs/OPERATOR_CONSOLE_DESIGN.md) — custom teacher names, workspaces, automatic identities and the approved ChatGPT-inspired dark UI direction.
+8. [Security](docs/SECURITY.md) — identity, isolation, secrets and evidence handling.
+9. [Operations](docs/OPERATIONS.md) — CI/CD, release, logging and recovery.
+10. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
+11. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
+12. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
 
 ## Working principle
 
