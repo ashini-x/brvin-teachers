@@ -32,7 +32,7 @@ jobs:
     environment:
       name: production
     env:
-      CLOUDFLARE_ACCOUNT_ID: ${ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       CF_SEND_TELEMETRY: "false"
     steps:
       - uses: actions/checkout@v6
@@ -42,12 +42,12 @@ jobs:
       - name: Apply application D1 migrations
         run: npx cf d1 migrations apply e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf --dir migrations
         env:
-          CLOUDFLARE_API_TOKEN: ${ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - run: npx cf build --mode production
       - name: Deploy existing Worker resource
         run: npx cf deploy --prebuilt --mode production
         env:
-          CLOUDFLARE_API_TOKEN: ${ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Verify public health endpoint
         shell: bash
         env:
