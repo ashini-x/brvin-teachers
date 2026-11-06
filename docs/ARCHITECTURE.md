@@ -1,6 +1,6 @@
 # BRVIN Teachers — Target Application Architecture
 
-**Status:** Operator Console and tenant-profile foundation implemented in PR #1; BRVIN management and teaching workflows pending  
+**Status:** Operator Console/tenant profiles deployed; Core management and classroom/source consumer implementation validated in PRs #107 and #2; rollout activation pending  
 **Decision date:** 6 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **BRVIN core repository:** ashini-x/parmar-ai
@@ -174,4 +174,9 @@ These codes are operator-facing references only. Tenant and BRVIN records retain
 
 The central Operator Console is the primary operator-facing control surface for teacher onboarding and workspace operations. Its approved screen flow, custom teacher/project/collection/source names, automatically generated identifiers, workspace navigation, cross-system provisioning/failure states, and responsive ChatGPT-inspired dark visual system are specified in [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
 
-Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. BRVIN creates and allocates its own project, collection and source identities through a future narrow authenticated management interface; the console must not write BRVIN D1 directly or reuse the retrieval RPC for administrative writes. PR #1 implements the Access-authenticated shell, live teacher directory/search, custom teacher-name creation, generated tenant UUID/reference, workspace overview, rename preserving IDs and operator audit events. The initial application D1 schema and Worker binding are checked in; production migration/deploy and authenticated browser verification are still pending. The BRVIN management interface, project/collection/source creation, upload and retrieval remain unimplemented.
+Teacher names are arbitrary editable display names, not unique keys. New tenant UUID/reference values are allocated by this application's database. PR #1 deployed the Access-authenticated shell, teacher directory/search, custom-name creation, generated tenant UUID/reference, workspace view, rename and operator audit events. PR #2 adds the Classroom, Collection/Bookshelf and PDF Source workflows and their same-account service-binding adapter; its tests, production build and dry-run pass. The coordinated Core management entrypoint is PR #107 in `parmar-ai`; its typecheck, tests, Node tests and both Worker dry-runs pass. The entrypoint creates Core-owned projects/collections/sources, allocates the hierarchical references, and uses the existing private ingestion workflow. These integration PRs are validated but not yet deployed. The Service Binding intentionally contains a fail-closed placeholder until the production application/environment is registered in BRVIN Admin.
+
+
+## 12. Management integration and rollout
+
+See [BRVIN_MANAGEMENT_INTEGRATION.md](BRVIN_MANAGEMENT_INTEGRATION.md) for the private management entrypoint, trusted environment binding, ownership checks, available operations, PDF upload lifecycle and rollout steps. It is deliberately separate from the frozen BRVIN retrieval v2 API and does not give this repository direct Core database or storage access.
