@@ -32,7 +32,8 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 3. docs/REPOSITORY_GUIDE.md
 4. docs/ARCHITECTURE.md
 5. docs/DEVELOPMENT_PLAN.md
-6. The relevant contract, security, operations or decision document.
+6. docs/IDENTIFIER_POLICY.md when working on tenant, project, collection or source identity/reference handling.
+7. The relevant contract, security, operations or decision document.
 
 ### In ashini-x/parmar-ai
 
@@ -79,6 +80,7 @@ Do not infer that an implementation is deployed because it exists on main; do no
 ## 5. Canonical external references
 
 - [BRVIN Teachers architecture in core planning docs](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_TEACHERS_ARCHITECTURE.md)
+- [BRVIN Teachers identifier policy](https://github.com/ashini-x/brvin-teachers/blob/main/docs/IDENTIFIER_POLICY.md)
 - [BRVIN core master plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_MASTER_PLAN.md)
 - [BRVIN system reference](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_SYSTEM_REFERENCE.md)
 - [BRVIN frozen RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)
