@@ -17,10 +17,8 @@ interface BrvinTeachersManagementBinding {
   listTeacherProjects(input: { tenantReference: string }): Promise<BrvinManagementResponse<{ projects: Array<Record<string, unknown>> }>>;
   createTeacherProject(input: { tenantReference: string; name: string; subject: string; description?: string; ownerLabel?: string; requestId: string }): Promise<BrvinManagementResponse<{ project: Record<string, unknown> }>>;
   updateTeacherProject(input: { tenantReference: string; projectId: string; name: string; subject: string; description?: string }): Promise<BrvinManagementResponse<{ project: Record<string, unknown> }>>;
-  updateTeacherProject(input: { tenantReference: string; projectId: string; name: string; subject: string; description?: string }): Promise<BrvinManagementResponse<{ project: Record<string, unknown> }>>;
   listTeacherCollections(input: { tenantReference: string; projectId: string }): Promise<BrvinManagementResponse<{ collections: Array<Record<string, unknown>> }>>;
   createTeacherCollection(input: { tenantReference: string; projectId: string; name: string; description?: string; requestId: string }): Promise<BrvinManagementResponse<{ collection: Record<string, unknown> }>>;
-  updateTeacherCollection(input: { tenantReference: string; projectId: string; collectionId: string; name: string; description?: string }): Promise<BrvinManagementResponse<{ collection: Record<string, unknown> }>>;
   updateTeacherCollection(input: { tenantReference: string; projectId: string; collectionId: string; name: string; description?: string }): Promise<BrvinManagementResponse<{ collection: Record<string, unknown> }>>;
   grantTeacherCollection(input: { tenantReference: string; projectId: string; collectionId: string }): Promise<BrvinManagementResponse<{ projectId: string; collectionId: string }>>;
   revokeTeacherCollection(input: { tenantReference: string; projectId: string; collectionId: string }): Promise<BrvinManagementResponse<{ projectId: string; collectionId: string }>>;
