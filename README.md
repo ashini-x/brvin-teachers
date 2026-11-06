@@ -22,14 +22,14 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 - [x] Separate public repository created.
 - [x] Initial architecture and operating documentation established.
 - [x] Bootstrap Worker and non-sensitive `/health` endpoint deployed.
-- [x] GitHub Actions CI/CD successfully tested against Cloudflare production deployment.
+- [x] GitHub Actions CI/CD verified end to end with committed `package-lock.json`, clean `npm ci` installs and post-deployment health checks.
 - [ ] Pilot teacher, subject, approved BRVIN project/source and first channel selected.
 - [ ] Runtime and database architecture translated into implementation contracts.
 - [ ] Full pilot foundation implemented (tenant model, D1 migrations, authentication and selected channel).
 - [ ] BRVIN application/environment registered and private v2 binding verified.
 - [ ] Genuine teacher-focused retrieval and post-revocation denial acceptance completed.
 
-The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.thenewtongs.workers.dev/health](https://brvin-teachers.thenewtongs.workers.dev/health). GitHub Actions run #3 passed unit tests, build, deployment dry-run, production deployment and the live health check. This proves the GitHub-to-Cloudflare deployment path works. It does **not** mean the teaching platform is implemented: no application D1 database, tenant/student model, channel integration, BRVIN Service Binding or real retrieval flow exists yet. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
+The Worker now serves a minimal bootstrap health endpoint at [brvin-teachers.thenewtongs.workers.dev/health](https://brvin-teachers.thenewtongs.workers.dev/health). GitHub Actions [run #4](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916) passed the committed-lockfile `npm ci` install, all three unit tests, production build, deployment dry-run, production deployment and live health check. The current Worker version is `dc86a9d6-ee31-4165-a9fe-34a22a792955`. This proves the unattended GitHub-to-Cloudflare deployment path works. It does **not** mean the teaching platform is implemented: no application D1 database, tenant/student model, channel integration, BRVIN Service Binding or real retrieval flow exists yet. See [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 
