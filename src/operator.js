@@ -19,4 +19,240 @@ async function list(db,q){const v=typeof q==="string"?q.replace(/\s+/gu," ").tri
 async function get(db,id){const r=await db.prepare("SELECT id,tenant_ref,name,student_display_name,status,created_at,updated_at FROM teachers WHERE id=? LIMIT 1").bind(id).first();if(!r)return null;const p=await db.prepare("SELECT brvin_project_id,project_ref,name,subject,provisioning_status FROM tenant_brvin_projects WHERE tenant_id=? ORDER BY created_at DESC").bind(id).all();return{id:String(r.id),reference:String(r.tenant_ref),name:String(r.name),studentDisplayName:String(r.student_display_name),status:String(r.status),createdAt:Number(r.created_at),updatedAt:Number(r.updated_at),projects:(p.results||[]).map(x=>({id:String(x.brvin_project_id),reference:String(x.project_ref),name:String(x.name),subject:String(x.subject),status:String(x.provisioning_status)}))}}
 async function create(db,actor,b){const name=clean(b.name),display=clean(b.studentDisplayName)||name;if(name.length<2||display.length<2)return json({ok:false,error:"Enter valid teacher and student-facing names."},400);const id=crypto.randomUUID().toLowerCase(),now=Date.now();try{await db.batch([db.prepare("UPDATE id_sequences SET current_value=current_value+1,updated_at=? WHERE scope_key='tenant'").bind(now),db.prepare("INSERT INTO teachers(id,tenant_ref,name,student_display_name,status,created_at,updated_at) SELECT ?, 'TCH-' || printf('%06d',current_value), ?, ?, 'active', ?, ? FROM id_sequences WHERE scope_key='tenant'").bind(id,name,display,now,now),db.prepare("INSERT INTO operator_audit_events(id,actor_email,event_type,entity_type,entity_id,reference,details_json,created_at,tenant_id) SELECT ?,?,'teacher.created','teacher',id,tenant_ref,'{}',?,id FROM teachers WHERE id=?").bind(crypto.randomUUID().toLowerCase(),actor.email,now,id)]);const teacher=await get(db,id);if(!teacher)throw new Error();return json({ok:true,teacher},201)}catch{return json({ok:false,error:"The teacher could not be created. Check the application database and retry."},503)}}
 async function rename(db,actor,id,b){const name=clean(b.name),display=clean(b.studentDisplayName)||name;if(name.length<2||display.length<2)return json({ok:false,error:"Enter valid teacher and student-facing names."},400);const now=Date.now();try{const r=await db.prepare("UPDATE teachers SET name=?,student_display_name=?,updated_at=? WHERE id=?").bind(name,display,now,id).run();if(Number(r.meta?.changes||0)!==1)return json({ok:false,error:"Teacher workspace not found."},404);await db.prepare("INSERT INTO operator_audit_events(id,actor_email,event_type,entity_type,entity_id,reference,details_json,created_at,tenant_id) SELECT ?,?,'teacher.renamed','teacher',id,tenant_ref,'{}',?,id FROM teachers WHERE id=?").bind(crypto.randomUUID().toLowerCase(),actor.email,now,id).run();return json({ok:true,teacher:await get(db,id)})}catch{return json({ok:false,error:"The teacher details could not be saved."},503)}}
-export async function handleOperatorRequest(req,env,ctx){const path=new URL(req.url).pathname;if(path!=="/operator"&&!path.startsWith("/operator/"))return null;const actor=await identity(ctx);if(!actor)return json({ok:false,error:"OPERATOR_AUTH_REQUIRED"},401);if(req.method==="GET"&&(path==="/operator"||path==="/operator/"))return page(PAGE);if(req.method==="GET"&&path==="/operator/assets/app.css")return asset(CSS,"text/css; charset=utf-8");if(req.method==="GET"&&path==="/operator/assets/app.js"){const{OPERATOR_CLIENT_JS}=await import("./operator-client.js");return asset(OPERATOR_CLIENT_JS,"application/javascript; charset=utf-8")}if(!path.startsWith("/operator/api/"))return json({ok:false,error:"NOT_FOUND"},404);if(!env?.DB)return json({ok:false,error:"APP_DATABASE_NOT_CONFIGURED"},503);if(req.method==="GET"&&path==="/operator/api/session")return json({ok:true,operator:{name:actor.name,email:actor.email}});if(req.method==="GET"&&path==="/operator/api/teachers"){try{return json({ok:true,teachers:await list(env.DB,new URL(req.url).searchParams.get("q")||"")})}catch{return json({ok:false,error:"TEACHER_DIRECTORY_UNAVAILABLE"},503)}}if(req.method==="POST"&&path==="/operator/api/teachers"){if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);const b=await readBody(req);return b?create(env.DB,actor,b):json({ok:false,error:"INVALID_REQUEST_BODY"},400)}const m=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})$/iu);if(m&&req.method==="GET"){try{const t=await get(env.DB,m[1]);return t?json({ok:true,teacher:t}):json({ok:false,error:"TEACHER_NOT_FOUND"},404)}catch{return json({ok:false,error:"TEACHER_WORKSPACE_UNAVAILABLE"},503)}}if(m&&req.method==="PATCH"){if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);const b=await readBody(req);return b?rename(env.DB,actor,m[1],b):json({ok:false,error:"INVALID_REQUEST_BODY"},400)}return json({ok:false,error:"NOT_FOUND"},404)}
+async function getTenantRecord(db, tenantId) {
+  if (!/^[a-f0-9-]{36}$/iu.test(tenantId)) return null;
+  const row = await db.prepare(
+    "SELECT id,tenant_ref,name,student_display_name,status FROM teachers WHERE id=? LIMIT 1"
+  ).bind(tenantId).first();
+  return row ? {
+    id: String(row.id),
+    reference: String(row.tenant_ref),
+    name: String(row.name),
+    studentDisplayName: String(row.student_display_name),
+    status: String(row.status)
+  } : null;
+}
+
+function coreFailure(result, fallback) {
+  const code = typeof result?.code === "string" ? result.code : "BRVIN_MANAGEMENT_FAILED";
+  const message = typeof result?.message === "string" ? result.message.slice(0, 220) : fallback;
+  const status = code === "PROJECT_NOT_FOUND" || code === "RESOURCE_NOT_FOUND" ? 404 :
+    code === "IDEMPOTENCY_CONFLICT" || code === "COLLECTION_NOT_GRANTED" ? 409 :
+    code === "INVALID_REQUEST" ? 400 : 502;
+  return json({ ok: false, error: code, message, retryable: result?.retryable === true }, status);
+}
+
+async function storeProjectMapping(db, tenant, project, requestId) {
+  const id = typeof project?.id === "string" ? project.id : "";
+  const reference = typeof project?.reference === "string" ? project.reference : "";
+  const name = clean(project?.name);
+  const subject = clean(project?.subject) || name;
+  if (!id || !reference || !name || !subject) throw new Error("BRVIN returned an incomplete project identity.");
+  const now = Date.now();
+  await db.prepare(
+    "INSERT OR IGNORE INTO tenant_brvin_projects(id,tenant_id,brvin_project_id,project_ref,name,subject,provisioning_status,operation_id,created_at,updated_at) " +
+    "VALUES(?,?,?,?,?,?,'active',?,?,?)"
+  ).bind(crypto.randomUUID().toLowerCase(), tenant.id, id, reference, name, subject, requestId || null, now, now).run();
+  const mapped = await db.prepare(
+    "SELECT tenant_id,project_ref FROM tenant_brvin_projects WHERE brvin_project_id=? LIMIT 1"
+  ).bind(id).first();
+  if (!mapped || mapped.tenant_id !== tenant.id || mapped.project_ref !== reference) {
+    throw new Error("A BRVIN project is already mapped to a different teacher workspace.");
+  }
+  await db.prepare(
+    "UPDATE tenant_brvin_projects SET name=?,subject=?,provisioning_status='active',updated_at=? WHERE brvin_project_id=? AND tenant_id=?"
+  ).bind(name, subject, now, id, tenant.id).run();
+}
+
+async function requireManagement(env) {
+  if (!env?.BRVIN_MANAGEMENT) return { error: json({ ok: false, error: "BRVIN_MANAGEMENT_NOT_CONFIGURED", message: "The private BRVIN management binding is not configured." }, 503) };
+  try {
+    const health = await env.BRVIN_MANAGEMENT.health();
+    if (!health?.ok) return { error: coreFailure(health, "The BRVIN application environment is not registered or active.") };
+    return { management: env.BRVIN_MANAGEMENT };
+  } catch {
+    return { error: json({ ok: false, error: "BRVIN_MANAGEMENT_UNAVAILABLE", message: "The private BRVIN management service is temporarily unavailable." }, 503) };
+  }
+}
+
+async function listTeacherProjects(env, tenant) {
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  const result = await connection.management.listTeacherProjects({ tenantReference: tenant.reference });
+  if (!result?.ok) return coreFailure(result, "BRVIN could not list classrooms.");
+  const projects = Array.isArray(result.projects) ? result.projects : [];
+  try {
+    for (const project of projects) await storeProjectMapping(env.DB, tenant, project, "");
+    const mapped = await env.DB.prepare(
+      "SELECT brvin_project_id,project_ref,name,subject,provisioning_status,created_at,updated_at " +
+      "FROM tenant_brvin_projects WHERE tenant_id=? ORDER BY created_at DESC"
+    ).bind(tenant.id).all();
+    return json({ ok: true, projects: (mapped.results || []).map(row => ({
+      id: String(row.brvin_project_id),
+      reference: String(row.project_ref),
+      name: String(row.name),
+      subject: String(row.subject),
+      status: String(row.provisioning_status),
+      createdAt: Number(row.created_at),
+      updatedAt: Number(row.updated_at)
+    })) });
+  } catch {
+    return json({ ok: false, error: "PROJECT_MAPPING_RECONCILIATION_REQUIRED", message: "BRVIN listed the project, but the application mapping could not be reconciled. Retry this request." }, 503);
+  }
+}
+
+async function createTeacherProject(env, tenant, body) {
+  const name = clean(body.name);
+  const subject = clean(body.subject);
+  const description = typeof body.description === "string" ? body.description.trim().slice(0, 500) : "";
+  const requestId = typeof body.requestId === "string" && /^[a-f0-9-]{36}$/iu.test(body.requestId)
+    ? body.requestId.toLowerCase() : "";
+  if (name.length < 2 || !subject || !requestId) return json({ ok: false, error: "Enter a classroom name, subject and valid request ID." }, 400);
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  try {
+    const result = await connection.management.createTeacherProject({
+      tenantReference: tenant.reference,
+      name,
+      subject,
+      description,
+      ownerLabel: tenant.name,
+      requestId
+    });
+    if (!result?.ok) return coreFailure(result, "BRVIN could not create this classroom.");
+    await storeProjectMapping(env.DB, tenant, result.project, requestId);
+    return json({ ok: true, project: result.project }, 201);
+  } catch {
+    return json({
+      ok: false,
+      error: "PROJECT_MAPPING_PENDING",
+      message: "BRVIN created the classroom, but its application mapping could not be confirmed. Retry the same request so the operation can be reconciled."
+    }, 503);
+  }
+}
+
+async function listTeacherCollections(env, tenant, projectId) {
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  const result = await connection.management.listTeacherCollections({
+    tenantReference: tenant.reference,
+    projectId
+  });
+  return result?.ok ? json({ ok: true, collections: result.collections }) : coreFailure(result, "BRVIN could not list collections.");
+}
+
+async function createTeacherCollection(env, tenant, projectId, body) {
+  const name = clean(body.name);
+  const description = typeof body.description === "string" ? body.description.trim().slice(0, 500) : "";
+  const requestId = typeof body.requestId === "string" && /^[a-f0-9-]{36}$/iu.test(body.requestId)
+    ? body.requestId.toLowerCase() : "";
+  if (name.length < 2 || !requestId) return json({ ok: false, error: "Enter a collection name and valid request ID." }, 400);
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  const result = await connection.management.createTeacherCollection({
+    tenantReference: tenant.reference, projectId, name, description, requestId
+  });
+  return result?.ok ? json({ ok: true, collection: result.collection }, 201) : coreFailure(result, "BRVIN could not create this collection.");
+}
+
+async function listTeacherSources(env, tenant, projectId, collectionId) {
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  const result = await connection.management.listTeacherSources({
+    tenantReference: tenant.reference, projectId, collectionId
+  });
+  return result?.ok ? json({ ok: true, sources: result.sources }) : coreFailure(result, "BRVIN could not list sources.");
+}
+
+async function startTeacherSourceUpload(env, tenant, projectId, collectionId, body) {
+  const title = clean(body.title);
+  const filename = typeof body.filename === "string" ? body.filename.split(/[\\/]/u).pop()?.slice(0, 255) || "" : "";
+  const sha256 = typeof body.sha256 === "string" ? body.sha256.toUpperCase() : "";
+  const size = Number(body.size);
+  const pageCount = Number(body.pageCount);
+  if (!title || !filename || !/^[A-F0-9]{64}$/u.test(sha256) ||
+      !Number.isSafeInteger(size) || size < 8 || size > 1024 * 1024 * 1024 ||
+      !Number.isSafeInteger(pageCount) || pageCount < 1 || pageCount > 2000 ||
+      body.costConfirmed !== true) {
+    return json({ ok: false, error: "INVALID_UPLOAD_DETAILS", message: "Check the PDF name, fingerprint, file size, page count and OCR cost confirmation." }, 400);
+  }
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  const result = await connection.management.startTeacherSourceUpload({
+    tenantReference: tenant.reference, projectId, collectionId,
+    title, filename, sha256, size, pageCount, costConfirmed: true
+  });
+  return result?.ok ? json({ ok: true, source: result.source, upload: result.upload }, 201) : coreFailure(result, "BRVIN could not start this upload.");
+}
+
+async function handleTeacherSourceLifecycle(req, env, tenant, projectId, collectionId, importId, action) {
+  const connection = await requireManagement(env);
+  if (connection.error) return connection.error;
+  if (action === "chunk") {
+    if (!sameOrigin(req) || !req.headers.get("content-type")?.toLowerCase().startsWith("application/octet-stream")) {
+      return json({ ok: false, error: "INVALID_CHUNK_REQUEST" }, 403);
+    }
+    const start = Number(req.headers.get("x-upload-start"));
+    const totalSize = Number(req.headers.get("x-upload-total-size"));
+    if (!Number.isSafeInteger(start) || start < 0 || !Number.isSafeInteger(totalSize) || totalSize < 8) {
+      return json({ ok: false, error: "INVALID_CHUNK_RANGE" }, 400);
+    }
+    const bytes = await req.arrayBuffer();
+    if (bytes.byteLength < 1 || bytes.byteLength > 8 * 1024 * 1024) return json({ ok: false, error: "CHUNK_SIZE_INVALID" }, 413);
+    const result = await connection.management.uploadTeacherSourceChunk({
+      tenantReference: tenant.reference, projectId, collectionId, importId, start, totalSize, bytes
+    });
+    return result?.ok ? json({ ok: true, upload: result.upload }) : coreFailure(result, "BRVIN could not accept this upload chunk.");
+  }
+  const input = { tenantReference: tenant.reference, projectId, collectionId, importId };
+  const result = action === "complete"
+    ? await connection.management.completeTeacherSourceUpload(input)
+    : action === "resume"
+      ? await connection.management.resumeTeacherSourceUpload(input)
+      : await connection.management.getTeacherSourceStatus(input);
+  return result?.ok ? json({ ok: true, result: result.result }) : coreFailure(result, "BRVIN could not complete this source operation.");
+}
+
+export async function handleOperatorRequest(req,env,ctx){const path=new URL(req.url).pathname;if(path!=="/operator"&&!path.startsWith("/operator/"))return null;const actor=await identity(ctx);if(!actor)return json({ok:false,error:"OPERATOR_AUTH_REQUIRED"},401);if(req.method==="GET"&&(path==="/operator"||path==="/operator/"))return page(PAGE);if(req.method==="GET"&&path==="/operator/assets/app.css")return asset(CSS,"text/css; charset=utf-8");if(req.method==="GET"&&path==="/operator/assets/app.js"){const{OPERATOR_CLIENT_JS}=await import("./operator-client.js");return asset(OPERATOR_CLIENT_JS,"application/javascript; charset=utf-8")}if(!path.startsWith("/operator/api/"))return json({ok:false,error:"NOT_FOUND"},404);if(!env?.DB)return json({ok:false,error:"APP_DATABASE_NOT_CONFIGURED"},503);if(req.method==="GET"&&path==="/operator/api/session")return json({ok:true,operator:{name:actor.name,email:actor.email}});if(req.method==="GET"&&path==="/operator/api/teachers"){try{return json({ok:true,teachers:await list(env.DB,new URL(req.url).searchParams.get("q")||"")})}catch{return json({ok:false,error:"TEACHER_DIRECTORY_UNAVAILABLE"},503)}}if(req.method==="POST"&&path==="/operator/api/teachers"){if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);const b=await readBody(req);return b?create(env.DB,actor,b):json({ok:false,error:"INVALID_REQUEST_BODY"},400)}const m=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})$/iu);if(m&&req.method==="GET"){try{const t=await get(env.DB,m[1]);return t?json({ok:true,teacher:t}):json({ok:false,error:"TEACHER_NOT_FOUND"},404)}catch{return json({ok:false,error:"TEACHER_WORKSPACE_UNAVAILABLE"},503)}}if(m&&req.method==="PATCH"){if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);const b=await readBody(req);return b?rename(env.DB,actor,m[1],b):json({ok:false,error:"INVALID_REQUEST_BODY"},400)}
+const projectsMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects$/iu);
+if(projectsMatch){
+  const tenant=await getTenantRecord(env.DB,projectsMatch[1]);
+  if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  if(req.method==="GET")return listTeacherProjects(env,tenant);
+  if(req.method==="POST"){
+    if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+    const body=await readBody(req);return body?createTeacherProject(env,tenant,body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
+  }
+}
+const collectionsMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections$/iu);
+if(collectionsMatch){
+  const tenant=await getTenantRecord(env.DB,collectionsMatch[1]);
+  if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  if(req.method==="GET")return listTeacherCollections(env,tenant,collectionsMatch[2]);
+  if(req.method==="POST"){
+    if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+    const body=await readBody(req);return body?createTeacherCollection(env,tenant,collectionsMatch[2],body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
+  }
+}
+const sourcesMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections\/([a-f0-9-]{36})\/sources$/iu);
+if(sourcesMatch){
+  const tenant=await getTenantRecord(env.DB,sourcesMatch[1]);
+  if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  if(req.method==="GET")return listTeacherSources(env,tenant,sourcesMatch[2],sourcesMatch[3]);
+  if(req.method==="POST"&&path.endsWith("/sources")){
+    if(!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+    const body=await readBody(req);return body?startTeacherSourceUpload(env,tenant,sourcesMatch[2],sourcesMatch[3],body):json({ok:false,error:"INVALID_REQUEST_BODY"},400);
+  }
+}
+const sourceLifecycleMatch=path.match(/^\/operator\/api\/teachers\/([a-f0-9-]{36})\/projects\/([a-f0-9-]{36})\/collections\/([a-f0-9-]{36})\/sources\/([a-f0-9-]{36})\/(chunk|complete|resume|status)$/iu);
+if(sourceLifecycleMatch){
+  const tenant=await getTenantRecord(env.DB,sourceLifecycleMatch[1]);
+  if(!tenant)return json({ok:false,error:"TEACHER_NOT_FOUND"},404);
+  const action=sourceLifecycleMatch[5].toLowerCase();
+  if(action==="status"&&req.method==="GET")return handleTeacherSourceLifecycle(req,env,tenant,sourceLifecycleMatch[2],sourceLifecycleMatch[3],sourceLifecycleMatch[4],"status");
+  if(action!=="status"&&req.method==="POST"){
+    if(action!=="chunk"&&!validWrite(req))return json({ok:false,error:"INVALID_ORIGIN_OR_CONTENT_TYPE"},403);
+    return handleTeacherSourceLifecycle(req,env,tenant,sourceLifecycleMatch[2],sourceLifecycleMatch[3],sourceLifecycleMatch[4],action);
+  }
+}
+return json({ok:false,error:"NOT_FOUND"},404)}
