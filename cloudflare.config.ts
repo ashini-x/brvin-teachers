@@ -11,8 +11,7 @@ export default defineConfig({
     previewUrls: false,
     env: {
       DB: bindings.d1({ id: "e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf", name: "brvin-teachers-app" }),
-      // Replace this deliberately unregistered placeholder after creating the
-      // brvin-teachers / production environment in BRVIN Admin.
+      // BRVIN-generated production identity. Keep this value deployment-controlled.
       BRVIN_MANAGEMENT: bindings.worker({
         worker: "parmar-ai",
         exportName: "BrvinTeachersManagementApi",
