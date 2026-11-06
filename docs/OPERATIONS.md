@@ -26,13 +26,13 @@ Use GitHub as the source of truth. The expected flow is:
 4. Run formatting, typecheck, unit, integration and security checks.
 5. Review the diff and test evidence.
 6. Merge through the protected main branch.
-7. Deploy production only through the approved GitHub Actions environment and approval gate.
+7. Deploy production through the `production` GitHub Actions Environment. Configure required reviewers there if each production deployment must pause for human approval.
 8. Run health, application and private BRVIN smoke tests.
 9. Record the deployed revision, Worker version and acceptance outcome.
 
 Keep GitHub Actions permissions minimal. The default GITHUB_TOKEN should have only the repository permissions a workflow needs. Do not expose Cloudflare production credentials to pull_request jobs from forks or use unsafe pull_request_target patterns.
 
-Do not configure both GitHub Actions and Cloudflare Workers Builds to independently auto-deploy the same Worker. GitHub Actions is the release authority for this repository. The current [workflow](../.github/workflows/deploy.yml) was verified in [run #3](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860): unit tests, production build, deployment dry-run, production Worker deployment and live `/health` smoke test all passed. Pull requests validate without production credentials; pushes to `main` deploy through the `production` environment.
+Do not configure both GitHub Actions and Cloudflare Workers Builds to independently auto-deploy the same Worker. GitHub Actions is the release authority for this repository. The current [workflow](../.github/workflows/deploy.yml) was verified in [run #3](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860): unit tests, production build, deployment dry-run, production Worker deployment and live `/health` smoke test all passed. Pull requests validate without production credentials; pushes to `main` deploy through the `production` environment. The verified run proceeded without a manual approval pause, so a required-reviewer protection rule has not been verified.
 
 ## 3. Cloudflare tooling and resources
 
@@ -42,7 +42,7 @@ Start with one runtime Worker and one application D1 database. Add Durable Objec
 
 ## 4. Deployment credentials
 
-CI deployment is already configured and has passed an end-to-end smoke test. The token is stored in GitHub, not in this repository. Its confirmed scope should remain limited to the existing `brvin-teachers` Worker with Workers Editor. Do not broaden it for ordinary releases.
+CI deployment is already configured and has passed an end-to-end smoke test. The token is stored in GitHub, not in this repository. Its confirmed scope should remain limited to the existing `brvin-teachers` Worker with Workers Editor. Do not broaden it for ordinary releases. The current workflow runs `npm install` because a committed `package-lock.json` has not yet been added; commit a lockfile and switch to `npm ci` before expanding the dependency tree or treating builds as fully reproducible.
 
 If later changes require additional deployment capabilities:
 - create a dedicated Cloudflare API token for this repository's deployment workflow;
