@@ -1,6 +1,6 @@
 # BRVIN v2 Integration — Consumer Contract
 
-**Status:** BRVIN Teachers is registered as an active production application/environment. Tenant-scoped project/retrieval helpers and the content-free probe are merged/deployed; this PR vendors the pinned BRVIN connector and configures both private bindings. Production activation awaits this PR's validation, merge and deployment.  
+**Status:** BRVIN Teachers production identity, both private Service Bindings and the pinned v2 connector are deployed. CI and production smoke checks passed in release #42181732210. The remaining connection gate is BRVIN Admin's one-time proof acceptance; no student channel/model runtime is live.  
 **Source of truth:** [Frozen BRVIN RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)  
 **Integration guide:** [BRVIN Application Integration Guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
 
@@ -22,7 +22,7 @@ The private retrieval Worker has no public route. Do not add a public URL, expos
 
 ## 2. Trusted identity
 
-The Core management entrypoint and consumer `BRVIN_MANAGEMENT` Service Binding are deployed. BRVIN Admin now has an active `brvin-teachers` application and active `production` environment. The generated environment ID is `515e7752-20ff-42f9-b393-7c8130a64bf8`. The currently deployed consumer still has the fail-closed placeholder; this PR replaces it and adds the separate `BRVIN_SERVICE` binding. Both bindings use the same BRVIN-issued ID through trusted deployment props. The ID is never accepted from browser or request input.
+The Core management entrypoint and both consumer Service Bindings are deployed. BRVIN Admin has an active `brvin-teachers` application and `production` environment with generated ID `515e7752-20ff-42f9-b393-7c8130a64bf8`. Both bindings use this same trusted deployment prop. The ID is never accepted from browser or request input. The deployed binding state is not considered Connected until BRVIN Admin accepts the proof from the consumer's live probe.
 
 BRVIN Admin generates the immutable applicationEnvironmentId. Obtain the exact value from the non-secret integration handoff and configure it as trusted Worker deployment configuration/entrypoint props. Never invent, guess or hardcode an ID from another application.
 
@@ -90,7 +90,7 @@ Never accept a project ID supplied by the browser, bot payload, URL, custom head
 
 ## 6. Connection verification is separate from retrieval
 
-The current BRVIN integration guide defines a protected challenge/proof connection verification flow. The consumer feature branch now wires POST and OPTIONS /brvin/connection-probe to a content-free handler:
+The current BRVIN integration guide defines a protected challenge/proof connection verification flow. The deployed consumer wires POST and OPTIONS /brvin/connection-probe to a content-free handler:
 
 - The handler accepts exactly challengeId and nonce, with bounded JSON input.
 - The Worker calls proveConnectionV2({ challengeId, nonce }) through the private binding, server-side only.
@@ -131,4 +131,4 @@ Any proposed change to these rules requires a reviewed, coordinated change to th
 
 ## 9. Current implementation status
 
-The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`. The BRVIN Teachers application and production environment are now registered and active in BRVIN Admin. PR #4 merged the tenant-scoped project-list/retrieval helpers and content-free connection-probe route; the main deployment passed [release #42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189). This follow-up PR vendors `@brvin/connector` from immutable upstream Core commit `91b6a499bd782ae298b41e790157c23682f10881`, applies its deadline/response-size/no-retry behavior to retrieval and configures both private bindings with the registered production environment ID. Its code and live connection state remain pending CI/deployment evidence. The student-facing channel/authentication/model workflow is not implemented and remains deliberately deferred. The existing helper is not evidence that a student chatbot or model tool path is live. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md), [infrastructure status](INFRASTRUCTURE_STATUS.md), and the core contract.
+The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`. BRVIN Teachers production release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed the registered `BRVIN_MANAGEMENT` and `BRVIN_SERVICE` bindings, the pinned `@brvin/connector` from immutable upstream Core commit `91b6a499bd782ae298b41e790157c23682f10881`, and the bounded/no-retry tenant adapter. The Worker version is `79d10bd5-319c-49a6-bed4-bb587d5916c4`. The remaining connection acceptance is BRVIN Admin's one-time proof. The student-facing channel/authentication/model workflow is not implemented and remains deliberately deferred; the existing helper is not evidence that a student chatbot or model tool path is live. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md), [infrastructure status](INFRASTRUCTURE_STATUS.md), and the core contract.
