@@ -1,6 +1,6 @@
 # BRVIN Teachers — First Pilot Brief
 
-**Status:** First real teacher profile created; BRVIN production environment registered; project/collection/PDF upload awaits private binding release and verification  
+**Status:** Real teacher profile created; BRVIN production identity and both private bindings deployed; proof and knowledge-project/PDF onboarding pending  
 **Last updated:** 6 November 2026  
 **Purpose:** Define the smallest genuine teacher-led pilot before Phase 1 data-model implementation.
 
@@ -98,7 +98,9 @@ Quality, latency and cost thresholds must be agreed before wider student access.
 - [x] Prepare an attributed three-page open-license adaptation; teacher approval remains pending.
 - [x] Create the real teacher profile in BRVIN Teachers (`TCH-000001`).
 - [x] Register BRVIN Teachers and its active production environment in BRVIN Admin.
-- [ ] Release and verify the two private BRVIN bindings.
+- [x] Deploy both private BRVIN bindings with the BRVIN-generated Production identity (consumer release #42181732210).
+- [ ] Run BRVIN Admin **Verify connection** and confirm **Connected · no ready knowledge**.
+- [ ] Confirm management health in the existing teacher workspace.
 - [ ] Create the Physics knowledge project and collection from the existing teacher workspace.
 - [ ] Obtain teacher approval and upload the prepared PDF.
 - [ ] Verify `READY` and 3/3 indexed pages.
@@ -111,4 +113,4 @@ Quality, latency and cost thresholds must be agreed before wider student access.
 
 ## 10. Explicitly deferred
 
-Do not create the application D1 schema, register a BRVIN application/environment, issue a BRVIN app-project grant, configure the private Service Binding or add live channel credentials until the required Phase 0 decisions and Phase 1 foundation are ready. Do not use a synthetic production teacher, source or grant.
+The application D1, real teacher profile, BRVIN application/environment and private bindings are already deployed. Do not recreate those records or create synthetic teachers/projects/sources/grants. Before project/source onboarding, complete BRVIN Admin's one-time connection proof and confirm management health. Student channel credentials and student traffic remain deferred until channel/authentication/budget decisions are approved.
