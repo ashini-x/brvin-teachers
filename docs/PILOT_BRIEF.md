@@ -10,7 +10,7 @@
 |---|---|
 | Pilot teacher | The real teacher participating in the first BRVIN Teachers onboarding exercise |
 | Teacher participation | Confirmed; the teacher is directly participating in onboarding and will approve the teaching material |
-| Public documentation label | `First teacher pilot — Physics` (role label only; no personal details) |
+| Public documentation label | `First teacher onboarding — Physics` (role label only; no personal details) |
 | Operating model | Standard operator-managed teacher onboarding; this is the same process intended for future teachers |
 | Pilot size | One teacher and a small, teacher-approved student test group |
 
