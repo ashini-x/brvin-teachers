@@ -1,6 +1,6 @@
 # BRVIN v2 Integration — Consumer Contract
 
-**Status:** Private management Service Binding deployed; separate BRVIN v2 retrieval binding not yet configured  
+**Status:** Tenant-scoped v2 adapter helpers and the content-free connection-probe route are implemented on feature branch `feat/brvin-v2-retrieval-binding`; PR #4 validation passed and review/merge remain pending. The production BRVIN application/environment and separate retrieval binding are still not configured.  
 **Source of truth:** [Frozen BRVIN RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)  
 **Integration guide:** [BRVIN Application Integration Guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
 
@@ -86,12 +86,14 @@ Never accept a project ID supplied by the browser, bot payload, URL, custom head
 
 ## 6. Connection verification is separate from retrieval
 
-The current BRVIN integration guide defines a protected challenge/proof connection verification flow. Implement it as documented when the consumer Worker exists:
+The current BRVIN integration guide defines a protected challenge/proof connection verification flow. The consumer feature branch now wires POST and OPTIONS /brvin/connection-probe to a content-free handler:
 
-- The consumer route accepts only the documented challenge shape.
+- The handler accepts exactly challengeId and nonce, with bounded JSON input.
 - The Worker calls proveConnectionV2({ challengeId, nonce }) through the private binding, server-side only.
-- The route returns only the proof result, not source data or credentials.
-- BRVIN Admin's protected finalizer verifies and consumes the short-lived proof.
+- It returns only the proof; it does not return readiness, project/source metadata or credentials.
+- CORS is non-credentialed and supports only POST/OPTIONS plus content-type.
+- Core failures are mapped to safe consumer error codes; nonce/proof values are never logged.
+- BRVIN Admin's protected finalizer remains responsible for verifying and consuming the short-lived proof.
 - Expired, replayed, malformed or wrong-environment challenges fail closed.
 
 proveConnectionV2 is for connection verification, not a substitute for any of the three retrieval methods. Do not invoke it from browser/mobile code or expose nonce/proof material in logs.
@@ -125,4 +127,4 @@ Any proposed change to these rules requires a reviewed, coordinated change to th
 
 ## 9. Current implementation status
 
-The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`; the `BRVIN_MANAGEMENT` binding is deployed in `brvin-teachers`. These are administrative project/collection/source lifecycle operations and are deliberately separate from retrieval v2. The app must still register its production environment and configure `BRVIN_SERVICE` to private `brvin-service` / `BrvinRetrievalApi` using the generated environment UUID. No teacher, source, student or channel has been provisioned yet. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md) and [infrastructure status](INFRASTRUCTURE_STATUS.md).
+The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`; the `BRVIN_MANAGEMENT` binding is deployed in `brvin-teachers`. These are administrative project/collection/source lifecycle operations and are deliberately separate from retrieval v2. Tenant-scoped project-list/retrieval helpers and the content-free connection-probe route are implemented on feature branch `feat/brvin-v2-retrieval-binding`; mocked tenant-boundary, contract-validation and probe tests passed in PR validation run [#42174366282](https://github.com/ashini-x/brvin-teachers/actions/runs/42174366282). The branch is not merged or deployed. The production BRVIN application/environment remains unregistered, the app config still has no `BRVIN_SERVICE` binding, and no teacher/source/student/channel has been provisioned. Do not configure the binding or enable student traffic until the real pilot decisions and BRVIN-generated environment identity are ready. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md), [infrastructure status](INFRASTRUCTURE_STATUS.md), and the core contract.

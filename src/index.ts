@@ -1,12 +1,76 @@
+import { handleBrvinConnectionProbe } from "./brvin-v2.js";
 import { handleOperatorRequest } from "./operator.js";
 import { handleRequest as publicRequest } from "./health.js";
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (new URL(request.url).pathname === "/brvin/connection-probe") {
+      return handleBrvinConnectionProbe(request, env);
+    }
     const response = await handleOperatorRequest(request, env, ctx);
     return response ?? publicRequest(request);
   }
 };
+
+type BrvinV2Failure = {
+  ok: false;
+  code: string;
+  message: string;
+  retryable: boolean;
+  userMessage?: string;
+  requestId?: string;
+};
+
+type BrvinV2Result<T> = { ok: true; data: T } | BrvinV2Failure;
+
+interface BrvinV2Binding {
+  listAuthorizedProjectsV2(): Promise<BrvinV2Result<Array<{
+    projectId: string;
+    slug: string;
+    name: string;
+    description: string;
+    ready: boolean;
+    authorizedSourceCount: number;
+  }>>>;
+  getProjectStatusV2(input: { projectId: string }): Promise<BrvinV2Result<{
+    projectId: string;
+    ready: boolean;
+    authorizedSourceCount: number;
+  }>>;
+  retrieveProjectContextV2(input: {
+    projectId: string;
+    queries: string[];
+    pageNumbers?: number[];
+    requestId?: string;
+  }): Promise<BrvinV2Result<{
+    passages: Array<{
+      id: string;
+      bookId: string;
+      bookTitle: string;
+      pdfPage: number;
+      printedPage?: string;
+      section?: string;
+      text: string;
+      score: number;
+    }>;
+    pageImages?: Array<{
+      mimeType: "image/jpeg" | "image/png" | "image/webp";
+      data: string;
+      byteLength: number;
+    }>;
+    searchedSources: number;
+    searchCount: number;
+  }>>;
+  proveConnectionV2(input: {
+    challengeId: string;
+    nonce: string;
+  }): Promise<BrvinV2Result<{
+    challengeId: string;
+    proof: string;
+    ready: boolean;
+    authorizedSourceCount: number;
+  }>>;
+}
 
 type BrvinManagementResponse<T extends Record<string, unknown> = Record<string, unknown>> =
   | ({ ok: true } & T)
@@ -33,4 +97,5 @@ interface BrvinTeachersManagementBinding {
 interface Env {
   DB: D1Database;
   BRVIN_MANAGEMENT?: BrvinTeachersManagementBinding;
+  BRVIN_SERVICE?: BrvinV2Binding;
 }
