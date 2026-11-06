@@ -14,11 +14,11 @@
 | Operating model | Standard operator-managed teacher onboarding; this is the same process intended for future teachers |
 | Pilot size | One teacher and a small, teacher-approved student test group |
 
-Do not publish the teacher's personal identity or student details in this repository. In BRVIN Admin, enter the teacher's real professional/display name in the Teacher / owner label field. The repository uses a role label only; this is not a synthetic teacher or a special internal account.
+Do not publish the teacher's personal identity or student details in this repository. The actual display name is already stored in the BRVIN Teachers teacher profile and will be associated with the Core project through the Operator Console. The repository uses a role label only; this is not a synthetic teacher or a special internal account.
 
 ## 2. Subject and teaching workflow
 
-- Subject: Physics.
+- Subject: Physics (Class IX Science topic).
 - Initial topic candidate: **Newton's Laws of Motion**.
 - Target knowledge source: the prepared three-page Class IX *Force and Laws of Motion* handout; teacher review and approval are still pending.
 - Intended student workflow: a student asks a conceptual or numerical question about the three-page topic; the assistant explains the relevant principle, works through a suitable example and cites the source title and physical PDF page where supported.
