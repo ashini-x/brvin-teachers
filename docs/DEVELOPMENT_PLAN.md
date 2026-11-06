@@ -1,6 +1,6 @@
 # BRVIN Teachers — Development Plan
 
-**Status:** Real teacher workspace created; BRVIN production application/environment registered; private binding activation is in this PR; student/channel runtime remains deferred  
+**Status:** Real teacher workspace created; BRVIN production application/environment registered; both private bindings deployed; one-time proof and knowledge-source onboarding pending  
 **Rule:** A phase is complete only when its stated evidence is recorded. A planned task is not a deployed capability.
 
 ## Phase 0 — Select and validate the first pilot
@@ -23,11 +23,11 @@ Record the approved pilot and measurable acceptance tests before Phase 1 is cons
 
 ## Phase 1 — Repository and application foundation
 
-**Status:** Shared Worker, application D1/tenant profile, protected Operator Console and classroom/collection/source workflows are deployed. The first real teacher profile exists and BRVIN Admin has an active production application/environment. The management and retrieval Service Binding identity/config activation is staged in the current PR; live connection proof and knowledge-project/source onboarding remain after release.
+**Status:** Shared Worker, application D1/tenant profile, protected Operator Console and classroom/collection/source workflows are deployed. The first real teacher profile exists and BRVIN Admin has an active production application/environment. Both private Service Bindings and the pinned connector are deployed in consumer release #42181732210. Live BRVIN proof/management-health verification and knowledge-project/source onboarding remain.
 
-The protected Operator Console, tenant-profile D1 schema and application Access controls are deployed. Consumer release [#42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189) deployed the tenant-scoped v2 project-list/retrieval helpers and content-free probe, in addition to the existing classroom/collection/source UI. Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the named management entrypoint. The real teacher profile and active BRVIN application/environment now exist. This PR vendors the bounded BRVIN connector and configures both private bindings; deployment and proof verification remain pending. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The protected Operator Console, tenant-profile D1 schema and application Access controls are deployed. Consumer release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed the two private bindings and pinned BRVIN connector; its validation, D1 migration, production deploy, public health and Access checks all passed. Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the named management entrypoint. The real teacher profile and active BRVIN application/environment exist. The remaining binding acceptance is BRVIN Admin's one-time proof and management health verification. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
-The Operator Console can currently create real teacher profiles. This teacher's profile is already present; do not create a duplicate. The BRVIN application/environment is registered. After both private bindings are released and verified, use the existing teacher workspace to create the real knowledge project, collection and teacher-approved PDF. No synthetic production records are allowed.
+The Operator Console can currently create real teacher profiles. This teacher's profile is already present; do not create a duplicate. The BRVIN application/environment and both private bindings are deployed. After BRVIN Admin accepts the connection proof and management health is confirmed, use the existing teacher workspace to create the real knowledge project, collection and teacher-approved PDF. No synthetic production records are allowed.
 
 Build only the remaining capabilities required by the selected pilot:
 
@@ -46,14 +46,13 @@ No provider bot token or production BRVIN identity is required just to create th
 
 ## Phase 2 — First real channel and BRVIN v2 consumer
 
-**Current status — 6 November 2026:** PR #4 merged and deployed in consumer release [#42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189), adding tenant-scoped project-list/retrieval helpers and the content-free connection probe. BRVIN Admin registration is now active. This PR vendors `@brvin/connector` from immutable Core commit `91b6a499bd782ae298b41e790157c23682f10881`, adds deadlines/response-size bounds/no-auto-retry, and stages `BRVIN_MANAGEMENT` plus `BRVIN_SERVICE` with the generated trusted environment ID. CI/deployment and live proof remain pending. The student-facing model/channel/authentication runtime does not yet exist; do not create student traffic or infer it from the connection proof.
+**Current status — 6 November 2026:** PR #4 merged and deployed in consumer release [#42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189), adding tenant-scoped project-list/retrieval helpers and the content-free connection probe. PR #5 merged and deployed in consumer release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210). The deployed Worker uses the BRVIN-issued Production environment ID on both private bindings and vendors `@brvin/connector` from immutable Core commit `91b6a499bd782ae298b41e790157c23682f10881`, with deadlines/response-size bounds/no automatic retry. Only BRVIN Admin's one-time proof and management-health confirmation remain. The student-facing model/channel/authentication runtime does not yet exist; do not create student traffic or infer it from the connection proof.
 
 - implement one selected channel end-to-end;
 - authenticate the channel webhook or web session;
 - resolve tenant/student server-side;
 - implement the tenant's model orchestration and answer response;
-- release the management and retrieval Service Bindings using the same BRVIN-generated production environment identity;
-- verify the management entrypoint and complete BRVIN Admin's one-time connection-proof challenge;
+- complete BRVIN Admin's one-time connection-proof challenge and verify the management entrypoint's health;
 - implement the frozen v2 client with strict types and bounded inputs;
 - perform the documented connection proof check;
 - retrieve evidence from a real approved teacher project;
