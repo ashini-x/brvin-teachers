@@ -163,3 +163,9 @@ The first useful deployment must demonstrate:
 - denial after revoking the app-project grant;
 - safe failure when BRVIN or a provider is unavailable;
 - operator visibility into the tenant, connection and usage without exposing secrets.
+
+## 10. Human-readable reference identifiers
+
+Use the approved hierarchical reference-code policy in [IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md): one tenant reference (`TCH`), project references scoped to a tenant (`PRJ`), collection references scoped to their originating project (`COL`), and source references scoped to their originating collection (`SRC`). Each child counter restarts at `001` under its parent, so local numbers may repeat while the full path remains unique.
+
+These codes are operator-facing references only. Tenant and BRVIN records retain their immutable system IDs; authorization, database relationships and v2 retrieval continue to use those IDs. Tenant references are allocated by this application; BRVIN allocates project, collection and source references because it owns those records. The policy is accepted but not implemented; the coordinated two-repository schema/admin work must be completed before production codes are issued.
