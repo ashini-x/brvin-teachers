@@ -111,3 +111,23 @@ test("operator API requires D1", async () => {
   const response = await handleOperatorRequest(request("/operator/api/teachers"), {}, access);
   assert.equal(response.status, 503);
 });
+
+
+test("teacher classroom APIs fail closed until the trusted BRVIN management binding is active", async () => {
+  const db = new FakeD1();
+  const created = await handleOperatorRequest(
+    request("/operator/api/teachers", "POST", { name: "Physics Teacher" }),
+    { DB: db },
+    access
+  );
+  const teacher = (await created.json()).teacher;
+  const response = await handleOperatorRequest(
+    request("/operator/api/teachers/" + teacher.id + "/projects"),
+    { DB: db },
+    access
+  );
+  const body = await response.json();
+  assert.equal(response.status, 503);
+  assert.equal(body.error, "BRVIN_MANAGEMENT_NOT_CONFIGURED");
+  assert.equal(db.teachers.length, 1);
+});
