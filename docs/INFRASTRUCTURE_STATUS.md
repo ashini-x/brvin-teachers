@@ -57,7 +57,6 @@ Do not change either existing Worker as part of BRVIN Teachers setup.
 - Generated BRVIN `applicationEnvironmentId` and BRVIN application/environment registration.
 - Tenant/student/channel identity implementation and first channel integration.
 - Channel credentials, bot/webhook registrations or model-provider credentials.
-- Channel credentials, bot/webhook registrations or model-provider credentials.
 - Custom domain, routes, Durable Objects, Queues or other optional services.
 
 ## 5. Next setup sequence
