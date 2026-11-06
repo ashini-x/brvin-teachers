@@ -13,7 +13,7 @@ This file records observed Cloudflare resources. It is a status record, not a de
 | Worker name | `brvin-teachers` |
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Created | 6 November 2026 |
-| Resource state | Bootstrap version deployed to production |
+| Deployed resource state | Bootstrap version remains in production until PR #1 is merged and deployed |
 | `deployed_on` | `2026-11-06T02:01:54.572431Z` |
 | Observability | Enabled |
 | Invocation logs | Enabled and persisted |
@@ -22,14 +22,29 @@ This file records observed Cloudflare resources. It is a status record, not a de
 | `workers.dev` | Enabled — `https://brvin-teachers.thenewtongs.workers.dev` |
 | Preview URLs | Disabled |
 | Service bindings | None |
-| D1 bindings | None |
+| D1 binding | `DB` → `brvin-teachers-app` is declared in PR #1 source configuration; live binding awaits release |
 | Custom domains/routes | None |
 
 Current deployed Worker version: `dc86a9d6-ee31-4165-a9fe-34a22a792955` (version 3; deployment ID `aa621a40-5cc5-4788-9504-ec80fd2c8c43`).
 
-The public [health endpoint](https://brvin-teachers.thenewtongs.workers.dev/health) returns a non-sensitive bootstrap status. The root route describes the runtime as a bootstrap only. No teaching, tenant or student features are exposed yet.
+The currently deployed public [health endpoint](https://brvin-teachers.thenewtongs.workers.dev/health) still reports bootstrap status. PR #1 changes the source Worker to the operator-console foundation but has not yet been deployed.
 
-## 2. Existing BRVIN dependency
+## 2. Application D1 and operator Access
+
+| Field | Verified value |
+|---|---|
+| Application D1 | `brvin-teachers-app` |
+| Database ID | `e1d4c754-7b89-45d0-9ee0-e8c0049a5ebf` |
+| Created | 6 November 2026 |
+| Location hint | APAC |
+| Schema | Empty at creation; `0001_operator_foundation.sql` is checked into PR #1 and awaits its production migration step |
+| Worker binding | `DB` binding declared in PR #1; deployed binding not yet verified |
+
+This database is separate from the BRVIN core knowledge registry. It stores teacher profiles, tenant mappings and operator/application metadata only. It must not store copies of source PDFs, OCR output, indexed passages or BRVIN grants.
+
+Cloudflare Access application **BRVIN Teachers Operator Console** was created for `brvin-teachers.thenewtongs.workers.dev/operator*` with a narrow operator allow policy. Verify that an authenticated browser session reaches `ctx.access.getIdentity()` after the console release is deployed. The root and `/health` routes are outside this operator path.
+
+## 3. Existing BRVIN dependency
 
 The same account contains:
 - `parmar-ai` — existing control/admin and ingestion/application Worker.
@@ -39,7 +54,7 @@ BRVIN Teachers will later use a private same-account Service Binding named `BRVI
 
 Do not change either existing Worker as part of BRVIN Teachers setup.
 
-## 3. Verified CI/CD integration
+## 4. Verified CI/CD integration
 
 - Workflow: [BRVIN Teachers CI/CD](https://github.com/ashini-x/brvin-teachers/actions/workflows/deploy.yml).
 - Latest verified run: [Run #4 — successful](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916).
@@ -52,16 +67,16 @@ Do not change either existing Worker as part of BRVIN Teachers setup.
 - The successful deploy confirms the GitHub Environment's `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were resolved. The token value is not stored in this repository or exposed in logs.
 - Pull requests validate without production credentials. A push to `main` runs validation first and automatically deploys only after all validation steps pass; no manual human approval is required for routine releases.
 
-## 4. Not yet provisioned
+## 5. Not yet provisioned
 
-- BRVIN Teachers application D1 database and migration history.
+- Production application D1 migration history and live `DB` Worker binding (pending PR #1 deployment).
 - Private BRVIN Service Binding.
 - Generated BRVIN `applicationEnvironmentId` and BRVIN application/environment registration.
 - Tenant/student/channel identity implementation and first channel integration.
 - Channel credentials, bot/webhook registrations or model-provider credentials.
 - Custom domain, routes, Durable Objects, Queues or other optional services.
 
-## 5. Next setup sequence
+## 6. Next setup sequence
 
 1. Define the real pilot (teacher, subject, source/project, first channel and student authentication) before implementing runtime behavior.
 2. Design the tenant/student/channel data model and D1 migration plan against that pilot.
@@ -69,4 +84,4 @@ Do not change either existing Worker as part of BRVIN Teachers setup.
 4. Register BRVIN Teachers and the exact deployed environment in BRVIN Admin, obtain the generated `applicationEnvironmentId`, configure the private Service Binding and verify the connection.
 5. Implement the selected channel and BRVIN v2 retrieval, then complete real teacher retrieval and grant-revocation acceptance.
 
-The deployment token does not need D1 access merely to deploy a Worker that has a D1 binding. Add narrowly scoped D1 permissions only if CI is later responsible for creating or directly migrating the remote database.
+The PR #1 main-release workflow applies the checked-in D1 migration before deployment. Its Cloudflare token therefore requires D1 migration-write permission scoped only to `brvin-teachers-app`, in addition to the existing Worker deployment scope. This has not yet been verified by a production release. Do not broaden it to other D1 databases or account administration.
