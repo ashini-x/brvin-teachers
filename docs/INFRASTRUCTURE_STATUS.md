@@ -14,7 +14,7 @@ This file records observed Cloudflare resources. It is a status record, not a de
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Created | 6 November 2026 |
 | Resource state | Bootstrap version deployed to production |
-| `deployed_on` | `2026-11-06T01:50:19Z` |
+| `deployed_on` | `2026-11-06T02:01:54.572431Z` |
 | Observability | Enabled |
 | Invocation logs | Enabled and persisted |
 | Query-string redaction | Enabled |
@@ -25,7 +25,7 @@ This file records observed Cloudflare resources. It is a status record, not a de
 | D1 bindings | None |
 | Custom domains/routes | None |
 
-Current deployed Worker version: `b1e5c561-ae65-4738-ba70-a195b3aefab3`.
+Current deployed Worker version: `dc86a9d6-ee31-4165-a9fe-34a22a792955` (version 3; deployment ID `aa621a40-5cc5-4788-9504-ec80fd2c8c43`).
 
 The public [health endpoint](https://brvin-teachers.thenewtongs.workers.dev/health) returns a non-sensitive bootstrap status. The root route describes the runtime as a bootstrap only. No teaching, tenant or student features are exposed yet.
 
@@ -42,13 +42,15 @@ Do not change either existing Worker as part of BRVIN Teachers setup.
 ## 3. Verified CI/CD integration
 
 - Workflow: [BRVIN Teachers CI/CD](https://github.com/ashini-x/brvin-teachers/actions/workflows/deploy.yml).
-- Verified run: [Run #3 — successful](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860).
-- Source commit: `3917dc96cbb3d9f491405ed94e59f91efe4bfb1d`.
-- Validation: all three Node tests passed; Cloudflare build and no-deploy dry-run passed.
-- Deployment: GitHub Actions deployed the existing Worker resource through the `production` environment.
-- Live smoke test: `/health` returned `ok: true`, `app: brvin-teachers` and `status: bootstrap`.
+- Latest verified run: [Run #4 — successful](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916).
+- Source commit: `0bc0f95946a765ed181506f0ad5c3e03d62113d7`.
+- Dependency installation: committed `package-lock.json`; both CI validation and deployment use `npm ci`. The run restored the npm cache and installed 55 packages from the lockfile.
+- Validation: all three Node tests passed; Cloudflare production build and no-deploy dry-run passed.
+- Deployment: GitHub Actions deployed the existing Worker through the `production` Environment. Cloudflare confirms version `dc86a9d6-ee31-4165-a9fe-34a22a792955`, deployment ID `aa621a40-5cc5-4788-9504-ec80fd2c8c43`, deployed at `2026-11-06T02:01:54.572431Z`.
+- Live smoke test: `/health` returned `{"ok":true,"app":"brvin-teachers","status":"bootstrap","version":"0.1.0-bootstrap"}`.
 - Runtime: Node.js `22.23.0`; Cloudflare CLI `1.0.0-beta.28`; Vite `7.3.7`; Cloudflare Vite plugin `2.0.0-beta.v.12`.
-- The successful deploy confirms the GitHub environment's `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were resolved by the workflow. The token value is not stored in this repository or exposed in logs.
+- The successful deploy confirms the GitHub Environment's `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were resolved. The token value is not stored in this repository or exposed in logs.
+- Pull requests validate without production credentials. A push to `main` runs validation first and automatically deploys only after all validation steps pass; no manual human approval is required for routine releases.
 
 ## 4. Not yet provisioned
 
