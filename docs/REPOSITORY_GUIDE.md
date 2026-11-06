@@ -33,7 +33,8 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 4. docs/ARCHITECTURE.md
 5. docs/DEVELOPMENT_PLAN.md
 6. docs/IDENTIFIER_POLICY.md when working on tenant, project, collection or source identity/reference handling.
-7. The relevant contract, security, operations or decision document.
+7. docs/OPERATOR_CONSOLE_DESIGN.md when working on the Operator Console, tenant workspace, admin UX or BRVIN management handoff.
+8. The relevant contract, security, operations or decision document.
 
 ### In ashini-x/parmar-ai
 
