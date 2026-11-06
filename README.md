@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** Operator Console, classroom/collection/source management and Core management binding deployed; BRVIN application registration and retrieval activation pending  
+**Status:** One real teacher workspace created; BRVIN production application/environment active; private management/retrieval binding release and connection proof pending  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
@@ -26,12 +26,14 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 - [x] Classroom/project, collection/bookshelf and source/PDF workflows are deployed in the protected Operator Console.
 - [x] Private `BRVIN_MANAGEMENT` Service Binding is deployed from `brvin-teachers` to `parmar-ai` / `BrvinTeachersManagementApi`.
 - [x] Core ownership/reference metadata migration and management entrypoint are deployed in `parmar-ai`; existing GCS/Vision/Workflow ingestion is reused.
-- [ ] Register the `brvin-teachers` application and active production environment in BRVIN Admin; replace the fail-closed environment-ID placeholder with the generated UUID and redeploy.
-- [ ] Configure the separate private BRVIN v2 retrieval binding and verify actual teacher-scoped retrieval plus post-revocation denial.
-- [ ] Merge and deploy the application-side tenant-scoped v2 adapter and connection-probe route; implementation is on `feat/brvin-v2-retrieval-binding`, PR #4 validation has passed, and review/merge are pending.
+- [x] Register the `brvin-teachers` application and active production environment in BRVIN Admin.
+- [ ] Release the registered environment ID on both private bindings: `BRVIN_MANAGEMENT` → `parmar-ai` / `BrvinTeachersManagementApi` and `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi`.
+- [x] Merge/deploy the tenant-scoped project/retrieval helpers and content-free connection-probe route (consumer PR #4, release #42174893189).
+- [ ] Complete the connector/deadline/response-bound integration and live connection proof in this PR.
+- [ ] Create the real Physics project/collection and upload teacher-approved material after management connection succeeds.
 - [ ] Select the first student channel, define authentication and operating-cost limits, then implement student/channel/model workflows.
 
-The protected Operator Console and tenant D1 foundation were deployed in PR #1. The classroom/collection/source integration was merged as PR #2 and deployed by [main release #42171352464](https://github.com/ashini-x/brvin-teachers/actions/runs/42171352464): D1 migration, production Worker deployment, public health and Cloudflare Access protection all passed. Current Worker version is `961500a1-462f-46aa-9fc6-6d02fdafc09a` (deployment `ed86feab-8ea8-47ec-ac98-4c460ecb90d6`). Core PR #107 was deployed by [paired release #42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140); both `parmar-ai` and `brvin-service` deployments and live smoke checks passed. The consumer `BRVIN_MANAGEMENT` Service Binding is live and targets `parmar-ai` / `BrvinTeachersManagementApi`. A read-only BRVIN registry query found no `brvin-teachers` application/environment record; the binding config intentionally retains `BRVIN_TEACHERS_ENVIRONMENT_ID_REQUIRED` and therefore fails closed. The separate retrieval v2 binding is not configured, and the app D1 still contains zero teacher profiles and zero project mappings. No production teacher or source has been seeded. See [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
+The protected Operator Console and tenant D1 foundation are deployed. Consumer main release [#42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189) deployed the tenant-scoped v2 helpers and content-free probe; Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the separate management entrypoint. The user has created one real teacher workspace, and BRVIN Admin now has an active `brvin-teachers` Production identity (`515e7752-20ff-42f9-b393-7c8130a64bf8`). This PR vendors the BRVIN v2 connector and stages both private bindings with that ID; the production release and connection proof are not yet complete. The application D1 has one teacher profile and zero Core project mappings. No project, collection, PDF source or student has been seeded. See [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 
