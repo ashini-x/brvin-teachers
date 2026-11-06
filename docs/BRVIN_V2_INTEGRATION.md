@@ -30,6 +30,10 @@ The v2 service resolves identity from trusted WorkerEntrypoint ctx.props.applica
 
 **Do not use legacy clientId for a new v2 integration.** The v1 contract remains only for existing compatibility. V2 must never fall back to v1 identity.
 
+### Pinned connector source
+
+The consumer vendors `@brvin/connector` locally under `src/brvin-connector/`; no public npm package is installed. Its immutable upstream pin is [parmar-ai commit `91b6a499bd782ae298b41e790157c23682f10881`](https://github.com/ashini-x/parmar-ai/commit/91b6a499bd782ae298b41e790157c23682f10881). The tenant adapter uses `createBrvinConnector` with a 15-second per-call deadline and 8 MiB serialized response cap. The connector preserves structured service failures, bounds requests/responses, emits only content-free diagnostic metadata when configured and never automatically retries a retrieval. The probe-only `proveConnectionV2` method intentionally stays outside the retrieval connector and is called only by the content-free server route.
+
 ## 3. Supported v2 retrieval methods
 
 The frozen contract defines:
@@ -127,4 +131,4 @@ Any proposed change to these rules requires a reviewed, coordinated change to th
 
 ## 9. Current implementation status
 
-The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`. The BRVIN Teachers application and production environment are now registered and active in BRVIN Admin. PR #4 merged the tenant-scoped project-list/retrieval helpers and content-free connection-probe route; the main deployment passed [release #42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189). This follow-up PR vendors `@brvin/connector` from immutable upstream Core commit `91b6a499bd782ae298b41e790157c23682f10881`, applies its deadline/response-size/no-retry behavior to retrieval and configures both private bindings with the registered production environment ID. Its code and live connection state remain pending CI/deployment evidence. The student-facing channel/authentication/model workflow is not implemented and remains deliberately deferred. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md), [infrastructure status](INFRASTRUCTURE_STATUS.md), and the core contract.
+The management capability (`BrvinTeachersManagementApi`) is deployed on `parmar-ai`. The BRVIN Teachers application and production environment are now registered and active in BRVIN Admin. PR #4 merged the tenant-scoped project-list/retrieval helpers and content-free connection-probe route; the main deployment passed [release #42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189). This follow-up PR vendors `@brvin/connector` from immutable upstream Core commit `91b6a499bd782ae298b41e790157c23682f10881`, applies its deadline/response-size/no-retry behavior to retrieval and configures both private bindings with the registered production environment ID. Its code and live connection state remain pending CI/deployment evidence. The student-facing channel/authentication/model workflow is not implemented and remains deliberately deferred. The existing helper is not evidence that a student chatbot or model tool path is live. See [BRVIN management integration](BRVIN_MANAGEMENT_INTEGRATION.md), [infrastructure status](INFRASTRUCTURE_STATUS.md), and the core contract.
