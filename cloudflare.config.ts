@@ -16,7 +16,12 @@ export default defineConfig({
       BRVIN_MANAGEMENT: bindings.worker({
         worker: "parmar-ai",
         exportName: "BrvinTeachersManagementApi",
-        props: { applicationEnvironmentId: "BRVIN_TEACHERS_ENVIRONMENT_ID_REQUIRED" }
+        props: { applicationEnvironmentId: "515e7752-20ff-42f9-b393-7c8130a64bf8" }
+      }),
+      BRVIN_SERVICE: bindings.worker({
+        worker: "brvin-service",
+        exportName: "BrvinRetrievalApi",
+        props: { applicationEnvironmentId: "515e7752-20ff-42f9-b393-7c8130a64bf8" }
       })
     },
     observability: {
