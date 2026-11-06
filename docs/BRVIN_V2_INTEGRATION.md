@@ -1,6 +1,6 @@
 # BRVIN v2 Integration — Consumer Contract
 
-**Status:** Tenant-scoped v2 adapter helpers and the content-free connection-probe route are implemented on the current feature branch; CI/review pending. The production BRVIN application/environment and separate retrieval binding are still not configured.  
+**Status:** Tenant-scoped v2 adapter helpers and the content-free connection-probe route are implemented on feature branch `feat/brvin-v2-retrieval-binding`; PR #4 validation passed and review/merge remain pending. The production BRVIN application/environment and separate retrieval binding are still not configured.  
 **Source of truth:** [Frozen BRVIN RPC v2 contract](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_2_RPC_V2_CONTRACT.md)  
 **Integration guide:** [BRVIN Application Integration Guide](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_INTEGRATION_GUIDE.md)
 
