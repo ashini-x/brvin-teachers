@@ -1,8 +1,8 @@
 # Operations — Development, CI/CD and Production
 
-**Status:** Operating standard; Worker resource shell provisioned, runtime deployment not configured
+**Status:** Bootstrap Worker deployed; GitHub Actions → Cloudflare deployment verified
 
-A Cloudflare Worker resource named `brvin-teachers` exists in the same account as BRVIN's `brvin-service`. It has no uploaded code or deployed version, `workers.dev` is disabled, and it has no bindings or D1 database. No GitHub Actions deployment token or workflow exists yet. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The `brvin-teachers` Worker is deployed at `https://brvin-teachers.thenewtongs.workers.dev` with only a minimal `/health` and root status response. The GitHub Actions workflow uses the protected `production` environment and successfully deployed the Worker using the repository's Cloudflare API token and account ID variable. The application D1 database and BRVIN Service Binding are not yet configured. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 ## 1. Environments
 
@@ -32,7 +32,7 @@ Use GitHub as the source of truth. The expected flow is:
 
 Keep GitHub Actions permissions minimal. The default GITHUB_TOKEN should have only the repository permissions a workflow needs. Do not expose Cloudflare production credentials to pull_request jobs from forks or use unsafe pull_request_target patterns.
 
-Do not configure both GitHub Actions and Cloudflare Workers Builds to independently auto-deploy the same Worker. Choose one release authority; the initial recommendation is GitHub Actions because it can enforce the repository's full test and approval gates.
+Do not configure both GitHub Actions and Cloudflare Workers Builds to independently auto-deploy the same Worker. GitHub Actions is the release authority for this repository. The current [workflow](../.github/workflows/deploy.yml) was verified in [run #3](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860): unit tests, production build, deployment dry-run, production Worker deployment and live `/health` smoke test all passed. Pull requests validate without production credentials; pushes to `main` deploy through the `production` environment.
 
 ## 3. Cloudflare tooling and resources
 
@@ -42,7 +42,9 @@ Start with one runtime Worker and one application D1 database. Add Durable Objec
 
 ## 4. Deployment credentials
 
-When CI deployment is ready:
+CI deployment is already configured and has passed an end-to-end smoke test. The token is stored in GitHub, not in this repository. Its confirmed scope should remain limited to the existing `brvin-teachers` Worker with Workers Editor. Do not broaden it for ordinary releases.
+
+If later changes require additional deployment capabilities:
 - create a dedicated Cloudflare API token for this repository's deployment workflow;
 - scope it to the correct account and only the required products/resources;
 - do not use the Global API Key or a personal broad token;
