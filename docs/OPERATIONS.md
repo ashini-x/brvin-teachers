@@ -2,7 +2,7 @@
 
 **Status:** Bootstrap Worker deployed; GitHub Actions → Cloudflare deployment verified
 
-The `brvin-teachers` Worker is deployed at `https://brvin-teachers.thenewtongs.workers.dev` with only a minimal `/health` and root status response. The GitHub Actions workflow uses the protected `production` environment and successfully deployed the Worker using the repository's Cloudflare API token and account ID variable. The application D1 database and BRVIN Service Binding are not yet configured. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The `brvin-teachers` Worker is deployed at `https://brvin-teachers.thenewtongs.workers.dev` with only a minimal `/health` and root status response. The GitHub Actions workflow uses the `production` environment and successfully deployed the Worker using the repository's Cloudflare API token and account ID variable. The application D1 database and BRVIN Service Binding are not yet configured. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 ## 1. Environments
 
