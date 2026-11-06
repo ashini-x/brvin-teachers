@@ -21,7 +21,7 @@ Record the approved pilot and measurable acceptance tests before Phase 1 is cons
 
 ## Phase 1 — Repository and application foundation
 
-The initial `brvin-teachers` runtime Worker and a non-sensitive `/health` endpoint are implemented and deployed. GitHub Actions run [#3](https://github.com/ashini-x/brvin-teachers/actions/runs/42146322860) passed tests, Cloudflare build, deployment dry-run, production deployment and live health verification. The current version is a bootstrap only; Phase 1 is **not complete** because the tenant/student/channel domain, application D1 schema/migrations, secure operator access and full pilot foundation are not yet implemented. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
+The initial `brvin-teachers` runtime Worker and a non-sensitive `/health` endpoint are implemented and deployed. GitHub Actions run [#4](https://github.com/ashini-x/brvin-teachers/actions/runs/42147596916) verified the committed npm lockfile with clean `npm ci` installs, all three tests, Cloudflare build, deployment dry-run, production deployment and live health verification. The current version is a bootstrap only; Phase 1 is **not complete** because the tenant/student/channel domain, application D1 schema/migrations, secure operator access and full pilot foundation are not yet implemented. See [Cloudflare infrastructure status](INFRASTRUCTURE_STATUS.md).
 
 Build only the foundation required by the selected pilot:
 
