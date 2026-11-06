@@ -99,13 +99,13 @@ A successful deployment response or HTTP 200 alone is not acceptance.
 
 ## 8. Recovery and rollback
 
-Before first production release, define:
-- previous known-good Worker version and rollback command/path;
-- compatibility rules for D1 schema changes;
-- how to disable a tenant or channel without affecting others;
-- credential rotation and emergency revocation;
-- BRVIN binding/identity recovery steps;
-- data backup and restore expectations;
+The initial production releases are complete. At the time of the 6 November 2026 release, the known-good consumer Worker version is `961500a1-462f-46aa-9fc6-6d02fdafc09a`; the corresponding deployed Core versions are recorded in [INFRASTRUCTURE_STATUS.md](INFRASTRUCTURE_STATUS.md). Use GitHub Actions for all subsequent releases and the Cloudflare Worker deployment history for rollback.
+
+Before enabling real teachers/students, define and test:
+- how to disable one tenant or channel without affecting others;
+- credential rotation and emergency revocation for any future channel/provider credentials;
+- BRVIN binding/environment-ID recovery and retrieval-grant revocation;
+- application D1 backup/restore and migration compatibility;
 - incident communication and audit procedure.
 
 Prefer backward-compatible expand/contract migrations. Do not delete or rename production fields in the same release that first stops using them unless rollback behavior is explicitly safe.
