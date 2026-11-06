@@ -13,23 +13,23 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Worker | `brvin-teachers` |
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Public URL | `https://brvin-teachers.thenewtongs.workers.dev` |
-| Production version | `5067ed6c-f8b7-47f8-afd0-59942422e6d4` |
-| Deployment ID | `25bf26f3-afad-4bea-812c-e17d254e3ba2` |
-| Deployed | `2026-11-06T06:31:26.715656Z` |
-| Release | [GitHub Actions #42174893189](https://github.com/ashini-x/brvin-teachers/actions/runs/42174893189) |
+| Production version | `79d10bd5-319c-49a6-bed4-bb587d5916c4` |
+| Deployment ID | `607623e2-1104-4c36-98a7-997e621fd24f` |
+| Deployed | `2026-11-06T07:34:57.432120Z` |
+| Release | [GitHub Actions #42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) |
 | Compatibility date | `2026-11-06` |
 | Observability | Enabled; invocation logs persisted; query strings redacted |
 | Preview URLs | Disabled |
 | D1 binding | `DB` → `brvin-teachers-app` (live and verified) |
-| Management binding | `BRVIN_MANAGEMENT` → service `parmar-ai`, entrypoint `BrvinTeachersManagementApi` (declared in the pending activation PR; not yet live with the registered ID) |
-| Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (declared in the pending activation PR; not yet live) |
+| Management binding | `BRVIN_MANAGEMENT` → service `parmar-ai`, entrypoint `BrvinTeachersManagementApi` (deployed with registered production identity; management health verification pending) |
+| Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (deployed with registered production identity; BRVIN proof verification pending) |
 | Custom domains/routes | None |
 
-The current deployed Worker version is the main-release baseline. The pending activation PR adds the generated BRVIN identity to both service bindings; do not record either binding as active with the new identity until the production release and live verification complete.
+The current deployed Worker version includes both private Service Bindings configured with the BRVIN-generated production identity. Deployment is verified, but the BRVIN registry's connection state is still pending until the administrator runs **Verify connection** and the one-time proof is accepted. Do not mark the environment Connected from deployment evidence alone.
 
 The protected Operator Console is served at `/operator`; public `/health` is non-sensitive. The release workflow applied application D1 migrations, deployed the Worker, passed public health and confirmed Cloudflare Access protects the operator route.
 
-The live Worker currently has the management Service Binding and app D1 binding, but the deployed binding still carries the fail-closed placeholder from the preceding release. BRVIN Admin registration is now complete; this PR sets the generated trusted identity on both private Service Bindings. The Worker will not use the new identity until the PR is merged and the existing GitHub Actions production release succeeds.
+The live Worker settings show `BRVIN_MANAGEMENT` → `parmar-ai` / `BrvinTeachersManagementApi` and `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi`, alongside the existing `DB` binding. Production release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed the generated trusted environment identity on both bindings. The management health and one-time BRVIN connection proof still require application-level verification.
 
 Cloudflare Access application **BRVIN Teachers Operator Console** protects `brvin-teachers.thenewtongs.workers.dev/operator*` using its configured operator allow policy. The production release smoke check verified that the protected path requires Access identity.
 
@@ -76,7 +76,7 @@ BRVIN Admin registration is complete. The active application and Production envi
 | Worker URL | `https://brvin-teachers.thenewtongs.workers.dev` |
 | Registry status | Active |
 
-The actual target Worker and Core Workers are in Cloudflare account `b34a6c0b7221454c5db977fe61ddf759`; this was verified through the authenticated Cloudflare account connection and matches BRVIN's account ID in the handoff. `brvin-service` has its workers.dev subdomain disabled and no public route. The pending consumer PR adds both private Service Bindings with this exact trusted environment ID. Do not supply it from browser state or HTTP input.
+The actual target Worker and Core Workers are in Cloudflare account `b34a6c0b7221454c5db977fe61ddf759`; this was verified through the authenticated Cloudflare account connection and matches BRVIN's account ID in the handoff. `brvin-service` has its workers.dev subdomain disabled and no public route. Production release #42181732210 now includes both private Service Bindings with this exact trusted environment ID. Do not supply it from browser state or HTTP input.
 
 ## 5. CI/CD and deployment authority
 
@@ -88,10 +88,10 @@ The actual target Worker and Core Workers are in Cloudflare account `b34a6c0b722
 
 ## 6. Next setup sequence
 
-1. Merge and deploy the reviewed consumer binding/connector PR through the existing GitHub Actions pipeline.
-2. Confirm the Operator Console's management health is ready and run **Applications → Production → Verify connection** in BRVIN Admin. Do not mark Connected manually.
-3. Create the Physics knowledge project and collection from the existing real teacher workspace in BRVIN Teachers.
-4. Upload the teacher-approved, legitimately licensed PDF. Wait for `READY` and full page indexing.
-5. Verify source status and citations. Student retrieval acceptance, grant revocation denial and student/channel workflows remain separate later gates.
+1. In BRVIN Admin, open the registered `BRVIN Teachers` Production environment and select **Verify connection**. Confirm the one-time proof is accepted and the status becomes **Connected · no ready knowledge** while there are no ready sources.
+2. Open the existing teacher workspace in the BRVIN Teachers Operator Console and confirm its management health/project actions are available.
+3. Create the Physics knowledge project and collection from that real teacher workspace.
+4. After teacher approval, upload the open-license three-page PDF and wait for `READY` with all pages indexed.
+5. Verify source status and provenance. Student retrieval acceptance, grant-revocation denial and student/channel workflows remain separate later gates.
 
 The production teacher row exists (one); no Core project mapping, BRVIN project, collection, PDF source, application-project retrieval grant or student has been created by this integration. Students, channels, model workflows and student authentication remain unimplemented.
