@@ -5,7 +5,7 @@
 
 ## Phase 0 — Select and validate the first pilot
 
-The first pilot teacher is the user participating as a real-life teacher. The working subject is Physics, with Newton's Laws of Motion proposed as the initial three-page topic. See [PILOT_BRIEF.md](PILOT_BRIEF.md) for the current decisions and remaining teacher/source/channel/authentication acceptance items. This pilot is genuine and user-approved as a teacher-led project; it is not a synthetic production tenant.
+The first real teacher is participating directly in the standard BRVIN Teachers onboarding process. The working subject is Physics, with Newton's Laws of Motion proposed as the initial three-page topic. See [PILOT_BRIEF.md](PILOT_BRIEF.md) for the teacher onboarding decisions and remaining source/channel/authentication acceptance items. Use the teacher's actual professional/display name in BRVIN Admin; the public repository records only a role label and must not contain the teacher's personal details. This is a genuine teacher-led pilot, not a synthetic tenant or a special internal operating mode.
 
 Do not start broad scaffolding until the first real use case is defined.
 
