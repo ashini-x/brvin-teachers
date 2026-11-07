@@ -1,6 +1,6 @@
 # Cloudflare Infrastructure Status
 
-**Last verified:** 6 November 2026  
+**Last verified:** 7 November 2026  
 **Repository:** `ashini-x/brvin-teachers`  
 **Account relationship:** Same Cloudflare account that contains the existing BRVIN Workers `parmar-ai` and `brvin-service`.
 
@@ -13,23 +13,23 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Worker | `brvin-teachers` |
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Public URL | `https://brvin-teachers.thenewtongs.workers.dev` |
-| Production version | `79d10bd5-319c-49a6-bed4-bb587d5916c4` |
-| Deployment ID | `607623e2-1104-4c36-98a7-997e621fd24f` |
-| Deployed | `2026-11-06T07:34:57.432120Z` |
+| Production version | `f0942e0a-49f0-468f-b59c-e58d6eb7c16b` |
+| Deployment ID | `73699f1d-f9da-4fe4-90bb-77bebc0daf64` |
+| Deployed | `2026-11-06T07:56:05.285590Z` |
 | Release | [GitHub Actions #42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) |
 | Compatibility date | `2026-11-06` |
 | Observability | Enabled; invocation logs persisted; query strings redacted |
 | Preview URLs | Disabled |
 | D1 binding | `DB` → `brvin-teachers-app` (live and verified) |
-| Management binding | `BRVIN_MANAGEMENT` → service `parmar-ai`, entrypoint `BrvinTeachersManagementApi` (deployed with registered production identity; management health verification pending) |
-| Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (deployed with registered production identity; BRVIN proof verification pending) |
+| Management binding | `BRVIN_MANAGEMENT` → service `parmar-ai`, entrypoint `BrvinTeachersManagementApi` (deployed with active registered Production identity; authenticated UI health indicator still to be checked) |
+| Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (deployed with active registered Production identity; one-time proof accepted 6 November 2026) |
 | Custom domains/routes | None |
 
-The current deployed Worker version includes both private Service Bindings configured with the BRVIN-generated production identity. Deployment is verified, but the BRVIN registry's connection state is still pending until the administrator runs **Verify connection** and the one-time proof is accepted. Do not mark the environment Connected from deployment evidence alone.
+The current deployed Worker version includes both private Service Bindings configured with the BRVIN-generated Production identity. BRVIN Admin accepted the one-time private retrieval proof on 6 November 2026; a read-only registry check on 7 November confirmed the environment remains `active` and its latest proof status is `connected`. The proof snapshot recorded zero ready sources because it preceded creation of the Physics project and source. It does not establish source readiness or student retrieval acceptance.
 
 The protected Operator Console is served at `/operator`; public `/health` is non-sensitive. The release workflow applied application D1 migrations, deployed the Worker, passed public health and confirmed Cloudflare Access protects the operator route.
 
-The live Worker settings show `BRVIN_MANAGEMENT` → `parmar-ai` / `BrvinTeachersManagementApi` and `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi`, alongside the existing `DB` binding. Production release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed the generated trusted environment identity on both bindings. The management health and one-time BRVIN connection proof still require application-level verification.
+The live Worker settings show `BRVIN_MANAGEMENT` → `parmar-ai` / `BrvinTeachersManagementApi` and `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi`, alongside the existing `DB` binding. Production release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed the generated trusted environment identity on both bindings. The one-time retrieval proof was subsequently accepted. The separate management-health badge still requires an authenticated visual check.
 
 Cloudflare Access application **BRVIN Teachers Operator Console** protects `brvin-teachers.thenewtongs.workers.dev/operator*` using its configured operator allow policy. The production release smoke check verified that the protected path requires Access identity.
 
@@ -44,9 +44,9 @@ Cloudflare Access application **BRVIN Teachers Operator Console** protects `brvi
 | Migration | `0001_operator_foundation.sql` applied by the production release |
 | Live tables confirmed | `id_sequences`, `teachers`, `tenant_brvin_projects`, `operator_audit_events`, plus D1 system tables |
 | Current teacher rows | 1 (`TCH-000001`, the real teacher workspace shown in the Operator Console) |
-| Current Core-project mappings | 0 |
+| Current Core-project mappings | 1 (`TCH-000001-PRJ-001`, Physics) |
 
-This database owns tenant profiles, tenant references, the app-to-BRVIN project mapping and application/operator metadata. It must never contain copies of source PDFs, OCR output, indexed passages or BRVIN grants. No teacher record has been seeded.
+This database owns tenant profiles, tenant references, the app-to-BRVIN project mapping and application/operator metadata. It must never contain copies of source PDFs, OCR output, indexed passages or BRVIN grants. One real teacher profile (`TCH-000001`) and one active Physics project mapping (`TCH-000001-PRJ-001`) are present. Core, not this database, remains authoritative for project/collection/source records and grants.
 
 ## 3. Existing BRVIN dependencies
 
@@ -88,10 +88,10 @@ The actual target Worker and Core Workers are in Cloudflare account `b34a6c0b722
 
 ## 6. Next setup sequence
 
-1. In BRVIN Admin, open the registered `BRVIN Teachers` Production environment and select **Verify connection**. Confirm the one-time proof is accepted and the status becomes **Connected · no ready knowledge** while there are no ready sources.
-2. Open the existing teacher workspace in the BRVIN Teachers Operator Console and confirm its management health/project actions are available.
-3. Create the Physics knowledge project and collection from that real teacher workspace.
-4. After teacher approval, upload the open-license three-page PDF and wait for `READY` with all pages indexed.
-5. Verify source status and provenance. Student retrieval acceptance, grant-revocation denial and student/channel workflows remain separate later gates.
+1. The one-time Production proof is complete; registry status is `connected`. Its zero-ready-source snapshot predates the project and PDF that were created later.
+2. Open the existing teacher workspace in the BRVIN Teachers Operator Console and visually confirm its independent management-health indicator.
+3. Inspect the saved Vision operation response and exact temporary GCS output prefix for the existing 3-page Physics source. The first expected `output-1-to-1.json` object was not found; do not re-upload or resume indexing until the destination/prefix/object state is understood.
+4. Recover indexing using the existing resumable Workflow path if the saved OCR output is intact; only consider a new OCR operation after confirming the output is unrecoverable and obtaining approval for any repeat Vision charge.
+5. Verify `READY` with all 3 pages indexed, then complete useful v2 retrieval/provenance testing and grant-revocation denial. Student/channel/model workflows remain separate later gates.
 
-The production teacher row exists (one); no Core project mapping, BRVIN project, collection, PDF source, application-project retrieval grant or student has been created by this integration. Students, channels, model workflows and student authentication remain unimplemented.
+The production teacher row, active Physics project mapping, Core project, teacher-notes collection, collection/project link, application-project grant and 3-page PDF source now exist. The latest source status is `failed`, with `indexed_pages=0` of 3: Vision reports operation completion, but the expected first-page output object is missing from the temporary OCR prefix. The original source record remains registered; no re-upload or retry has been performed. No student record, channel runtime, model workflow or student authentication has been created.
