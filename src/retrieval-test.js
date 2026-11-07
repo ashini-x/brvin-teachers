@@ -9,7 +9,7 @@ const MAX_PDF_PAGE = 2_000;
 const MAX_PASSAGES = 8;
 const MAX_PASSAGE_CHARS = 1_800;
 
-const PAGE = String.raw\`<!doctype html>
+const PAGE = String.raw`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -54,11 +54,11 @@ const PAGE = String.raw\`<!doctype html>
     <footer>Evidence is returned by BRVIN Core. The page number shown is the source PDF page provenance, not an AI-generated guess.</footer>
   </main>
 </body>
-</html>\`;
+</html>`;
 
-const CSS = String.raw\`*{box-sizing:border-box} :root{color-scheme:dark;--bg:#111318;--panel:#1c2028;--line:#343b47;--text:#edf0f5;--muted:#a0a9b7;--accent:#a8c5ed} html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at top,#202735 0,#111318 56%);color:var(--text);font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif} .shell{width:min(860px,calc(100% - 36px));margin:0 auto;padding:28px 0 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.back{color:#c8d1df;text-decoration:none;font-size:12px}.back:hover{text-decoration:underline}.tag,.eyebrow{color:#9fb8dc;letter-spacing:.14em;font-size:10px;font-weight:650}.intro{padding:48px 0 22px}.eyebrow{margin:0 0 10px}.intro h1{font-size:clamp(28px,5vw,42px);line-height:1.08;margin:0 0 13px;letter-spacing:-.035em}.lead{margin:0;color:#b3bdca;max-width:650px;font-size:15px}.notice{border:1px solid #6d6045;background:#282519;border-radius:12px;padding:14px 17px;margin:4px 0 20px}.notice strong{font-size:12px;color:#e6c888}.notice p{font-size:12px;color:#c9c1a9;margin:5px 0 0}.panel,.result{background:rgba(28,32,40,.94);border:1px solid var(--line);border-radius:14px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}.panel h2{font-size:16px;margin:0}.panel-head p{font-size:11px;color:var(--muted);margin:3px 0 0}form{display:grid;gap:9px}form>label{font-size:12px;color:#cbd3df;font-weight:600;margin-top:9px}form>label span,.hint{font-weight:400;color:#8c96a5;font-size:11px}select,input[type=text],textarea{width:100%;border:1px solid #46505f;background:#12161d;color:#edf0f5;border-radius:8px;padding:11px 12px;font:inherit}textarea{resize:vertical;min-height:92px}input:focus,textarea:focus,select:focus{outline:2px solid #7697c6;outline-offset:1px}.hint{margin:-5px 0 2px}.confirm{display:flex;align-items:flex-start;gap:9px;color:#cbd3df;font-size:11px;font-weight:400!important}.confirm input{margin-top:3px;accent-color:#a8c5ed}button{margin-top:8px;background:#dfe9f7;color:#162031;border:0;border-radius:8px;padding:12px 15px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.results{display:grid;gap:12px;margin-top:18px}.result{padding:17px}.result h3{font-size:14px;margin:0}.result .meta{font-size:11px;color:#aeb8c7;margin:5px 0 12px}.result pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e3e8f1;margin:0;background:#12161d;border-radius:8px;padding:13px}.result-summary{font-size:12px;color:#b9c5d4}.state{border:1px solid #43566f;border-radius:9px;padding:12px;color:#c9d9ee;background:#1b2635;font-size:12px}.state.error{border-color:#704e4e;background:#2a1d20;color:#eab4b4}.state.empty{border-color:#6d6045;background:#282519;color:#e6d6b5}footer{margin-top:24px;color:#7e8999;font-size:10px;text-align:center}@media(max-width:560px){.shell{width:calc(100% - 24px);padding-top:18px}.intro{padding-top:35px}.panel,.result{padding:15px}.tag{font-size:8px}}\`;
+const CSS = String.raw`*{box-sizing:border-box} :root{color-scheme:dark;--bg:#111318;--panel:#1c2028;--line:#343b47;--text:#edf0f5;--muted:#a0a9b7;--accent:#a8c5ed} html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at top,#202735 0,#111318 56%);color:var(--text);font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif} .shell{width:min(860px,calc(100% - 36px));margin:0 auto;padding:28px 0 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.back{color:#c8d1df;text-decoration:none;font-size:12px}.back:hover{text-decoration:underline}.tag,.eyebrow{color:#9fb8dc;letter-spacing:.14em;font-size:10px;font-weight:650}.intro{padding:48px 0 22px}.eyebrow{margin:0 0 10px}.intro h1{font-size:clamp(28px,5vw,42px);line-height:1.08;margin:0 0 13px;letter-spacing:-.035em}.lead{margin:0;color:#b3bdca;max-width:650px;font-size:15px}.notice{border:1px solid #6d6045;background:#282519;border-radius:12px;padding:14px 17px;margin:4px 0 20px}.notice strong{font-size:12px;color:#e6c888}.notice p{font-size:12px;color:#c9c1a9;margin:5px 0 0}.panel,.result{background:rgba(28,32,40,.94);border:1px solid var(--line);border-radius:14px;padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}.panel h2{font-size:16px;margin:0}.panel-head p{font-size:11px;color:var(--muted);margin:3px 0 0}form{display:grid;gap:9px}form>label{font-size:12px;color:#cbd3df;font-weight:600;margin-top:9px}form>label span,.hint{font-weight:400;color:#8c96a5;font-size:11px}select,input[type=text],textarea{width:100%;border:1px solid #46505f;background:#12161d;color:#edf0f5;border-radius:8px;padding:11px 12px;font:inherit}textarea{resize:vertical;min-height:92px}input:focus,textarea:focus,select:focus{outline:2px solid #7697c6;outline-offset:1px}.hint{margin:-5px 0 2px}.confirm{display:flex;align-items:flex-start;gap:9px;color:#cbd3df;font-size:11px;font-weight:400!important}.confirm input{margin-top:3px;accent-color:#a8c5ed}button{margin-top:8px;background:#dfe9f7;color:#162031;border:0;border-radius:8px;padding:12px 15px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.results{display:grid;gap:12px;margin-top:18px}.result{padding:17px}.result h3{font-size:14px;margin:0}.result .meta{font-size:11px;color:#aeb8c7;margin:5px 0 12px}.result pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e3e8f1;margin:0;background:#12161d;border-radius:8px;padding:13px}.result-summary{font-size:12px;color:#b9c5d4}.state{border:1px solid #43566f;border-radius:9px;padding:12px;color:#c9d9ee;background:#1b2635;font-size:12px}.state.error{border-color:#704e4e;background:#2a1d20;color:#eab4b4}.state.empty{border-color:#6d6045;background:#282519;color:#e6d6b5}footer{margin-top:24px;color:#7e8999;font-size:10px;text-align:center}@media(max-width:560px){.shell{width:calc(100% - 24px);padding-top:18px}.intro{padding-top:35px}.panel,.result{padding:15px}.tag{font-size:8px}}`;
 
-const JS = String.raw\`const form = document.querySelector("#retrieval-form");
+const JS = String.raw`const form = document.querySelector("#retrieval-form");
 const projectSelect = document.querySelector("#project");
 const targetStatus = document.querySelector("#target-status");
 const queryField = document.querySelector("#query");
@@ -82,7 +82,7 @@ function parsePages(value) {
   const input = value.trim();
   if (!input) return [];
   const pieces = input.split(",").map(part => part.trim());
-  if (!pieces.length || pieces.length > 3 || pieces.some(part => !/^[1-9]\\d{0,3}$/.test(part))) return null;
+  if (!pieces.length || pieces.length > 3 || pieces.some(part => !/^[1-9]\d{0,3}$/.test(part))) return null;
   const pages = [...new Set(pieces.map(Number))];
   return pages.length <= 3 && pages.every(page => page <= 2000) ? pages : null;
 }
@@ -120,7 +120,7 @@ async function loadTargets() {
 form.addEventListener("submit", async event => {
   event.preventDefault();
   const projectReference = projectSelect.value;
-  const query = queryField.value.replace(/\\s+/g, " ").trim();
+  const query = queryField.value.replace(/\s+/g, " ").trim();
   const pageNumbers = parsePages(pagesField.value);
   if (!projectReference) return showState("Select an authorised project.", "error");
   if (!query || query.length > 2000) return showState("Enter a search question of up to 2,000 characters.", "error");
@@ -173,7 +173,7 @@ form.addEventListener("submit", async event => {
   }
 });
 
-loadTargets();\`;
+loadTargets();`;
 
 function json(body, status = 200) {
   return Response.json(body, {
