@@ -1,7 +1,167 @@
 import { sha256File } from "./sha256.js";
+
+export function buildSourceProgressModel(payload, fallbackSource = {}, transfer = null) {
+  const body = payload && typeof payload === "object" && payload.result && typeof payload.result === "object"
+    ? payload.result : payload && typeof payload === "object" ? payload : {};
+  const job = body.import && typeof body.import === "object" ? body.import : {};
+  const pipeline = body.pipeline && typeof body.pipeline === "object" ? body.pipeline : {};
+  const vision = pipeline.vision && typeof pipeline.vision === "object" ? pipeline.vision : {};
+  const workflow = pipeline.workflow && typeof pipeline.workflow === "object" ? pipeline.workflow : {};
+  const events = Array.isArray(body.events) ? body.events.filter(event => event && typeof event === "object") : [];
+  const status = String(job.status || fallbackSource.status || "unknown").toLowerCase();
+  const expectedBytes = Math.max(0, Number(job.expectedSize ?? transfer?.totalBytes ?? fallbackSource.size ?? 0) || 0);
+  const serverBytes = Math.max(0, Number(job.uploadedBytes ?? 0) || 0);
+  const localBytes = transfer && transfer.active ? Math.max(0, Number(transfer.uploadedBytes ?? 0) || 0) : 0;
+  const uploadedBytes = Math.min(expectedBytes || Number.MAX_SAFE_INTEGER, Math.max(serverBytes, localBytes));
+  const uploadComplete = expectedBytes > 0
+    ? uploadedBytes >= expectedBytes
+    : ["uploaded", "processing", "completed", "ready"].includes(status);
+  const expectedPages = Math.max(0, Number(job.expectedPages ?? fallbackSource.pageCount ?? 0) || 0);
+  const indexedPages = Math.max(0, Number(job.indexedPages ?? fallbackSource.indexedPages ?? 0) || 0);
+  const indexComplete = expectedPages > 0 ? indexedPages >= expectedPages : ["completed", "ready"].includes(status);
+  const eventType = event => String(event.type || event.eventType || "").toLowerCase();
+  const eventPhase = event => String(event.phase || "").toLowerCase();
+  const eventTask = event => String(event.details?.task || "").toLowerCase();
+  const latestEvent = events[0] || null;
+  const latestFailure = status === "failed"
+    ? events.find(event => ["failed", "error"].includes(String(event.status || "").toLowerCase()) &&
+        !["retention", "cleanup", "deletion"].includes(eventPhase(event)))
+    : null;
+  const ocrVerified = events.some(event => ["ocr.output_verified", "ocr.completed"].includes(eventType(event)) &&
+    String(event.status || "").toLowerCase() === "completed");
+  const visionDone = (String(vision.status || "").toLowerCase() === "completed" && !vision.error) ||
+    ocrVerified || events.some(event => eventType(event).startsWith("index.") || eventType(event) === "qa.started");
+  const qaDone = events.some(event => eventType(event) === "qa.passed" &&
+    String(event.status || "").toLowerCase() === "completed") || ["completed", "ready"].includes(status);
+  const readyDone = ["completed", "ready"].includes(status) ||
+    String(fallbackSource.status || "").toLowerCase() === "ready";
+
+  let failureStage = null;
+  if (latestFailure) {
+    const combined = [
+      eventTask(latestFailure), eventPhase(latestFailure), eventType(latestFailure),
+      String(latestFailure.message || "")
+    ].join(" ").toLowerCase();
+    if (/quality_check|verification|retrieval qa|\bqa\b/u.test(combined)) failureStage = 3;
+    else if (/index_chunk|retry_page|repair_chunk|resume_index|index|page/u.test(combined)) failureStage = 2;
+    else if (/vision|ocr/u.test(combined)) failureStage = 1;
+    else if (/upload|transfer|sha-?256/u.test(combined)) failureStage = 0;
+    else if (vision.error) failureStage = 1;
+    else if (!uploadComplete) failureStage = 0;
+    else if (indexComplete) failureStage = 3;
+    else if (visionDone) failureStage = 2;
+    else failureStage = 1;
+  } else if (status === "failed") {
+    if (!uploadComplete) failureStage = 0;
+    else if (vision.error) failureStage = 1;
+    else if (indexComplete) failureStage = 3;
+    else if (visionDone) failureStage = 2;
+    else failureStage = 1;
+  }
+
+  const uploadPercent = expectedBytes > 0 ? Math.max(0, Math.min(100, Math.floor(uploadedBytes / expectedBytes * 100))) : 0;
+  const indexPercent = expectedPages > 0 ? Math.max(0, Math.min(100, Math.floor(indexedPages / expectedPages * 100))) : 0;
+  const findEvent = predicate => events.find(predicate) || null;
+  const uploadEvent = findEvent(event => eventPhase(event).includes("upload") || eventType(event).includes("upload"));
+  const visionEvent = findEvent(event => eventPhase(event) === "ocr" || eventType(event).includes("ocr"));
+  const indexEvent = findEvent(event => eventPhase(event) === "index" || eventType(event).includes("index") ||
+    ["index_chunk", "retry_page", "repair_chunk", "resume_index"].includes(eventTask(event)));
+  const qaEvent = findEvent(event => eventPhase(event) === "verification" || eventType(event).startsWith("qa."));
+  const readyEvent = findEvent(event => eventType(event).includes("ready") || eventType(event).includes("completed"));
+
+  const bytesLabel = value => {
+    if (!Number.isFinite(value) || value <= 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB"];
+    let size = value, unit = 0;
+    while (size >= 1024 && unit < units.length - 1) { size /= 1024; unit += 1; }
+    return (unit === 0 ? String(Math.round(size)) : size.toFixed(1)) + " " + units[unit];
+  };
+  const uploadDetail = uploadComplete
+    ? bytesLabel(uploadedBytes) + " of " + bytesLabel(expectedBytes) + " transferred to private storage."
+    : transfer?.active
+      ? "Uploading PDF · " + uploadPercent + "% · " + bytesLabel(uploadedBytes) + " of " + bytesLabel(expectedBytes) + "."
+      : uploadedBytes > 0
+        ? "Upload paused at " + uploadPercent + "% · " + bytesLabel(uploadedBytes) + " of " + bytesLabel(expectedBytes) + ". Select the same PDF again to resume from this saved offset."
+        : "Waiting for the secure PDF transfer to finish.";
+  const visionDetail = visionEvent?.message || (visionDone
+    ? "Google Cloud Vision completed document text detection. BRVIN is moving the saved page output through indexing."
+    : String(vision.status || "").toLowerCase() === "running"
+      ? "Google Cloud Vision is processing the PDF. This runs in the background on BRVIN Core."
+      : uploadComplete
+        ? "The secure upload is complete. BRVIN is preparing the Vision OCR job."
+        : "Starts automatically after the secure PDF upload completes.");
+  const indexDetail = indexEvent?.message || (indexComplete
+    ? "All " + expectedPages + " expected pages have been indexed."
+    : visionDone
+      ? "Indexed " + indexedPages + " of " + (expectedPages || "the expected") + " pages. BRVIN is processing the remaining pages."
+      : "Page indexing starts after Vision OCR output is available.");
+  const qaDetail = qaEvent?.message || (qaDone
+    ? "Page-grounded retrieval QA passed."
+    : indexComplete
+      ? "All pages are indexed. BRVIN is checking that retrieved answers retain their original PDF-page provenance."
+      : "Starts automatically after every expected page has been indexed.");
+  const readyDetail = readyDone
+    ? readyEvent?.message || "All required ingestion and retrieval checks passed. This source is READY for its authorized projects."
+    : qaDone
+      ? "Retrieval checks passed. BRVIN is finalizing the source's READY state."
+      : "The source becomes READY only after page indexing and retrieval QA both pass.";
+
+  const definitions = [
+    { key: "upload", title: "Secure PDF upload", detail: uploadDetail },
+    { key: "vision", title: "Vision OCR", detail: visionDetail },
+    { key: "index", title: "Page indexing", detail: indexDetail },
+    { key: "qa", title: "Retrieval quality checks", detail: qaDetail },
+    { key: "ready", title: "Ready", detail: readyDetail }
+  ];
+  const done = [uploadComplete, visionDone, indexComplete, qaDone, readyDone];
+  let activeStage = failureStage === null
+    ? done.findIndex(value => !value)
+    : -1;
+  if (activeStage < 0 && failureStage === null && !readyDone) activeStage = 4;
+  const failureMessage = latestFailure?.message || String(job.error || vision.error || workflow.error || fallbackSource.error || "");
+  const stages = definitions.map((definition, index) => {
+    let state = done[index] ? "completed" : "pending";
+    if (failureStage !== null) {
+      state = index < failureStage ? "completed" : index === failureStage ? "failed" : "pending";
+    } else if (index === activeStage) {
+      state = "active";
+    }
+    return {
+      ...definition,
+      state,
+      error: state === "failed" ? (failureMessage || "BRVIN stopped at this stage without returning an error message.") : "",
+      detail: state === "failed" && failureMessage ? failureMessage : definition.detail
+    };
+  });
+  const completedStages = stages.filter(stage => stage.state === "completed").length;
+  const progressFraction = failureStage === null
+    ? activeStage === 0 ? uploadPercent / 100
+      : activeStage === 2 ? indexPercent / 100
+      : 0
+    : 0;
+  const progressPercent = readyDone ? 100 : Math.max(0, Math.min(100,
+    Math.round((completedStages + progressFraction) / stages.length * 100)));
+  const overallState = readyDone ? "ready" : failureStage !== null ? "failed" :
+    !uploadComplete ? "uploading" : "processing";
+  const overallLabel = overallState === "ready" ? "Ready" :
+    overallState === "failed" ? "Failed" :
+    overallState === "uploading" ? "Uploading" : "Processing";
+  const updatedAt = Number(job.updatedAt || latestEvent?.createdAt || fallbackSource.updatedAt || 0) || 0;
+  return {
+    status, overallState, overallLabel, stages, progressPercent, completedStages,
+    expectedBytes, uploadedBytes, uploadPercent, expectedPages, indexedPages, indexPercent,
+    failureStage, failureMessage, updatedAt, latestEvent,
+    workflowStatus: String(workflow.status || ""),
+    visionStatus: String(vision.status || ""),
+    transferActive: Boolean(transfer?.active),
+    uploadPaused: !uploadComplete && !transfer?.active && uploadedBytes > 0
+  };
+}
+
 export const OPERATOR_CLIENT_JS = `(() => {
 "use strict";
 const sha256File = ${sha256File.toString()};
+const buildSourceProgressModel = ${buildSourceProgressModel.toString()};
 
 const $=id=>document.getElementById(id),content=$("content"),dialog=$("create-dialog"),form=$("create-form");let teachers=[],toastTimer=null;
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n}
