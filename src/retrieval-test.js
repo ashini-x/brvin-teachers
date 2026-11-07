@@ -66,6 +66,7 @@ const pagesField = document.querySelector("#pages");
 const confirmField = document.querySelector("#confirm");
 const runButton = document.querySelector("#run");
 const results = document.querySelector("#results");
+let requestAttempted = false;
 
 function node(tag, className, text) {
   const element = document.createElement(tag);
@@ -127,6 +128,7 @@ form.addEventListener("submit", async event => {
   if (pageNumbers === null) return showState("Enter up to three comma-separated physical PDF pages (maximum 2,000).", "error");
   if (!confirmField.checked) return showState("Confirm the quota notice before running the live retrieval.", "error");
 
+  requestAttempted = true;
   runButton.disabled = true;
   runButton.textContent = "Retrieving evidence…";
   showState("Sending one request through the private BRVIN v2 retrieval service…");
@@ -168,7 +170,7 @@ form.addEventListener("submit", async event => {
   } catch (error) {
     showState(error.message || "The retrieval test failed.", "error");
   } finally {
-    runButton.disabled = projectSelect.disabled || ![...projectSelect.options].some(option => option.dataset.ready === "true");
+    runButton.disabled = requestAttempted || projectSelect.disabled || ![...projectSelect.options].some(option => option.dataset.ready === "true");
     runButton.textContent = "Run one retrieval test";
   }
 });
@@ -334,7 +336,7 @@ export async function handleRetrievalTestRoute(req, env, path) {
             : code === "PROJECT_INACTIVE"
               ? "This knowledge project is inactive."
               : "BRVIN could not return evidence for this request.";
-        return json({ ok: false, code, message }, code === "INVALID_REQUEST" ? 400 : code === "PROJECT_NOT_AUTHORIZED" ? 403 : 502);
+        return json({ ok: false, code, message }, code === "INVALID_REQUEST" ? 400 : code === "PROJECT_NOT_AUTHORIZED" || code === "PROJECT_NOT_MAPPED_TO_TENANT" ? 403 : code === "MONTHLY_LIMIT_REACHED" ? 429 : 502);
       }
 
       const passages = safePassages(result.data.passages);
