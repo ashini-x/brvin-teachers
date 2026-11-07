@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** Production application/environment registered and private connection proof accepted; one real Physics project, collection and 3-page source exist; source indexing is failed pending OCR-output investigation. Student/channel/model runtime remains deferred  
+**Status:** Production application/environment registered; the three-page Physics source is READY and 3/3 indexed; Access-protected retrieval diagnostics are being added to verify passage/page provenance. Student/channel/model runtime remains deferred  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
@@ -32,10 +32,10 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 - [x] BRVIN Admin accepted the Production environment's one-time private connection proof; the registry reports `connected`.
 - [x] Deploy the pinned BRVIN connector with deadline, response-size and no-automatic-retry handling (upstream commit `91b6a499bd782ae298b41e790157c23682f10881`).
 - [ ] Confirm the Operator Console's live management-health indicator during the next authenticated operator session.
-- [ ] Recover the existing Physics source: Vision reported completion, but the expected first-page OCR JSON object is missing from the registered GCS prefix. Inspect the operation destination and object inventory before any retry or re-OCR.
+- [x] Verify the existing Physics pilot PDF is READY with 3/3 indexed pages and all three page-map tiles green; no re-upload or re-OCR was needed.
 - [ ] Select the first student channel, define authentication and operating-cost limits, then implement student/channel/model workflows.
 
-The protected Operator Console and tenant D1 foundation are deployed. Consumer main release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed both private BRVIN bindings and the pinned v2 connector. Consumer PR [#8](https://github.com/ashini-x/brvin-teachers/pull/8) and production release [#42403048998](https://github.com/ashini-x/brvin-teachers/actions/runs/42403048998) deployed the persistent five-stage source progress stepper; validation, build, D1 migration check, deployment, public health and Access-protection smoke checks passed. Live Worker version `c22a6d72-8f34-4a2e-95e4-c8876071e6ee` is at 100% traffic (deployment `1d8a4fcd-1a49-4189-98ee-41fd66885f7b`, 7 November 2026). The live Worker is version `f0942e0a-49f0-468f-b59c-e58d6eb7c16b` (deployment `73699f1d-f9da-4fe4-90bb-77bebc0daf64`, 100% traffic). The real teacher workspace and active BRVIN Production identity (`515e7752-20ff-42f9-b393-7c8130a64bf8`) exist, and the one-time private proof was accepted on 6 November 2026. App D1 has one teacher and one active Core-project mapping (`TCH-000001-PRJ-001`). Core has one active Physics project, one collection and one 3-page source (`TCH-000001-PRJ-001-COL-001-SRC-001`). The source is currently `failed` with 0/3 pages indexed because the expected first-page Vision OCR JSON object was not found; do not re-upload or resume until the Core operation destination and GCS prefix are inspected. No student records or student-facing channel/model runtime exist. See [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md) and [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
+The protected Operator Console, tenant D1 foundation and both private BRVIN bindings are deployed. Consumer PR [#10](https://github.com/ashini-x/brvin-teachers/pull/10) / release [#42417513862](https://github.com/ashini-x/brvin-teachers/actions/runs/42417513862) deployed automatic PDF page-count detection and the per-page status map inside the existing progress dialog; validation, tests, production build, deployment, public health and Access-protection smoke checks passed. The current production Worker version is `7719a4fb-9711-4181-ab67-4326cc146b9d` (deployment `c9b12c36-8080-45c8-877c-bbd939edff7a`, 100% traffic). App D1 has one active teacher/project mapping (`TCH-000001-PRJ-001`). Core has the active Physics project, the Newton's Laws teacher-notes collection and the 3-page source `TCH-000001-PRJ-001-COL-001-SRC-003`. Production D1 confirms the source is `ready`, with `page_count=3` and `indexed_pages=3`; the Operator screenshot shows all three page-map tiles green. The remaining pilot acceptance is a real v2 retrieval query that returns relevant passage text with correct physical PDF page provenance. No student records or student-facing channel/model runtime exist. See [BRVIN management integration](docs/BRVIN_MANAGEMENT_INTEGRATION.md), [temporary retrieval test runbook](docs/RETRIEVAL_TEST_RUNBOOK.md) and [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md).
 
 ## Start here
 
@@ -52,6 +52,7 @@ The protected Operator Console and tenant D1 foundation are deployed. Consumer m
 11. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
 12. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
 13. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
+14. [Temporary retrieval test runbook](docs/RETRIEVAL_TEST_RUNBOOK.md) — one-request, Access-protected live passage/page verification.
 
 ## Working principle
 
