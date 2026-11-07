@@ -257,7 +257,7 @@ function renderSourceProgress(){
     const labels={completed:"Indexed",running:"Running",queued:"Queued",error:"Failed",missing:"Not indexed yet"};
     model.pageStates.forEach((status,index)=>{
      const cell=el("span","source-page-cell",String(index+1));
-     cell.dataset.status=status;cell.title="PDF page "+(index+1)+" · "+labels[status];cell.setAttribute("aria-label",cell.title);
+     cell.dataset.status=status;cell.title="PDF page "+(index+1)+" · "+labels[status];cell.setAttribute("role","img");cell.setAttribute("aria-label",cell.title);
      fragment.append(cell);
     });
     pageMap.replaceChildren(fragment);pageMap.dataset.signature=model.expectedPages+":"+signature;
