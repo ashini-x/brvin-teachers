@@ -117,3 +117,18 @@ test("active Vision OCR advances the stepper after secure upload", () => {
   assert.equal(model.stages[0].state, "completed");
   assert.equal(model.stages[1].state, "active");
 });
+
+test("a browser chunk failure turns Secure PDF upload red with the exact transfer error", () => {
+  const message = "The source chunk could not be uploaded (HTTP 502).";
+  const model = buildSourceProgressModel({
+    import: { status: "uploading", expectedSize: 1000, uploadedBytes: 400, indexedPages: 0, expectedPages: 4 }
+  }, { ...source, status: "uploading", size: 1000, pageCount: 4 }, {
+    id: source.id, totalBytes: 1000, uploadedBytes: 400, active: false, error: message
+  });
+
+  assert.equal(model.overallState, "failed");
+  assert.equal(model.failureStage, 0);
+  assert.equal(model.stages[0].state, "failed");
+  assert.equal(model.stages[0].error, message);
+  assert.equal(model.stages[1].state, "pending");
+});
