@@ -100,6 +100,7 @@ async function loadTargets() {
       option.textContent = target.projectName + " · " + target.projectReference +
         (target.ready ? " · Ready (" + target.authorizedSourceCount + " source)" : " · No ready source");
       option.dataset.ready = target.ready ? "true" : "false";
+      option.disabled = target.ready !== true;
       projectSelect.append(option);
     }
     if (!projectSelect.options.length) {
@@ -120,6 +121,7 @@ async function loadTargets() {
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
+  if (requestAttempted) return showState("One retrieval request has already been sent from this page. Do not repeat it without checking quota first.", "error");
   const projectReference = projectSelect.value;
   const query = queryField.value.replace(/\s+/g, " ").trim();
   const pageNumbers = parsePages(pagesField.value);
