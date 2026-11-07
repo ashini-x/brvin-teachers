@@ -297,3 +297,28 @@ Do not render unimplemented sections as if they work. Build a complete, reliable
 ## 11. Implementation status
 
 PR #1 deployed the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and operator audit records. PR #2 deployed classroom/project creation/listing/rename, collection/bookshelf creation/listing/rename/share/revoke, source listing, incremental SHA-256 fingerprinting, explicit OCR-cost acknowledgement, resumable 8 MiB PDF chunks and Core processing status. Core PR #107 deployed the separate management entrypoint and ownership/reference metadata. Consumer release #42171352464 and Core release #42171109140 both passed their production deployment and smoke checks. The consumer's `BRVIN_MANAGEMENT` binding is live but the production application/environment is not yet registered; the source config still has a fail-closed placeholder. Student, channel, configuration, usage and full activity workflows remain unimplemented.
+
+## 12. Persistent source-processing stepper
+
+The source progress experience is a modal stepper inspired by the supplied vertical checklist reference, adapted to the Operator Console's approved charcoal design system.
+
+### Five authoritative stages
+
+1. **Secure PDF upload** — browser-side resumable 8 MiB chunks into BRVIN's private storage.
+2. **Vision OCR** — the server-side Google Cloud Vision operation.
+3. **Page indexing** — BRVIN indexes each extracted page while preserving source and physical page provenance.
+4. **Retrieval quality checks** — the Core workflow verifies that scoped retrieval returns page-grounded evidence.
+5. **Ready** — BRVIN confirms the source is eligible for retrieval; the UI never sets this state itself.
+
+The active stage uses a restrained rotating four-dot loader. Completed stages show a green check and completed connector; pending stages remain neutral. A failed stage alone turns red, displays a failure marker and renders the exact Core event/error message in a readable error panel. Status is conveyed through text and icons as well as color. Respect `prefers-reduced-motion` by disabling the rotating loader.
+
+### Reopening and lifecycle
+
+- Opening **View progress** on a source calls the authenticated, tenant/project/collection-scoped `GET .../sources/:id/status` management route.
+- The modal renders Core's persisted import state, Vision/Workflow status and source activity events. It does not reconstruct status from browser memory or mutate BRVIN records.
+- Poll every four seconds while the modal is open and visible; back off while the document is hidden. Stop polling when the modal closes or Core confirms Ready. Reopening fetches the latest server state immediately.
+- Closing the modal never cancels Core's Workflow. After the secure upload is complete, OCR, indexing, recovery and retrieval QA continue on BRVIN Core even if the operator closes the page.
+- The chunk transfer itself is initiated by the browser. If the browser closes before the PDF is fully transferred, the server retains the resumable upload offset; the operator selects the same PDF again so its SHA-256 identity resolves the existing source and upload session rather than creating a duplicate.
+- If the status endpoint temporarily cannot be reached, show a neutral connection/retry notice. Do not mark a pipeline stage failed because of a transient UI polling error.
+- An actual upload-chunk error marks Secure PDF upload red. A Core event tagged `vision`/`ocr`, `index_chunk`/`repair_chunk`, or `quality_check`/`verification` marks the corresponding OCR, indexing or retrieval-QA stage red. Retention/cleanup warnings after READY are not ingestion-stage failures.
+- The modal's final state must read **Ready** only when BRVIN Core reports the completed/ready source state. Never optimistically display completion from the browser's successful upload alone.
