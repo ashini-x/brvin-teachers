@@ -1,6 +1,6 @@
 import { sha256File } from "./sha256.js";
 
-export function buildSourceProgressModel(payload, fallbackSource = {}, transfer = null) {
+export export function buildSourceProgressModel(payload, fallbackSource = {}, transfer = null) {
   const body = payload && typeof payload === "object" && payload.result && typeof payload.result === "object"
     ? payload.result : payload && typeof payload === "object" ? payload : {};
   const job = body.import && typeof body.import === "object" ? body.import : {};
@@ -27,7 +27,7 @@ export function buildSourceProgressModel(payload, fallbackSource = {}, transfer 
     ? events.find(event => ["failed", "error"].includes(String(event.status || "").toLowerCase()) &&
         !["retention", "cleanup", "deletion"].includes(eventPhase(event)))
     : null;
-  const ocrVerified = events.some(event => ["ocr.output_verified", "ocr.completed"].includes(eventType(event)) &&
+  const ocrVerified = events.some(event => eventType(event) === "ocr.output_verified" &&
     String(event.status || "").toLowerCase() === "completed");
   const visionDone = (String(vision.status || "").toLowerCase() === "completed" && !vision.error) ||
     ocrVerified || events.some(event => eventType(event).startsWith("index.") || eventType(event) === "qa.started");
@@ -163,12 +163,110 @@ export const OPERATOR_CLIENT_JS = `(() => {
 const sha256File = ${sha256File.toString()};
 const buildSourceProgressModel = ${buildSourceProgressModel.toString()};
 
-const $=id=>document.getElementById(id),content=$("content"),dialog=$("create-dialog"),form=$("create-form");let teachers=[],toastTimer=null;
+const $=id=>document.getElementById(id),content=$("content"),dialog=$("create-dialog"),form=$("create-form");let teachers=[],toastTimer=null,sourceProgressState=null,sourceProgressTimer=null,sourceProgressSequence=0;
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n}
 function btn(text,cls,action){const n=el("button",cls,text);n.type="button";if(action)n.addEventListener("click",action);return n}
 async function api(path,options){const r=await fetch("/operator/api/"+path,{credentials:"same-origin",cache:"no-store",...options,headers:{...(options&&options.headers?options.headers:{})}});let d={};try{d=await r.json()}catch{}if(r.status===401)throw new Error("Your operator session expired. Refresh and sign in again.");if(!r.ok||d.ok!==true)throw new Error(d.message||d.error||"Request failed.");return d}
 async function refreshCoreStatus(){const card=$("core-status"),label=$("core-status-text");if(!card||!label)return;card.dataset.status="checking";label.textContent="Checking management link…";try{await api("brvin-management/health");card.dataset.status="connected";label.textContent="Management connected";card.setAttribute("aria-label","BRVIN Core management connected")}catch{card.dataset.status="unavailable";label.textContent="Management unavailable";card.setAttribute("aria-label","BRVIN Core management unavailable")}}
 async function apiBinary(path,bytes,headers){const r=await fetch("/operator/api/"+path,{method:"POST",credentials:"same-origin",cache:"no-store",headers:{"content-type":"application/octet-stream",...(headers||{})},body:bytes});let d={};try{d=await r.json()}catch{}if(r.status===401)throw new Error("Your operator session expired. Refresh and sign in again.");if(!r.ok||d.ok!==true)throw new Error(d.message||d.error||"The source chunk could not be uploaded.");return d}
+
+function stopSourceProgressPolling(){if(sourceProgressTimer!==null){clearTimeout(sourceProgressTimer);sourceProgressTimer=null}}
+function sourceProgressIsOpen(){const modal=$("source-progress-dialog");return Boolean(modal&&modal.open)}
+function sourceProgressRoute(state){const c=state.context,s=state.source;return "teachers/"+encodeURIComponent(c.tenantId)+"/projects/"+encodeURIComponent(c.projectId)+"/collections/"+encodeURIComponent(c.collectionId)+"/sources/"+encodeURIComponent(s.id)+"/status"}
+function sourceProgressTimestamp(value){const date=new Date(Number(value)||0);if(!Number.isFinite(date.getTime())||date.getTime()<=0)return "Waiting for the first server update";return "Updated "+new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(date)}
+function sourceProgressSpinner(){const spin=el("span","source-step-spinner");spin.setAttribute("aria-label","In progress");for(let i=0;i<4;i++)spin.append(el("i"));return spin}
+function renderSourceProgress(){
+ const state=sourceProgressState;if(!state)return;
+ const model=buildSourceProgressModel(state.data||{},state.source,state.transfer);
+ const subtitle=$("source-progress-subtitle"),summary=$("source-progress-summary"),steps=$("source-progress-steps"),updated=$("source-progress-updated"),footnote=$("source-progress-footnote");
+ if(!summary||!steps)return;
+ subtitle.textContent=[state.source.title||state.source.filename||"PDF source",state.source.reference||""].filter(Boolean).join(" · ");
+ summary.replaceChildren();
+ const main=el("div","source-progress-summary-main");
+ main.append(el("strong","",model.overallLabel+" · "+model.completedStages+" of 5 stages complete"));
+ const pageLabel=model.expectedPages>0?(model.indexedPages+"/"+model.expectedPages+" pages indexed"):"Awaiting page metadata";
+ const uploadLabel=model.expectedBytes>0?(model.uploadPercent+"% PDF transfer"):"Secure upload";
+ main.append(el("small","",pageLabel+" · "+uploadLabel));
+ const bar=el("div","source-progress-count"),fill=el("i");fill.style.width=model.progressPercent+"%";bar.append(fill);main.append(bar);
+ const badge=el("span","source-progress-status",model.overallLabel);badge.dataset.state=model.overallState;
+ summary.append(main,badge);
+ const oldNotice=summary.nextElementSibling;
+ if(oldNotice&&oldNotice.classList.contains("source-progress-connection"))oldNotice.remove();
+ if(state.connectionProblem){
+  const notice=el("p","source-progress-connection",state.connectionProblem);
+  notice.dataset.state="error";notice.setAttribute("role","status");summary.after(notice);
+ }
+ steps.replaceChildren();
+ model.stages.forEach((stage,index)=>{
+  const row=el("article","source-step");row.dataset.state=stage.state;
+  const marker=el("span","source-step-marker");
+  if(stage.state==="active")marker.append(sourceProgressSpinner());
+  else marker.textContent=stage.state==="completed"?"✓":stage.state==="failed"?"!":String(index+1);
+  const copy=el("div","source-step-copy"),head=el("div","source-step-head");
+  head.append(el("strong","",stage.title),el("span","source-step-state",stage.state==="completed"?"Complete":stage.state==="active"?"In progress":stage.state==="failed"?"Failed":"Waiting"));
+  copy.append(head);
+  if(stage.state==="failed"){
+   copy.append(el("div","source-step-error",stage.error||stage.detail||"This stage failed without a returned error message."));
+  }else{
+   copy.append(el("p","source-step-detail",stage.detail));
+  }
+  row.append(marker,copy);steps.append(row);
+ });
+ if(model.overallState==="ready"){
+  footnote.textContent="Ready. The server confirmed that page indexing and retrieval quality checks passed. The source is now available to authorized projects.";
+ }else if(model.uploadPaused){
+  footnote.textContent="The partial PDF transfer is saved in BRVIN Core. To continue a transfer interrupted before completion, select the same PDF again in this collection; BRVIN will resume from the saved byte offset.";
+ }else if(model.transferActive){
+  footnote.textContent="The browser is transferring the PDF in resumable chunks. Once secure upload completes, OCR, indexing and quality checks continue on BRVIN Core even when this window is closed.";
+ }else if(model.overallState==="failed"){
+  footnote.textContent="BRVIN has recorded this failure against the stage shown in red. Closing this window will not change the saved source or its processing history.";
+ }else{
+  footnote.textContent="The secure PDF upload has completed. OCR, page indexing and retrieval quality checks continue in a server-side BRVIN Workflow. Close this window and reopen View progress later to see the latest saved state.";
+ }
+ updated.textContent=sourceProgressTimestamp(model.updatedAt);
+}
+async function pollSourceProgress(sequence){
+ const state=sourceProgressState;if(!state||sequence!==sourceProgressSequence||!sourceProgressIsOpen())return;
+ stopSourceProgressPolling();
+ try{
+  const response=await api(sourceProgressRoute(state));
+  if(!sourceProgressState||sequence!==sourceProgressSequence)return;
+  state.data=response.result||response;state.connectionProblem="";
+  renderSourceProgress();
+  const model=buildSourceProgressModel(state.data,state.source,state.transfer);
+  if(model.overallState==="ready")return;
+ }catch(error){
+  if(!sourceProgressState||sequence!==sourceProgressSequence)return;
+  state.connectionProblem=error.message||"Could not refresh the BRVIN status. Retrying…";
+  renderSourceProgress();
+ }
+ if(sourceProgressState&&sequence===sourceProgressSequence&&sourceProgressIsOpen()){
+  const hidden=document.visibilityState==="hidden";
+  const delay=hidden?12000:state.connectionProblem?6000:4000;
+  sourceProgressTimer=setTimeout(()=>void pollSourceProgress(sequence),delay);
+ }
+}
+function openSourceProgress(source,context,transfer=null){
+ const modal=$("source-progress-dialog");if(!modal)return;
+ stopSourceProgressPolling();
+ const same=sourceProgressState&&sourceProgressState.source.id===source.id;
+ sourceProgressSequence+=1;
+ sourceProgressState={
+  source:{...source},
+  context:{...context},
+  transfer:transfer||(same?sourceProgressState.transfer:null),
+  data:same?sourceProgressState.data:null,
+  connectionProblem:""
+ };
+ if(!modal.open)modal.showModal();
+ renderSourceProgress();
+ void pollSourceProgress(sourceProgressSequence);
+}
+function updateSourceProgressTransfer(transfer){
+ if(!sourceProgressState||sourceProgressState.source.id!==transfer.id)return;
+ sourceProgressState.transfer={...transfer};
+ renderSourceProgress();
+}
 function toast(msg){const n=$("toast");n.textContent=msg;n.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.classList.remove("visible"),2500)}
 function metric(label,value,caption){const m=el("article","metric");m.append(el("small","",label),el("strong","",value),el("em","",caption));return m}
 function teacherCard(t){const c=el("article","teacher"),main=el("div"),meta=el("div","meta"),actions=el("div","teacher-actions");main.append(el("h3","",t.name));meta.append(el("span","ref",t.reference),el("span","","·"),el("span","","Student display: "+t.studentDisplayName));main.append(meta);actions.append(el("span","pill",t.status),btn("Open workspace →","text-btn",()=>workspace(t.id)));c.append(main,actions);return c}
@@ -321,7 +419,7 @@ overview();
 }catch(e){fail(e)}
 }
 function overviewPage(){$("page-title").textContent="Overview";content.replaceChildren();const intro=el("div","intro");intro.append(el("h2","","Platform overview"));const metrics=el("div","metrics");metrics.append(metric("Total teachers",teachers.length,"Database-backed"),metric("Active teachers",teachers.filter(t=>t.status==="active").length,"Currently enabled"),metric("BRVIN projects","—","Management pending"));const panel=el("section","panel"),head=el("div","panel-head"),list=el("div","teacher-list");head.append(el("h3","","Recently created"),btn("View all →","text-btn",directory));teachers.slice(0,5).forEach(t=>list.append(teacherCard(t)));if(!teachers.length){const empty=el("div","empty");empty.append(el("h3","","Workspace ready"),el("p","","No teacher records yet."),btn("Create teacher","primary",openDialog));list.append(empty)}panel.append(head,list);content.append(intro,metrics,panel)}
-function bind(){$("add").addEventListener("click",openDialog);$("close").addEventListener("click",closeDialog);$("cancel").addEventListener("click",closeDialog);form.addEventListener("submit",create);$("menu").addEventListener("click",()=>{$("sidebar").classList.toggle("open");$("scrim").classList.toggle("open")});$("scrim").addEventListener("click",()=>{$("sidebar").classList.remove("open");$("scrim").classList.remove("open")});document.querySelectorAll("nav button:not(:disabled)").forEach(n=>n.addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===n));n.dataset.page==="overview"?overviewPage():directory();$("sidebar").classList.remove("open");$("scrim").classList.remove("open")}))}
+function bind(){$("source-progress-close").addEventListener("click",()=>{$("source-progress-dialog").close()});$("source-progress-dialog").addEventListener("click",e=>{if(e.target===$("source-progress-dialog"))$("source-progress-dialog").close()});$("source-progress-dialog").addEventListener("close",()=>stopSourceProgressPolling());$("add").addEventListener("click",openDialog);$("close").addEventListener("click",closeDialog);$("cancel").addEventListener("click",closeDialog);form.addEventListener("submit",create);$("menu").addEventListener("click",()=>{$("sidebar").classList.toggle("open");$("scrim").classList.toggle("open")});$("scrim").addEventListener("click",()=>{$("sidebar").classList.remove("open");$("scrim").classList.remove("open")});document.querySelectorAll("nav button:not(:disabled)").forEach(n=>n.addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===n));n.dataset.page==="overview"?overviewPage():directory();$("sidebar").classList.remove("open");$("scrim").classList.remove("open")}))}
 async function start(){bind();try{const s=await api("session");$("operator-name").textContent=s.operator.name||s.operator.email;$("operator-foot").textContent=s.operator.email;void refreshCoreStatus();teachers=(await api("teachers")).teachers;directory()}catch(e){fail(e)}}
 start();
 })();`;
