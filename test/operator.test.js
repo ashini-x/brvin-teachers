@@ -70,6 +70,7 @@ test("operator shell has a restrictive CSP", async () => {
   assert.match(html, /Create teacher/);
   assert.match(html, /core-status-text/);
   assert.match(html, /Checking management link/);
+  assert.match(html, /source-progress-dialog/);
   assert.doesNotMatch(html, /Management link pending/);
 });
 
@@ -188,4 +189,66 @@ test("BRVIN management status fails closed for missing or rejected health bindin
   );
   assert.equal(rejected.status, 502);
   assert.equal((await rejected.json()).error, "APPLICATION_ENVIRONMENT_NOT_REGISTERED");
+});
+
+test("source status is fetched through the tenant-scoped private BRVIN management binding", async () => {
+  const db = new FakeD1();
+  const created = await handleOperatorRequest(
+    request("/operator/api/teachers", "POST", { name: "Physics Teacher" }),
+    { DB: db },
+    access
+  );
+  const teacher = (await created.json()).teacher;
+  const projectId = "00000000-0000-4000-8000-000000000001";
+  const collectionId = "00000000-0000-4000-8000-000000000002";
+  const importId = "00000000-0000-4000-8000-000000000003";
+  let received = null;
+  const response = await handleOperatorRequest(
+    request("/operator/api/teachers/" + teacher.id + "/projects/" + projectId + "/collections/" + collectionId + "/sources/" + importId + "/status"),
+    {
+      DB: db,
+      BRVIN_MANAGEMENT: {
+        async health() {
+          return { ok: true, application: "brvin-teachers", management: "ready" };
+        },
+        async getTeacherSourceStatus(input) {
+          received = input;
+          return {
+            ok: true,
+            result: {
+              import: { id: importId, status: "processing", uploadedBytes: 1000, expectedSize: 1000, indexedPages: 2, expectedPages: 4 },
+              pipeline: { vision: { status: "completed" }, workflow: { status: "running" } },
+              events: []
+            }
+          };
+        }
+      }
+    },
+    access
+  );
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(received, {
+    tenantReference: teacher.reference,
+    projectId,
+    collectionId,
+    importId
+  });
+  assert.equal(body.result.import.status, "processing");
+  assert.equal(body.result.import.indexedPages, 2);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("source progress assets expose the accessible stepper and rotating-dot loader", async () => {
+  const js = await handleOperatorRequest(request("/operator/assets/app.js"), { DB: new FakeD1() }, access);
+  const css = await handleOperatorRequest(request("/operator/assets/app.css"), { DB: new FakeD1() }, access);
+  assert.equal(js.status, 200);
+  assert.equal(css.status, 200);
+  const jsText = await js.text();
+  const cssText = await css.text();
+  assert.match(jsText, /buildSourceProgressModel/);
+  assert.match(jsText, /getTeacherSourceStatus|\/status/);
+  assert.match(cssText, /source-step-spinner/);
+  assert.match(cssText, /@keyframes source-step-rotate/);
+  assert.match(cssText, /prefers-reduced-motion/);
 });

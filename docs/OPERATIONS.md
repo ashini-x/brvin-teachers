@@ -124,3 +124,23 @@ For each production release, record in the pull request or release note:
 - known issues and rollback reference.
 
 Keep README.md, docs/DEVELOPMENT_PLAN.md and relevant runbooks synchronized when status changes.
+
+## 10. Source progress, resumption and failure visibility
+
+The Operator Console's source **View progress** modal is a live read-only view of the source's persisted BRVIN Core state. It uses the tenant/project/collection-authorized management RPC; the browser never queries Core D1, GCS or AI Search directly.
+
+The stepper shows these five stages in order: Secure PDF upload → Vision OCR → Page indexing → Retrieval quality checks → Ready. It consumes the Core import record, Vision operation state, Workflow state and recent source activity events. The final Ready state is displayed only after Core confirms the completed/ready source state and its readiness gates have passed.
+
+The modal polls every four seconds while open and visible, with a slower interval while the browser tab is hidden. Closing the modal stops UI polling only; it does not cancel the Cloudflare Workflow. Reopening **View progress** fetches the latest server state. Polling/network errors are shown as a neutral connection notice and must not be misreported as a pipeline-stage failure.
+
+The browser sends the PDF in resumable 8 MiB chunks. If the browser closes before all bytes arrive, the partial byte offset and resumable GCS upload session remain on the server. To continue that transfer, select the same PDF again; its SHA-256 fingerprint resolves the existing source/upload and resumes from the server-reported offset. Do not create a second source to continue an existing upload.
+
+After the secure upload reaches its expected byte count and the completion request starts the Core Workflow, Vision OCR, page indexing, unattended recovery and retrieval QA run server-side. The browser may close without stopping those stages.
+
+Failure presentation follows the recorded failure event:
+- browser chunk/transfer error → Secure PDF upload;
+- Vision operation/OCR error → Vision OCR;
+- `index_chunk`, `repair_chunk`, `retry_page` or related page-index error → Page indexing;
+- `quality_check`, retrieval verification or `qa` failure → Retrieval quality checks.
+
+Render the exact recorded error message in the failed step. Do not turn a temporary status-polling outage or post-READY OCR-retention cleanup warning into a red ingestion step. A failed status is not silently cleared by reopening the modal; the operator sees the persisted failure until Core recovery changes the job state. Never manually mark a source Ready.
