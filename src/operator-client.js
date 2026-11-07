@@ -91,7 +91,7 @@ export function buildSourceProgressModel(payload, fallbackSource = {}, transfer 
       const page = Number(event.details?.page ?? event.details?.pageNumber ?? 0);
       if (!Number.isSafeInteger(page) || page < 1 || page > expectedPages) continue;
       const type = eventType(event);
-      if (type === "index.page_completed" || type === "index.page_retry_scheduled") pageStates[page - 1] = "queued";
+      if (type === "index.page_completed" || type === "index.page_repaired" || type === "index.page_retry_scheduled") pageStates[page - 1] = "queued";
       else if (["failed", "error"].includes(String(event.status || "").toLowerCase())) pageStates[page - 1] = "error";
     }
   }
