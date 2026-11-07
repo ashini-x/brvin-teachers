@@ -132,3 +132,39 @@ test("a browser chunk failure turns Secure PDF upload red with the exact transfe
   assert.equal(model.stages[0].error, message);
   assert.equal(model.stages[1].state, "pending");
 });
+
+test("the PDF page map uses Core's exact page-state snapshot", () => {
+  const model = buildSourceProgressModel({
+    import: { status: "processing", expectedSize: source.size, uploadedBytes: source.size, indexedPages: 1, expectedPages: 3 },
+    events: [{
+      phase: "indexing", type: "index.monitor_pass", status: "running",
+      details: { expectedPages: 3, pageStateMap: "crq" }, createdAt: 1793952634000
+    }]
+  }, { ...source, pageCount: 0 });
+
+  assert.equal(model.expectedPages, 3);
+  assert.deepEqual(model.pageStates, ["completed", "running", "queued"]);
+  assert.deepEqual(model.pageStatusCounts, { completed: 1, running: 1, queued: 1, error: 0, missing: 0 });
+  assert.equal(model.pageMapUpdatedAt, 1793952634000);
+});
+
+test("events after the last map snapshot update only the affected page state", () => {
+  const model = buildSourceProgressModel({
+    import: { status: "processing", expectedSize: source.size, uploadedBytes: source.size, indexedPages: 0, expectedPages: 3 },
+    events: [
+      { phase: "indexing", type: "index.page_completed", status: "completed", details: { page: 2 }, createdAt: 1793952635000 },
+      { phase: "indexing", type: "index.monitor_pass", status: "running", details: { expectedPages: 3, pageStateMap: "mmm" }, createdAt: 1793952634000 }
+    ]
+  }, source);
+
+  assert.deepEqual(model.pageStates, ["missing", "queued", "missing"]);
+});
+
+test("new BRVIN collection uploads remain explicitly page-count pending until Core detects OCR outputs", () => {
+  const model = buildSourceProgressModel({
+    import: { status: "processing", expectedSize: source.size, uploadedBytes: source.size, indexedPages: 0, expectedPages: 0 }
+  }, source);
+
+  assert.equal(model.expectedPages, 0);
+  assert.deepEqual(model.pageStates, []);
+});
