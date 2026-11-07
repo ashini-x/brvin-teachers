@@ -28,11 +28,11 @@ const PAGE = String.raw`<!doctype html>
     <section class="intro">
       <p class="eyebrow">BRVIN V2 · LIVE EVIDENCE CHECK</p>
       <h1>PDF retrieval test</h1>
-      <p class="lead">Run one real search against an authorised teacher knowledge project. BRVIN returns the matching passage with its physical PDF page number.</p>
+      <p class="lead">Run a semantic search against an authorised teacher knowledge project. BRVIN returns relevant passage excerpts with their physical PDF page numbers.</p>
     </section>
     <section class="notice">
       <strong>Before running</strong>
-      <p>This calls the production private retrieval service. It does not upload, OCR, re-index or modify the PDF. A valid retrieval can consume project search quota. Run one test first; do not click repeatedly.</p>
+      <p>This calls the production private retrieval service. It does not upload, OCR, re-index or modify the PDF. One request can consume project search quota. Semantic search is the default; entering page numbers switches to exact-page lookup, which returns the requested page text and skips semantic search when those pages are found.</p>
     </section>
     <section class="panel">
       <div class="panel-head">
@@ -43,9 +43,9 @@ const PAGE = String.raw`<!doctype html>
         <select id="project" name="project" required disabled><option value="">Loading…</option></select>
         <label for="query">Question or search phrase</label>
         <textarea id="query" name="query" maxlength="2000" rows="3" required>According to the document, what is the relationship between force, mass and acceleration?</textarea>
-        <label for="pages">Exact PDF pages to include <span>(optional, up to 3)</span></label>
-        <input id="pages" name="pages" type="text" value="1,2,3" inputmode="numeric" autocomplete="off">
-        <p class="hint">Use physical PDF page numbers, not the printed page labels. Leaving this blank tests semantic search only.</p>
+        <label for="pages">Exact-page lookup override <span>(optional, up to 3 pages)</span></label>
+        <input id="pages" name="pages" type="text" value="" placeholder="Leave blank for semantic search" inputmode="numeric" autocomplete="off">
+        <p class="hint">Leave blank to search by your question and return relevant excerpts. Enter page numbers only when you want those exact pages; if found, BRVIN returns their page text instead of running semantic search.</p>
         <label class="confirm"><input id="confirm" type="checkbox" required> I understand this runs one live retrieval and may use project quota.</label>
         <button id="run" type="submit" disabled>Run one retrieval test</button>
       </form>
@@ -148,9 +148,15 @@ form.addEventListener("submit", async event => {
     }
 
     results.replaceChildren();
+    const modeLabel = body.retrievalMode === "exact-page"
+      ? "Exact-page lookup · semantic search skipped"
+      : "Semantic search";
+    const fallbackNote = body.pageLookupRequested && body.retrievalMode === "semantic"
+      ? " Exact-page items were not found, so semantic search was used as fallback."
+      : "";
     const summary = node("div", "result-summary",
-      "Search complete · " + body.searchCount + " search operation(s) · " +
-      body.searchedSources + " authorised source(s) · " + body.passages.length + " passage(s) returned.");
+      modeLabel + " · " + body.searchCount + " search operation(s) · " +
+      body.searchedSources + " authorised source(s) · " + body.passages.length + " passage(s) returned." + fallbackNote);
     results.append(summary);
     if (!body.passages.length) {
       results.append(node("div", "state empty", "The request succeeded, but BRVIN found no matching passage for this query/page selection. Try a more distinctive phrase from the PDF."));
@@ -342,12 +348,16 @@ export async function handleRetrievalTestRoute(req, env, path) {
       }
 
       const passages = safePassages(result.data.passages);
+      const searchCount = Math.max(0, Number(result.data.searchCount) || 0);
+      const exactPageLookup = input.pageNumbers.length > 0 && searchCount === 0 && passages.length > 0;
       return json({
         ok: true,
         projectName: String(project.name),
         projectReference: String(project.project_ref),
+        retrievalMode: exactPageLookup ? "exact-page" : "semantic",
+        pageLookupRequested: input.pageNumbers.length > 0,
         searchedSources: Math.max(0, Number(result.data.searchedSources) || 0),
-        searchCount: Math.max(0, Number(result.data.searchCount) || 0),
+        searchCount,
         passages,
       });
     } catch {
