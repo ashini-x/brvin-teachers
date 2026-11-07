@@ -322,3 +322,10 @@ The active stage uses a restrained rotating four-dot loader. Completed stages sh
 - If the status endpoint temporarily cannot be reached, show a neutral connection/retry notice. Do not mark a pipeline stage failed because of a transient UI polling error.
 - An actual upload-chunk error marks Secure PDF upload red. A Core event tagged `vision`/`ocr`, `index_chunk`/`repair_chunk`, or `quality_check`/`verification` marks the corresponding OCR, indexing or retrieval-QA stage red. Retention/cleanup warnings after READY are not ingestion-stage failures.
 - The modal's final state must read **Ready** only when BRVIN Core reports the completed/ready source state. Never optimistically display completion from the browser's successful upload alone.
+
+
+### PDF page map and automatic page count
+
+The source-upload form does not ask the operator to enter a PDF page count. BRVIN Core derives the count from its completed Google Vision per-page output inventory, validates the consecutive page files, and sends the authoritative value through the existing source-status response. Until that count is verified, the modal states that the page count is being detected and does not display a fabricated total.
+
+A page map sits below the five-stage progress stepper inside the same scrollable source-progress dialog. It renders one compact tile per detected PDF page and uses Core's saved per-page indexing snapshot to distinguish indexed, running, queued, failed and waiting pages. The dialog remains the only progress surface; the map is lower in the content so operators can scroll to it without a second popup. The UI must not make additional AI Search status requests to build the map.

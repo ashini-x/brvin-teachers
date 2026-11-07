@@ -83,9 +83,8 @@ Project/collection creates use a stable request ID and a SHA-256 hash of the sub
 The Operator Console:
 1. accepts a teacher-approved PDF and display title;
 2. calculates SHA-256 in the browser;
-3. requires the operator to provide the PDF page count;
-4. requires explicit acknowledgement that Google Cloud OCR can incur charges;
-5. starts the Core import;
+3. requires explicit acknowledgement that Google Cloud OCR can incur charges;
+4. starts the Core import without a client-supplied page count; Core derives the exact count from its completed Vision page-output inventory before indexing;
 6. transfers the file in chunks no larger than 8 MiB;
 7. asks Core to start or resume the existing ingestion Workflow;
 8. lists the real source lifecycle and indexed page count.
@@ -148,3 +147,10 @@ The real teacher, Physics project, teacher-notes collection and 3-page PDF sourc
 - Consumer release #42181732210 passed `npm ci`, tests, production build, dry-run, D1 migration, production deploy, public health and Access protection.
 - The application D1 contains one real teacher profile (`TCH-000001`) and one active Core-project mapping (`TCH-000001-PRJ-001`). Core has one active Physics project, one teacher-notes collection and one registered 3-page source; source status is `failed`, `indexed_pages=0`.
 - Both private bindings are present in the deployed Worker with the BRVIN-generated Production identity. BRVIN Admin accepted the one-time `/brvin/connection-probe` proof on 6 November 2026; its readiness snapshot recorded zero ready sources because it predates the source creation.
+
+
+## Automatic PDF page-count detection and source page map
+
+New collection-scoped BRVIN Teachers uploads do not submit a page count. The browser sends only the source title, filename, SHA-256 fingerprint, file size and explicit OCR-cost acknowledgement. Core stores page count as an internal not-yet-detected sentinel, then derives the exact count after Vision completes by validating the isolated per-page output inventory (output-1-to-1.json through output-N-to-N.json). Core requires a complete consecutive sequence, rejects gaps, duplicates, truncated inventories and counts above 2,000, and persists the verified count in its own source/import records before indexing begins. The legacy Fatman importer and its 538-page default are unchanged.
+
+The source-progress dialog includes a scrollable page map below the five-stage stepper. It displays every physical PDF page with the latest Core monitor status: indexed, running, queued, failed or waiting. Core includes the compact page-state snapshot in the existing source-status activity response. The consumer does not query AI Search or Core storage directly and does not create a second ingestion engine; the retrieval v2 contract remains unchanged.
