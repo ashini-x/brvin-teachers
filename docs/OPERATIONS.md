@@ -1,6 +1,6 @@
 # Operations — Development, CI/CD and Production
 
-**Status:** Teacher profile, active Production application/environment, both private bindings and one-time connection proof are complete. Physics project/collection/source exist; source indexing failed pending Vision-output investigation. Student/channel/model traffic remains disabled and unimplemented.
+**Status:** Teacher profile, active Production application/environment, both private bindings and one-time connection proof are complete. The persistent five-stage source-processing stepper is deployed in consumer release #42403048998. Physics project/collection/source exist; source indexing failed pending Vision-output investigation. Student/channel/model traffic remains disabled and unimplemented.
 
 The `brvin-teachers` Worker runs the protected Operator Console, application D1 and classroom/collection/source UI. Consumer release [#42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) deployed both private bindings, the pinned BRVIN connector and current tenant-scoped v2 adapter; CI, D1 migration, production deployment, health and Access smoke tests passed. Core release [#42171109140](https://github.com/ashini-x/parmar-ai/actions/runs/42171109140) deployed the private management entrypoint. BRVIN Admin registered the active Production application/environment and accepted the one-time retrieval connection proof on 6 November. One Physics project and collection now exist, together with one 3-page source that is currently failed with 0/3 pages indexed because the expected first Vision JSON object is missing. The Operator Console's separate management-health indicator still needs an authenticated visual check. Student/channel/model traffic remains disabled and unimplemented.
 
@@ -144,3 +144,9 @@ Failure presentation follows the recorded failure event:
 - `quality_check`, retrieval verification or `qa` failure → Retrieval quality checks.
 
 Render the exact recorded error message in the failed step. Do not turn a temporary status-polling outage or post-READY OCR-retention cleanup warning into a red ingestion step. A failed status is not silently cleared by reopening the modal; the operator sees the persisted failure until Core recovery changes the job state. Never manually mark a source Ready.
+
+## 11. Consumer release: persistent source progress stepper
+
+Consumer PR [#8](https://github.com/ashini-x/brvin-teachers/pull/8) was merged as `86a761a64344bb5dc9afaf28a6d8b5402edffdd3`. Production GitHub Actions run [#42403048998](https://github.com/ashini-x/brvin-teachers/actions/runs/42403048998) passed both validation and deploy/smoke-test jobs. The deployed `brvin-teachers` Worker is version `c22a6d72-8f34-4a2e-95e4-c8876071e6ee`, deployment `1d8a4fcd-1a49-4189-98ee-41fd66885f7b`, created 7 November 2026 at 18:48:27 UTC, 100% traffic.
+
+The modal is a read-only, tenant/project/collection-authorized view of the existing BRVIN Core import, Vision, Workflow and activity state. No Core RPC contract change, Core deployment or D1 schema migration was required. The deployment workflow applied the existing application migrations (no pending migration), passed the public health check and verified the Access-protected operator route. The actual Physics source failure remains an independent ingestion issue; the UI does not re-upload, resume, or mark it Ready automatically.

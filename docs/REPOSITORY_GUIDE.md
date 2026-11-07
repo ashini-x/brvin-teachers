@@ -1,6 +1,6 @@
 # Repository Guide — Coordinating BRVIN Teachers and BRVIN Core
 
-**Last reviewed:** 6 November 2026  
+**Last reviewed:** 7 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **Core repository:** ashini-x/parmar-ai
 
@@ -94,4 +94,4 @@ Do not infer that an implementation is deployed because it exists on main; do no
 
 ## 6. Current management handoff
 
-Consumer PR #2 and Core PR #107 are merged and deployed; consumer PR #4 / release #42174893189 deployed tenant-scoped project/retrieval helpers and the content-free probe. BRVIN Admin registered the active `brvin-teachers` Production environment. Consumer PR #5 / release #42181732210 deployed both private Service Bindings with the generated trusted environment ID and the pinned BRVIN connector; CI and production smoke checks passed. Complete BRVIN Admin's one-time proof and management-health check before marking Connected or creating the pilot project/source. The existing teacher profile is real; do not create duplicates. No student channel/model/authentication flow exists yet. Read [BRVIN_MANAGEMENT_INTEGRATION.md](BRVIN_MANAGEMENT_INTEGRATION.md) and [BRVIN_V2_INTEGRATION.md](BRVIN_V2_INTEGRATION.md) before changing either side.
+Consumer PR #2 and Core PR #107 are merged and deployed; consumer PR #4 / release #42174893189 deployed tenant-scoped project/retrieval helpers and the content-free probe. BRVIN Admin registered the active `brvin-teachers` Production environment. Consumer PR #5 / release #42181732210 deployed both private Service Bindings with the generated trusted environment ID and pinned BRVIN connector; the one-time proof is accepted. Consumer PR #8 / release #42403048998 deployed the persistent five-stage source progress stepper using the existing tenant-scoped Core status RPC; CI, Worker deployment, health and Access-protection smoke checks passed. The live consumer version is `c22a6d72-8f34-4a2e-95e4-c8876071e6ee` (deployment `1d8a4fcd-1a49-4189-98ee-41fd66885f7b`). The existing teacher profile is real; do not create duplicates. The registered Physics source is still failed pending the separate OCR-output investigation; the stepper does not itself repair or re-run that source. No student channel/model/authentication flow exists yet. Read [BRVIN_MANAGEMENT_INTEGRATION.md](BRVIN_MANAGEMENT_INTEGRATION.md) and [BRVIN_V2_INTEGRATION.md](BRVIN_V2_INTEGRATION.md) before changing either side.

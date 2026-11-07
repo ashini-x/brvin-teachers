@@ -1,6 +1,6 @@
 # BRVIN Teachers — Operator Console UX and Visual Design
 
-**Status:** Operator Console and classroom/collection/source screens deployed; BRVIN environment registration and retrieval activation pending  
+**Status:** Operator Console, classroom/collection/source screens and persistent five-stage source progress stepper deployed; BRVIN Production registration and one-time connection proof accepted  
 **Decision date:** 6 November 2026  
 **Product:** BRVIN Teachers Operator Console  
 **Implementation repository:** `ashini-x/brvin-teachers`  
@@ -296,7 +296,7 @@ Do not render unimplemented sections as if they work. Build a complete, reliable
 
 ## 11. Implementation status
 
-PR #1 deployed the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and operator audit records. PR #2 deployed classroom/project creation/listing/rename, collection/bookshelf creation/listing/rename/share/revoke, source listing, incremental SHA-256 fingerprinting, explicit OCR-cost acknowledgement, resumable 8 MiB PDF chunks and Core processing status. Core PR #107 deployed the separate management entrypoint and ownership/reference metadata. Consumer release #42171352464 and Core release #42171109140 both passed their production deployment and smoke checks. The consumer's `BRVIN_MANAGEMENT` binding is live but the production application/environment is not yet registered; the source config still has a fail-closed placeholder. Student, channel, configuration, usage and full activity workflows remain unimplemented.
+PR #1 deployed the Access-authenticated Operator Console shell, responsive dark layout, teacher directory/search, custom-name creation, generated tenant UUID/reference, duplicate-name support, rename without identifier changes and operator audit records. PR #2 deployed classroom/project creation/listing/rename, collection/bookshelf creation/listing/rename/share/revoke, source listing, incremental SHA-256 fingerprinting, explicit OCR-cost acknowledgement, resumable 8 MiB PDF chunks and Core processing status. Core PR #107 deployed the separate management entrypoint and ownership/reference metadata. Consumer PR #5 / release #42181732210 deployed both private Service Bindings with the generated active Production identity; BRVIN Admin accepted the one-time private proof on 6 November 2026. Consumer PR #8 / release #42403048998 deployed the persistent five-stage source progress stepper, per-source View progress action, Core-backed status polling, exact step-level errors, reduced-motion behavior and documented browser-resume/server-workflow boundaries. Both CI jobs passed; the production Worker deployed as version `c22a6d72-8f34-4a2e-95e4-c8876071e6ee` (deployment `1d8a4fcd-1a49-4189-98ee-41fd66885f7b`, 100% traffic). The existing Physics source remains failed pending OCR-output investigation; deploying the stepper does not change or falsely mark that source ready. Student, channel, configuration, usage and full activity workflows remain unimplemented.
 
 ## 12. Persistent source-processing stepper
 

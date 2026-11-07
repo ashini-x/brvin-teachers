@@ -13,10 +13,10 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Worker | `brvin-teachers` |
 | Worker resource ID | `e0ccfe8aed524e119f91ab5f784bf5be` |
 | Public URL | `https://brvin-teachers.thenewtongs.workers.dev` |
-| Production version | `f0942e0a-49f0-468f-b59c-e58d6eb7c16b` |
-| Deployment ID | `73699f1d-f9da-4fe4-90bb-77bebc0daf64` |
-| Deployed | `2026-11-06T07:56:05.285590Z` |
-| Release | [GitHub Actions #42181732210](https://github.com/ashini-x/brvin-teachers/actions/runs/42181732210) |
+| Production version | `c22a6d72-8f34-4a2e-95e4-c8876071e6ee` |
+| Deployment ID | `1d8a4fcd-1a49-4189-98ee-41fd66885f7b` |
+| Deployed | `2026-11-07T18:48:27.681093Z` |
+| Release | [GitHub Actions #42403048998](https://github.com/ashini-x/brvin-teachers/actions/runs/42403048998) |
 | Compatibility date | `2026-11-06` |
 | Observability | Enabled; invocation logs persisted; query strings redacted |
 | Preview URLs | Disabled |
@@ -25,7 +25,7 @@ This is a live-resource status record, not deployment configuration. Update it w
 | Retrieval binding | `BRVIN_SERVICE` → `brvin-service` / `BrvinRetrievalApi` (deployed with active registered Production identity; one-time proof accepted 6 November 2026) |
 | Custom domains/routes | None |
 
-The current deployed Worker version includes both private Service Bindings configured with the BRVIN-generated Production identity. BRVIN Admin accepted the one-time private retrieval proof on 6 November 2026; a read-only registry check on 7 November confirmed the environment remains `active` and its latest proof status is `connected`. The proof snapshot recorded zero ready sources because it preceded creation of the Physics project and source. It does not establish source readiness or student retrieval acceptance.
+The current deployed Worker version includes both private Service Bindings configured with the BRVIN-generated Production identity and the persistent five-stage source progress stepper. PR #8 / release #42403048998 deployed the UI with both the validation and production jobs passing; the release smoke checks confirmed public health and Access protection. BRVIN Admin accepted the one-time private retrieval proof on 6 November 2026; a read-only registry check on 7 November confirmed the environment remains `active` and its latest proof status is `connected`. The proof snapshot recorded zero ready sources because it preceded creation of the Physics project and source. It does not establish source readiness or student retrieval acceptance.
 
 The protected Operator Console is served at `/operator`; public `/health` is non-sensitive. The release workflow applied application D1 migrations, deployed the Worker, passed public health and confirmed Cloudflare Access protects the operator route.
 
@@ -85,6 +85,7 @@ The actual target Worker and Core Workers are in Cloudflare account `b34a6c0b722
 - Main releases apply checked-in application D1 migrations, build/deploy the Worker and run public health and Access-protection smoke checks.
 - Production Cloudflare credentials are stored in the GitHub `production` Environment, not in this repository.
 - Release #42171352464 is the first deployed classroom/source-management release and passed all required steps.
+- Release [#42403048998](https://github.com/ashini-x/brvin-teachers/actions/runs/42403048998) deployed source progress PR #8; version `c22a6d72-8f34-4a2e-95e4-c8876071e6ee` is at 100% traffic via deployment `1d8a4fcd-1a49-4189-98ee-41fd66885f7b`.
 
 ## 6. Next setup sequence
 
