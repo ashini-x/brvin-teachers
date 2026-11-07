@@ -123,7 +123,11 @@ test("protected diagnostic page uses no-store and a restrictive CSP", async () =
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.match(response.headers.get("content-security-policy"), /script-src 'self'/);
-  assert.match(await response.text(), /PDF retrieval test/);
+  const html = await response.text();
+  assert.match(html, /PDF retrieval test/);
+  assert.match(html, /value="" placeholder="Leave blank for semantic search"/);
+  assert.match(html, /semantic search is the default/i);
+  assert.match(html, /Exact-page lookup override/);
 });
 
 test("cross-origin diagnostic writes are rejected before accessing D1", async () => {
@@ -169,6 +173,8 @@ test("live test resolves project reference server-side and preserves Core PDF pa
   assert.equal(response.status, 200);
   assert.equal(body.ok, true);
   assert.equal(body.projectReference, PROJECT_REF);
+  assert.equal(body.retrievalMode, "semantic");
+  assert.equal(body.pageLookupRequested, true);
   assert.equal(body.passages[0].pdfPage, 2);
   assert.equal(body.passages[0].bookTitle, "Force and Laws of Motion - Class IX pilot handout");
   assert.equal(calls, 1);
@@ -179,6 +185,42 @@ test("live test resolves project reference server-side and preserves Core PDF pa
     requestId: received.requestId,
   });
   assert.match(received.requestId, /^[a-f0-9-]{36}$/u);
+});
+
+test("reports exact-page retrieval separately and states semantic search was skipped", async () => {
+  const DB = new FakeD1();
+  let received;
+  const BRVIN_SERVICE = {
+    async retrieveProjectContextV2(input) {
+      received = input;
+      return {
+        ok: true,
+        data: {
+          passages: [passage({ pdfPage: 1, text: "Full indexed text for PDF page one." })],
+          searchedSources: 1,
+          searchCount: 0,
+        },
+      };
+    },
+  };
+  const response = await handleRetrievalTestRoute(
+    postRequest({
+      projectReference: PROJECT_REF,
+      query: "Explain Newton's second law.",
+      pageNumbers: [1, 2, 3],
+    }),
+    { DB, BRVIN_SERVICE },
+    "/operator/api/retrieval-test",
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.ok, true);
+  assert.equal(body.retrievalMode, "exact-page");
+  assert.equal(body.pageLookupRequested, true);
+  assert.equal(body.searchCount, 0);
+  assert.equal(received.pageNumbers.length, 3);
+  assert.match(body.passages[0].text, /Full indexed text/);
 });
 
 test("target list shows only projects confirmed by Core and mapped in app D1", async () => {
