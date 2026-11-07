@@ -21,7 +21,7 @@ The current BRVIN contract and production facts remain authoritative in parmar-a
 
 - [x] Separate public repository and two-repository architecture established.
 - [x] Shared Worker, Cloudflare Access and GitHub Actions deployment path verified.
-- [x] Application D1 and tenant/audit schema deployed; it is ready for real teacher profiles (currently zero rows).
+- [x] Application D1 and tenant/audit schema deployed; one real teacher profile and one active Core-project mapping are present.
 - [x] Protected Operator Console deployed: teacher directory/search, custom-name creation, generated UUID/reference, workspace overview and rename.
 - [x] Classroom/project, collection/bookshelf and source/PDF workflows are deployed in the protected Operator Console.
 - [x] Private `BRVIN_MANAGEMENT` Service Binding is deployed from `brvin-teachers` to `parmar-ai` / `BrvinTeachersManagementApi`.
