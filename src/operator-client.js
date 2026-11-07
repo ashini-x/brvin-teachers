@@ -1,6 +1,6 @@
 import { sha256File } from "./sha256.js";
 
-export export function buildSourceProgressModel(payload, fallbackSource = {}, transfer = null) {
+export function buildSourceProgressModel(payload, fallbackSource = {}, transfer = null) {
   const body = payload && typeof payload === "object" && payload.result && typeof payload.result === "object"
     ? payload.result : payload && typeof payload === "object" ? payload : {};
   const job = body.import && typeof body.import === "object" ? body.import : {};
