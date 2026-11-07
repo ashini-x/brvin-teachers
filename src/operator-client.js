@@ -69,6 +69,37 @@ export function buildSourceProgressModel(payload, fallbackSource = {}, transfer 
   const qaEvent = findEvent(event => eventPhase(event) === "verification" || eventType(event).startsWith("qa."));
   const readyEvent = findEvent(event => eventType(event).includes("ready") || eventType(event).includes("completed"));
 
+  // Core's normal source monitor writes a compact exact page-status snapshot.
+  // Read it from the existing events response; never fan out AI Search scans
+  // from the consumer's four-second modal poll.
+  const pageMapEvent = expectedPages > 0 ? events.find(event =>
+    eventType(event) === "index.monitor_pass" &&
+    Number(event.details?.expectedPages) === expectedPages &&
+    typeof event.details?.pageStateMap === "string" &&
+    event.details.pageStateMap.length === expectedPages
+  ) : null;
+  const pageStates = Array.from({ length: expectedPages }, () => "missing");
+  const stateFromCode = code => code === "c" ? "completed" : code === "r" ? "running" :
+    code === "q" ? "queued" : code === "e" ? "error" : "missing";
+  if (pageMapEvent) {
+    [...pageMapEvent.details.pageStateMap].forEach((code, index) => { pageStates[index] = stateFromCode(code); });
+  }
+  const pageMapUpdatedAt = Number(pageMapEvent?.createdAt || 0) || 0;
+  if (pageMapEvent) {
+    for (const event of [...events].sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0))) {
+      if (Number(event.createdAt || 0) <= pageMapUpdatedAt) continue;
+      const page = Number(event.details?.page ?? event.details?.pageNumber ?? 0);
+      if (!Number.isSafeInteger(page) || page < 1 || page > expectedPages) continue;
+      const type = eventType(event);
+      if (type === "index.page_completed" || type === "index.page_retry_scheduled") pageStates[page - 1] = "queued";
+      else if (["failed", "error"].includes(String(event.status || "").toLowerCase())) pageStates[page - 1] = "error";
+    }
+  }
+  const pageStatusCounts = pageStates.reduce((counts, state) => {
+    counts[state] = (counts[state] || 0) + 1;
+    return counts;
+  }, { completed: 0, running: 0, queued: 0, error: 0, missing: 0 });
+
   const bytesLabel = value => {
     if (!Number.isFinite(value) || value <= 0) return "0 B";
     const units = ["B", "KB", "MB", "GB"];
@@ -150,6 +181,7 @@ export function buildSourceProgressModel(payload, fallbackSource = {}, transfer 
   return {
     status, overallState, overallLabel, stages, progressPercent, completedStages,
     expectedBytes, uploadedBytes, uploadPercent, expectedPages, indexedPages, indexPercent,
+    pageStates, pageStatusCounts, pageMapUpdatedAt,
     failureStage, failureMessage, updatedAt, latestEvent,
     workflowStatus: String(workflow.status || ""),
     visionStatus: String(vision.status || ""),
@@ -178,13 +210,13 @@ function sourceProgressSpinner(){const spin=el("span","source-step-spinner");spi
 function renderSourceProgress(){
  const state=sourceProgressState;if(!state)return;
  const model=buildSourceProgressModel(state.data||{},state.source,state.transfer);
- const subtitle=$("source-progress-subtitle"),summary=$("source-progress-summary"),steps=$("source-progress-steps"),updated=$("source-progress-updated"),footnote=$("source-progress-footnote");
+ const subtitle=$("source-progress-subtitle"),summary=$("source-progress-summary"),steps=$("source-progress-steps"),updated=$("source-progress-updated"),footnote=$("source-progress-footnote"),pageMap=$("source-page-map-grid"),pageMapSummary=$("source-page-map-summary");
  if(!summary||!steps)return;
  subtitle.textContent=[state.source.title||state.source.filename||"PDF source",state.source.reference||""].filter(Boolean).join(" · ");
  summary.replaceChildren();
  const main=el("div","source-progress-summary-main");
  main.append(el("strong","",model.overallLabel+" · "+model.completedStages+" of 5 stages complete"));
- const pageLabel=model.expectedPages>0?(model.indexedPages+"/"+model.expectedPages+" pages indexed"):"Awaiting page metadata";
+ const pageLabel=model.expectedPages>0?(model.indexedPages+"/"+model.expectedPages+" pages indexed"):"BRVIN will detect the exact page count from OCR output";
  const uploadLabel=model.expectedBytes>0?(model.uploadPercent+"% PDF transfer"):"Secure upload";
  main.append(el("small","",pageLabel+" · "+uploadLabel));
  const bar=el("div","source-progress-count"),fill=el("i");fill.style.width=model.progressPercent+"%";bar.append(fill);main.append(bar);
@@ -212,6 +244,26 @@ function renderSourceProgress(){
   }
   row.append(marker,copy);steps.append(row);
  });
+ if(pageMap&&pageMapSummary){
+  if(model.expectedPages<1){
+   pageMapSummary.textContent="BRVIN is verifying the PDF's exact page count from the completed Google Vision output inventory. The page map will appear automatically before indexing.";
+   if(pageMap.dataset.signature!=="pending"){pageMap.replaceChildren();pageMap.dataset.signature="pending";}
+  }else{
+   const counts=model.pageStatusCounts;
+   pageMapSummary.textContent=model.expectedPages+" PDF pages · "+counts.completed+" indexed · "+counts.running+" running · "+counts.queued+" queued · "+counts.error+" failed · "+counts.missing+" waiting";
+   const signature=model.pageStates.map(status=>status==="completed"?"c":status==="running"?"r":status==="queued"?"q":status==="error"?"e":"m").join("");
+   if(pageMap.dataset.signature!==model.expectedPages+":"+signature){
+    const fragment=document.createDocumentFragment();
+    const labels={completed:"Indexed",running:"Running",queued:"Queued",error:"Failed",missing:"Not indexed yet"};
+    model.pageStates.forEach((status,index)=>{
+     const cell=el("span","source-page-cell",String(index+1));
+     cell.dataset.status=status;cell.title="PDF page "+(index+1)+" · "+labels[status];cell.setAttribute("aria-label",cell.title);
+     fragment.append(cell);
+    });
+    pageMap.replaceChildren(fragment);pageMap.dataset.signature=model.expectedPages+":"+signature;
+   }
+  }
+ }
  if(model.overallState==="ready"){
   footnote.textContent="Ready. The server confirmed that page indexing and retrieval quality checks passed. The source is now available to authorized projects.";
  }else if(model.uploadPaused){
@@ -221,7 +273,7 @@ function renderSourceProgress(){
  }else if(model.overallState==="failed"){
   footnote.textContent="BRVIN has recorded this failure against the stage shown in red. Closing this window will not change the saved source or its processing history.";
  }else{
-  footnote.textContent="The secure PDF upload has completed. OCR, page indexing and retrieval quality checks continue in a server-side BRVIN Workflow. Close this window and reopen View progress later to see the latest saved state.";
+  footnote.textContent="BRVIN detects the exact PDF page count from its complete Vision page-output inventory. OCR, page indexing and retrieval quality checks continue in a server-side Workflow; closing this window does not stop processing.";
  }
  updated.textContent=sourceProgressTimestamp(model.updatedAt);
 }
@@ -371,9 +423,8 @@ if(c.ownership==="owned")upload.append(el("h3","","Add PDF source"),el("p","","C
 else upload.append(el("h3","","Source uploads restricted"),el("p","","Upload is available only from the collection's originating classroom. You can still view its sources here."));
 
 const form=el("form","upload-form"),titleField=field("Source title","source-title"),fileWrap=el("div","field-group"),fileLabel=el("label","","PDF file");fileLabel.htmlFor="source-file";const file=el("input","field-input");file.id="source-file";file.type="file";file.accept="application/pdf,.pdf";file.required=true;fileWrap.append(fileLabel,file);
-const page=field("PDF page count","source-pages","number");page.input.min="1";page.input.max="2000";page.input.required=true;
-const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";check.required=true;const checkText=el("span","","I understand that Google Cloud OCR may incur usage charges.");checkWrap.append(check,checkText);
-const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);if(c.ownership==="owned")upload.append(form);
+const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";check.required=true;const checkText=el("span","","I understand that Google Cloud OCR may incur usage charges. BRVIN will detect the page count automatically.");checkWrap.append(check,checkText);
+const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,checkWrap,submit,progress);if(c.ownership==="owned")upload.append(form);
 const sourceList=el("div","source-list"),heading=el("div","panel-head"),refreshBtn=btn("↻ Refresh status","text-btn",refreshSources);heading.append(el("h3","","Sources"),refreshBtn);sourceList.append(heading);
 grid.append(top,manage,upload,sourceList);
 let activeUploadTransfer=null;
@@ -384,20 +435,19 @@ sourceList.querySelectorAll(".source-row,.empty,.loading,.error").forEach(x=>x.r
 try{
 const result=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources");
 if(!result.sources.length){const empty=el("div","empty");empty.append(el("h3","","No sources yet"),el("p","","Upload the first teacher-approved PDF into this collection."));sourceList.append(empty)}
-else result.sources.forEach(source=>{const row=el("article","teacher source-row"),main=el("div"),meta=el("div","meta"),actions=el("div","source-actions"),status=el("span","pill",source.status);status.dataset.sourceState=String(source.status||"").toLowerCase();main.append(el("h3","",source.title));meta.append(el("span","ref",source.reference||"Reference pending"),el("span","","·"),el("span","",source.filename),el("span","","·"),el("span","",source.indexedPages+"/"+source.pageCount+" pages indexed"));main.append(meta);if(source.error)main.append(el("div","error",source.error));actions.append(status,btn("View progress","text-btn",()=>openSourceProgress(source,sourceProgressContext,activeUploadTransfer?.id===source.id?activeUploadTransfer:null)));row.append(main,actions);sourceList.append(row)})
+else result.sources.forEach(source=>{const row=el("article","teacher source-row"),main=el("div"),meta=el("div","meta"),actions=el("div","source-actions"),status=el("span","pill",source.status);status.dataset.sourceState=String(source.status||"").toLowerCase();main.append(el("h3","",source.title));const pageCount=Number(source.pageCount||0);meta.append(el("span","ref",source.reference||"Reference pending"),el("span","","·"),el("span","",source.filename),el("span","","·"),el("span","",pageCount>0?source.indexedPages+"/"+pageCount+" pages indexed":"Page count pending OCR"));main.append(meta);if(source.error)main.append(el("div","error",source.error));actions.append(status,btn("View progress","text-btn",()=>openSourceProgress(source,sourceProgressContext,activeUploadTransfer?.id===source.id?activeUploadTransfer:null)));row.append(main,actions);sourceList.append(row)})
 }catch(error){sourceList.append(el("div","error",error.message))}
 }
 form.addEventListener("submit",async e=>{
 e.preventDefault();const selected=file.files&&file.files[0];if(!selected||c.ownership!=="owned")return;
 if(selected.type!=="application/pdf"&&!selected.name.toLowerCase().endsWith(".pdf")){toast("Select a PDF file.");return}
 if(selected.size<8||selected.size>1024*1024*1024){toast("PDF must be between 8 bytes and 1 GB.");return}
-const pageCount=Number(page.input.value);if(!Number.isSafeInteger(pageCount)||pageCount<1||pageCount>2000){toast("Enter a valid PDF page count.");return}
 submit.disabled=true;submit.textContent="Preparing PDF…";progress.hidden=false;progress.textContent="Calculating the PDF fingerprint…";
 try{
 const sha=await sha256File(selected,(done,total)=>{progress.textContent="Calculating PDF fingerprint · "+Math.floor(done/total*100)+"%";});
-const started=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({title:titleField.input.value||selected.name.replace(/\.pdf$/iu,""),filename:selected.name,sha256:sha,size:selected.size,pageCount,costConfirmed:check.checked})});
+const started=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({title:titleField.input.value||selected.name.replace(/\.pdf$/iu,""),filename:selected.name,sha256:sha,size:selected.size,costConfirmed:check.checked})});
 const uploadInfo=started.upload||{},importId=uploadInfo.importId;if(typeof importId!=="string")throw new Error("BRVIN did not return an upload identifier.");
-const progressSource={id:importId,reference:started.source?.reference||null,title:started.source?.title||titleField.input.value||selected.name.replace(/\\.pdf$/iu,""),filename:selected.name,pageCount,status:uploadInfo.status||"uploading",indexedPages:0,updatedAt:Date.now()};
+const progressSource={id:importId,reference:started.source?.reference||null,title:started.source?.title||titleField.input.value||selected.name.replace(/\\.pdf$/iu,""),filename:selected.name,pageCount:Number(started.source?.pageCount||uploadInfo.expectedPages||0),status:uploadInfo.status||"uploading",indexedPages:0,updatedAt:Date.now()};
 activeUploadTransfer={id:importId,uploadedBytes:Number(uploadInfo.uploadedBytes||0),totalBytes:selected.size,active:true};
 openSourceProgress(progressSource,sourceProgressContext,activeUploadTransfer);
 void refreshSources();
