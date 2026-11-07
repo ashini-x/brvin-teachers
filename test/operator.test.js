@@ -62,6 +62,15 @@ test("Access identity is required", async () => {
   assert.equal(response.status, 401);
 });
 
+test("temporary retrieval diagnostic page remains behind Cloudflare Access", async () => {
+  const denied = await handleOperatorRequest(request("/operator/retrieval-test"), {}, {});
+  assert.equal(denied.status, 401);
+
+  const allowed = await handleOperatorRequest(request("/operator/retrieval-test"), {}, access);
+  assert.equal(allowed.status, 200);
+  assert.match(await allowed.text(), /PDF retrieval test/);
+});
+
 test("operator shell has a restrictive CSP", async () => {
   const response = await handleOperatorRequest(request("/operator"), {}, access);
   assert.equal(response.status, 200);
