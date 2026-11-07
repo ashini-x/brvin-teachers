@@ -45,6 +45,22 @@ Use this only when checking the page extraction/provenance mechanism independent
 
 Exact-page results can contain substantially more text than a semantic excerpt because the operation retrieves the specified page record.
 
+## Precision baseline for the three-page Newton pilot
+
+The Core precision update is deployed (Core PR [#135](https://github.com/ashini-x/parmar-ai/pull/135)). The shared AI Search index uses hybrid vector + BM25 retrieval, 256-token chunks with 10% overlap, RRF fusion and BGE cross-encoder reranking. The three existing pilot pages have been re-indexed from the stored OCR text (page 1: 3 chunks; page 2: 4; page 3: 4). No PDF upload or Google Vision OCR rerun was required.
+
+Use one focused query at a time, with the exact-page override blank:
+
+| Test question | Expected primary physical PDF page | What to verify |
+|---|---:|---|
+| `Explain Newton's second law: how do net force, mass and acceleration relate?` | 2 | The result explains that acceleration is in the direction of net force, increases with net force, and decreases with mass for the same net force. |
+| `A 4 kg box is pulled with 20 N to the right while friction is 8 N to the left. Calculate net force and acceleration.` | 3 | The result supports 12 N to the right and 3 m/s² to the right. |
+| `Why does a passenger move forward when a moving bus brakes suddenly? Which law explains it?` | 3 (answer key); page 1 also contains the explanation | The result identifies inertia and Newton's first law. |
+
+The expected pages above are a baseline for checking the source citation, not a hard-coded routing rule. A passage is acceptable only when its text actually supports the answer and its returned **PDF page N** matches the original physical PDF page. Do not enter the expected page number in the exact-page override while running a semantic test.
+
+A direct AI Search engine smoke check produced the expected top page for each of these questions. That is a retrieval-index check only; the final acceptance must still be performed through this protected page so the real v2 Service Binding, application/environment identity, project grant, ready-source checks and quota are exercised together. Each live retrieval test can consume project quota, and this page intentionally allows only one request per load.
+
 ## What constitutes useful semantic-search evidence
 
 - The endpoint returns `ok: true` through the private BRVIN v2 binding.
