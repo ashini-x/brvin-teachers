@@ -36,8 +36,8 @@ export export function buildSourceProgressModel(payload, fallbackSource = {}, tr
   const readyDone = ["completed", "ready"].includes(status) ||
     String(fallbackSource.status || "").toLowerCase() === "ready";
 
-  let failureStage = null;
-  if (latestFailure) {
+  let failureStage = transfer?.error ? 0 : null;
+  if (failureStage === null && latestFailure) {
     const combined = [
       eventTask(latestFailure), eventPhase(latestFailure), eventType(latestFailure),
       String(latestFailure.message || "")
@@ -51,7 +51,7 @@ export export function buildSourceProgressModel(payload, fallbackSource = {}, tr
     else if (indexComplete) failureStage = 3;
     else if (visionDone) failureStage = 2;
     else failureStage = 1;
-  } else if (status === "failed") {
+  } else if (failureStage === null && status === "failed") {
     if (!uploadComplete) failureStage = 0;
     else if (vision.error) failureStage = 1;
     else if (indexComplete) failureStage = 3;
@@ -118,7 +118,7 @@ export export function buildSourceProgressModel(payload, fallbackSource = {}, tr
     ? done.findIndex(value => !value)
     : -1;
   if (activeStage < 0 && failureStage === null && !readyDone) activeStage = 4;
-  const failureMessage = latestFailure?.message || String(job.error || vision.error || workflow.error || fallbackSource.error || "");
+  const failureMessage = String(transfer?.error || latestFailure?.message || job.error || vision.error || workflow.error || fallbackSource.error || "");
   const stages = definitions.map((definition, index) => {
     let state = done[index] ? "completed" : "pending";
     if (failureStage !== null) {
@@ -420,7 +420,7 @@ progress.textContent="BRVIN processing has started. The source will become avail
 if(activeUploadTransfer){activeUploadTransfer.active=false;updateSourceProgressTransfer(activeUploadTransfer)}
 activeUploadTransfer=null;
 toast("Secure upload completed");form.reset();await refreshSources();
-}catch(error){if(activeUploadTransfer){activeUploadTransfer.active=false;updateSourceProgressTransfer(activeUploadTransfer)}progress.textContent="Upload stopped: "+error.message;toast(error.message);void refreshSources()}finally{submit.disabled=false;submit.textContent="Start secure upload"}
+}catch(error){if(activeUploadTransfer?.active){activeUploadTransfer.active=false;activeUploadTransfer.error=error.message;updateSourceProgressTransfer(activeUploadTransfer)}else if(sourceProgressState&&sourceProgressState.source.id===activeUploadTransfer?.id){sourceProgressState.connectionProblem="BRVIN could not start or confirm the processing workflow: "+error.message;renderSourceProgress()}progress.textContent="Upload stopped: "+error.message;toast(error.message);void refreshSources()}finally{submit.disabled=false;submit.textContent="Start secure upload"}
 });
 await refreshSources();
 }
