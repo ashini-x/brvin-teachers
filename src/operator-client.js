@@ -376,13 +376,15 @@ const checkWrap=el("label","check-row"),check=el("input");check.type="checkbox";
 const submit=el("button","primary","Start secure upload");submit.type="submit";const progress=el("div","upload-progress");progress.hidden=true;form.append(titleField.wrap,fileWrap,page.wrap,checkWrap,submit,progress);if(c.ownership==="owned")upload.append(form);
 const sourceList=el("div","source-list"),heading=el("div","panel-head"),refreshBtn=btn("↻ Refresh status","text-btn",refreshSources);heading.append(el("h3","","Sources"),refreshBtn);sourceList.append(heading);
 grid.append(top,manage,upload,sourceList);
+let activeUploadTransfer=null;
+const sourceProgressContext={tenantId:t.id,projectId:project.id,collectionId:c.id};
 
 async function refreshSources(){
 sourceList.querySelectorAll(".source-row,.empty,.loading,.error").forEach(x=>x.remove());
 try{
 const result=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources");
 if(!result.sources.length){const empty=el("div","empty");empty.append(el("h3","","No sources yet"),el("p","","Upload the first teacher-approved PDF into this collection."));sourceList.append(empty)}
-else result.sources.forEach(source=>{const row=el("article","teacher source-row"),main=el("div"),meta=el("div","meta"),status=el("span","pill",source.status);main.append(el("h3","",source.title));meta.append(el("span","ref",source.reference||"Reference pending"),el("span","","·"),el("span","",source.filename),el("span","","·"),el("span","",source.indexedPages+"/"+source.pageCount+" pages indexed"));main.append(meta);if(source.error)main.append(el("div","error",source.error));row.append(main,status);sourceList.append(row)})
+else result.sources.forEach(source=>{const row=el("article","teacher source-row"),main=el("div"),meta=el("div","meta"),actions=el("div","source-actions"),status=el("span","pill",source.status);status.dataset.sourceState=String(source.status||"").toLowerCase();main.append(el("h3","",source.title));meta.append(el("span","ref",source.reference||"Reference pending"),el("span","","·"),el("span","",source.filename),el("span","","·"),el("span","",source.indexedPages+"/"+source.pageCount+" pages indexed"));main.append(meta);if(source.error)main.append(el("div","error",source.error));actions.append(status,btn("View progress","text-btn",()=>openSourceProgress(source,sourceProgressContext,activeUploadTransfer?.id===source.id?activeUploadTransfer:null)));row.append(main,actions);sourceList.append(row)})
 }catch(error){sourceList.append(el("div","error",error.message))}
 }
 form.addEventListener("submit",async e=>{
@@ -395,13 +397,19 @@ try{
 const sha=await sha256File(selected,(done,total)=>{progress.textContent="Calculating PDF fingerprint · "+Math.floor(done/total*100)+"%";});
 const started=await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({title:titleField.input.value||selected.name.replace(/\.pdf$/iu,""),filename:selected.name,sha256:sha,size:selected.size,pageCount,costConfirmed:check.checked})});
 const uploadInfo=started.upload||{},importId=uploadInfo.importId;if(typeof importId!=="string")throw new Error("BRVIN did not return an upload identifier.");
+const progressSource={id:importId,reference:started.source?.reference||null,title:started.source?.title||titleField.input.value||selected.name.replace(/\\.pdf$/iu,""),filename:selected.name,pageCount,status:uploadInfo.status||"uploading",indexedPages:0,updatedAt:Date.now()};
+activeUploadTransfer={id:importId,uploadedBytes:Number(uploadInfo.uploadedBytes||0),totalBytes:selected.size,active:true};
+openSourceProgress(progressSource,sourceProgressContext,activeUploadTransfer);
+void refreshSources();
 let uploaded=Number(uploadInfo.uploadedBytes||0);const chunkSize=8*1024*1024;
 while(uploaded<selected.size){
 const next=Math.min(selected.size,uploaded+chunkSize),chunk=selected.slice(uploaded,next),bytes=await chunk.arrayBuffer();
 progress.textContent="Uploading PDF · "+Math.floor(uploaded/selected.size*100)+"%";
 const part=await apiBinary("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources/"+encodeURIComponent(importId)+"/chunk",bytes,{"x-upload-start":String(uploaded),"x-upload-total-size":String(selected.size)});
 uploaded=Number(part.upload?.uploadedBytes??next);
+activeUploadTransfer.uploadedBytes=uploaded;updateSourceProgressTransfer(activeUploadTransfer);
 }
+activeUploadTransfer.active=false;activeUploadTransfer.uploadedBytes=uploaded;updateSourceProgressTransfer(activeUploadTransfer);
 progress.textContent="PDF uploaded. Starting OCR and indexing…";
 if(uploadInfo.status==="failed"&&uploadInfo.canResume){
 await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources/"+encodeURIComponent(importId)+"/resume",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});
@@ -409,8 +417,10 @@ await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(p
 await api("teachers/"+encodeURIComponent(t.id)+"/projects/"+encodeURIComponent(project.id)+"/collections/"+encodeURIComponent(c.id)+"/sources/"+encodeURIComponent(importId)+"/complete",{method:"POST",headers:{"content-type":"application/json"},body:"{}"});
 }
 progress.textContent="BRVIN processing has started. The source will become available only after indexing and quality checks complete.";
+if(activeUploadTransfer){activeUploadTransfer.active=false;updateSourceProgressTransfer(activeUploadTransfer)}
+activeUploadTransfer=null;
 toast("Secure upload completed");form.reset();await refreshSources();
-}catch(error){progress.textContent="Upload stopped: "+error.message;toast(error.message)}finally{submit.disabled=false;submit.textContent="Start secure upload"}
+}catch(error){if(activeUploadTransfer){activeUploadTransfer.active=false;updateSourceProgressTransfer(activeUploadTransfer)}progress.textContent="Upload stopped: "+error.message;toast(error.message);void refreshSources()}finally{submit.disabled=false;submit.textContent="Start secure upload"}
 });
 await refreshSources();
 }
