@@ -55,10 +55,10 @@ The protected Operator Console, tenant D1 foundation and both private BRVIN bind
 11. [Architecture decisions](docs/DECISIONS.md) — accepted decisions and deferred questions.
 12. [Agent instructions](AGENTS.md) — mandatory instructions for coding assistants.
 13. [Cloudflare infrastructure status](docs/INFRASTRUCTURE_STATUS.md) — actual provisioned resources and remaining setup.
-14. [Temporary retrieval test runbook](docs/RETRIEVAL_TEST_RUNBOOK.md) — one-request, Access-protected live passage/page verification.
+14. [Temporary retrieval test runbook](docs/RETRIEVAL_TEST_RUNBOOK.md) — one-request, Access-protected live passage/page verification.\n15. [Retrieval provider compatibility](docs/BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md) — preserve the current Operator Console, five-stage upload, per-page map and v2 consumer while Core modernizes retrieval behind the API.
 
 ## Working principle
 
-**One shared application platform; many isolated teacher experiences; one central operator console; BRVIN remains the knowledge authority.**
+**One shared application platform; many isolated teacher experiences; one central operator console; BRVIN remains the knowledge authority.**\n\n**Retrieval-provider migration rule:** BRVIN Core owns Vertex AI embeddings and Qdrant. This app continues using the private v2 binding and its existing answer workflow. No direct Qdrant/Vertex access or admin UI redesign is permitted. The current AI Search production path remains active until the Core M12–M17 gates pass.
 
 Start with a real pilot and the smallest complete, secure experience. Prefer tenant configuration and reusable modules over per-teacher code copies, Workers, databases or repositories. Keep documentation synchronized with accepted code and infrastructure changes.
