@@ -62,6 +62,6 @@ The protected Operator Console, tenant D1 foundation and both private BRVIN bind
 
 **One shared application platform; many isolated teacher experiences; one central operator console; BRVIN remains the knowledge authority.**
 
-**Retrieval-provider migration rule:** BRVIN Core owns Vertex AI embeddings and Qdrant. This app continues using the private v2 binding and its existing answer workflow. No direct Qdrant/Vertex access or admin UI redesign is permitted. The current AI Search production path remains active until the Core M12–M17 gates pass.
+**Retrieval-provider migration rule:** BRVIN Core owns Vertex AI embeddings and Qdrant, using one unified math-aware hybrid retrieval path for theory, formulas, worked examples and numerical problems. This app continues using the private v2 binding and its existing answer workflow. No direct Qdrant/Vertex/formula-indexing access or admin UI redesign is permitted. The current AI Search production path remains active until the Core M12–M17 gates pass.
 
 Start with a real pilot and the smallest complete, secure experience. Prefer tenant configuration and reusable modules over per-teacher code copies, Workers, databases or repositories. Keep documentation synchronized with accepted code and infrastructure changes.
