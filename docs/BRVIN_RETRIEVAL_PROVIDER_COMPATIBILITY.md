@@ -1,6 +1,6 @@
 # BRVIN Teachers — Retrieval Provider Compatibility and UI Preservation
 
-**Status:** Approved compatibility plan; no consumer/provider migration code implemented  
+**Status:** Approved compatibility plan; M13 Core implementation is in review only; no consumer/provider migration code implemented  
 **Owner:** ashini-x/brvin-teachers  
 **Core authority:** [BRVIN retrieval provider migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md)
 
@@ -95,7 +95,15 @@ Before production cutover, verify against the Qdrant shadow/canary provider thro
 
 M16 is complete only after the Core and consumer tests pass together. A UI screenshot alone is not proof of backend readiness or authorization.
 
-## 8. Coordination and references
+## 8. Current M13 Core status — no consumer change
+
+As of 8 November 2026, Core's M13 implementation is under review on `brvin/m13-provider-boundary-corpus` in `ashini-x/parmar-ai`. It introduces Core-owned retrieval/embedding ports and a deterministic private GCS corpus manifest path. The only M13 retrieval adapter is still Cloudflare AI Search. The durable-corpus writer is controlled by `BRVIN_CORPUS_MANIFEST_ENABLED` and remains explicitly disabled in Core production; the server-side provider selector is pinned to `cloudflare-ai-search`. No Vertex/Qdrant resource, SDK, credential or provider cutover is present in BRVIN Teachers.
+
+There is no M13 consumer code change. Keep the existing private BRVIN v2 binding, typed connector, tenant-to-project mapping, answer generation and citations exactly as deployed. The Core change does not add a request field, response field or consumer configuration. The current deployed Teachers Operator Console and its five-stage progress/page-map experience remain unchanged. Do not update this repository merely to mirror Core-internal provider abstractions; coordinate a consumer change only if a future reviewed Core contract change actually requires one.
+
+The latest Teachers production push run before these 8 November documentation updates is [CI/CD run #59](https://github.com/ashini-x/brvin-teachers/actions/runs/42423395691), which passed build, D1 migration, deployment, health and Access protection. Its deployed Worker version was `68d6694c-6371-4cae-8a25-4af40ca15706`. The 8 November commits after that run are documentation-only and did not trigger another consumer deployment.
+
+## 9. Coordination and references
 
 M16 consumer tracking: [BRVIN Teachers issue #18](https://github.com/ashini-x/brvin-teachers/issues/18), coordinated with [Core issue #145](https://github.com/ashini-x/parmar-ai/issues/145).
 
