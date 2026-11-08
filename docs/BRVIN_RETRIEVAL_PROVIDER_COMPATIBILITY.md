@@ -6,7 +6,7 @@
 
 ## 1. Purpose
 
-BRVIN Teachers is a downstream consumer of BRVIN Core. Core is planning to replace the current Cloudflare AI Search retrieval backend with Vertex AI embeddings and Qdrant hybrid retrieval after staged validation.
+BRVIN Teachers is a downstream consumer of BRVIN Core. Core is planning to replace the current Cloudflare AI Search retrieval backend with Vertex AI embeddings and Qdrant hybrid retrieval after staged validation. The target is one unified math-aware retrieval path for theory, formulas, worked examples and numerical problems—not separate subject bots.
 
 This repository must preserve the existing product experience. It must not become a second retrieval/indexing system.
 
@@ -64,13 +64,19 @@ The page map must not assume one page equals one vector or one search item. A pa
 
 The consumer must not calculate READY from vector counts. It displays Core's persisted source state and page statuses. READY remains a Core decision gated by all expected pages and retrieval QA.
 
+### Math-aware retrieval compatibility
+
+A student query may combine a concept explanation, an equation and a numerical example. Core must be able to return relevant evidence from these content types together through the same v2 request and bounded-evidence response; the consumer must not select a separate theory/maths bot or provider. Preserve formula text as supplied by Core, source titles and physical PDF page citations. Do not silently repair or invent a formula when OCR evidence is uncertain; surface the retrieved evidence and its citations so the consumer answer workflow can handle uncertainty transparently.
+
+This is a retrieval compatibility requirement only. It does not move embedding, indexing, formula extraction, Qdrant access or answer generation into this repository. Consumer code continues to call only the private v2 binding.
+
 If a provider is temporarily unavailable:
 - the UI shows the existing in-progress/failed stage and a useful provider-neutral error;
 - retry resumes from persisted OCR/chunk/embedding/index checkpoints;
 - the consumer must not re-upload the PDF or re-run OCR unless Core explicitly reports that the OCR artifact itself is missing and the Core recovery procedure requires it;
 - the UI must not show READY until Core confirms readiness.
 
-## 6. Consumer acceptance for M16
+## 7. Consumer acceptance for M16
 
 Before production cutover, verify against the Qdrant shadow/canary provider through the real production-like BRVIN v2 consumer path:
 
@@ -81,13 +87,15 @@ Before production cutover, verify against the Qdrant shadow/canary provider thro
 - Retry after an injected transient Vertex/Qdrant error resumes safely without duplicate chunks or a new Vision OCR operation.
 - READY appears only after Core's retrieval QA passes.
 - Existing retrieval test returns bounded, relevant evidence with the same source title and physical PDF page values.
+- Mixed theory+formula and numerical queries can return both explanatory and mathematical evidence through the same v2 path, with exact source/page provenance.
+- Symbol-sensitive formula cases do not silently substitute a different expression; OCR uncertainty remains attributable to the source page.
 - Revoking the Core application-project grant produces the same Not Authorised outcome; restoring the grant allows a subsequent valid request.
 - The final student/teacher answer experience and citations remain unchanged.
 - No consumer bundle, config, logs or D1 row contains Qdrant/Vertex credentials or raw embeddings.
 
 M16 is complete only after the Core and consumer tests pass together. A UI screenshot alone is not proof of backend readiness or authorization.
 
-## 7. Coordination and references
+## 8. Coordination and references
 
 M16 consumer tracking: [BRVIN Teachers issue #18](https://github.com/ashini-x/brvin-teachers/issues/18), coordinated with [Core issue #145](https://github.com/ashini-x/parmar-ai/issues/145).
 
