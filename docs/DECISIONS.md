@@ -143,6 +143,8 @@ The same teacher/project/collection/source workflows, secure upload, five-step p
 
 This app must not call Qdrant or Vertex AI directly, store their credentials, generate embeddings, own the index or use a vector filter as authorization. It continues to call the private BRVIN v2 binding; Core D1 remains authoritative for app/project/source grants, readiness and quota. The v2 response contract should remain unchanged for this provider migration.
 
+Core's retrieval path must be unified and math-aware: a mixed student query can retrieve explanatory text, formulas, worked examples and numerical passages together. Formula/LaTeX fields and content-type metadata remain Core-owned; this consumer preserves returned evidence and page citations and must not invent or silently correct uncertain OCR formulas.
+
 **Reason:** A backend upgrade should improve scale and control without changing the familiar administrator workflow or creating a second knowledge system in the consumer.
 
 **Full acceptance:** [BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md](BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md). Core rollout and rollback gates: [Core migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md).
