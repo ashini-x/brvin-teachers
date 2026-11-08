@@ -1,6 +1,6 @@
 # Repository Guide — Coordinating BRVIN Teachers and BRVIN Core
 
-**Last reviewed:** 7 November 2026  
+**Last reviewed:** 8 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **Core repository:** ashini-x/parmar-ai
 
@@ -68,7 +68,7 @@ A cross-repository change is required only when the feature depends on a BRVIN-o
 
 Never use a BRVIN core change as a shortcut for missing tenant authorization in the consumer. BRVIN app-project grants are application-wide; this application must still enforce the authenticated student's server-side tenant/project mapping.
 
-For the approved provider migration, use the Core plan [BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md) as the backend source of truth and this repository's [BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md](BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md) for UI/consumer acceptance. The unified retrieval target includes theory, formulas, worked examples and numerical problems in one math-aware hybrid path. Do not start consumer-side Qdrant, Vertex, embedding or formula-indexing integration.
+For the approved provider migration, use the Core plan [BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md) as the backend source of truth and this repository's [BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md](BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md) for UI/consumer acceptance. The unified retrieval target includes theory, formulas, worked examples and numerical problems in one math-aware hybrid path. Do not start consumer-side Qdrant, Vertex, embedding or formula-indexing integration. Core M13 is currently under review on `brvin/m13-provider-boundary-corpus`; its production provider remains AI Search and its optional corpus-manifest writer is default-off. M13 changes are Core-internal and require no consumer code or deployment. Keep the BRVIN Teachers v2 binding/typed connector and current Operator Console unchanged unless a later, separately reviewed contract change requires coordination.
 
 ## 4. Session handoff and status discipline
 
