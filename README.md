@@ -1,6 +1,6 @@
 # BRVIN Teachers
 
-**Status:** M11 real-consumer acceptance COMPLETE; the three-page Physics source is READY and 3/3 indexed; protected BRVIN v2 semantic retrieval, page provenance and revoke/re-grant checks passed. Core M13 provider boundary and M14 Vertex/Qdrant adapters plus staging-only saved-Vision backfill code are merged. Production retrieval remains AI Search; the real staging backfill and live Vertex/Qdrant pilot are pending. No consumer API or Teachers UI change. Student/channel/model runtime remains deferred  
+**Status:** M11 real-consumer acceptance COMPLETE; the three-page Physics source is READY and 3/3 indexed; protected BRVIN v2 semantic retrieval, page provenance and revoke/re-grant checks passed. Core M13 provider boundary and M14 Vertex/Qdrant adapters, saved-Vision backfill and isolated staging operator are merged. The M14 staging Worker is deployed, but Google Cloud bucket/service-account secrets are still needed before the real backfill; production retrieval remains AI Search. No consumer API or Teachers UI change. Student/channel/model runtime remains deferred  
 **Repository:** ashini-x/brvin-teachers  
 **Product role:** Multi-tenant teacher application platform and downstream BRVIN v2 consumer
 
