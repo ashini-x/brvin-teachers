@@ -79,11 +79,13 @@ The operator supplied a screenshot from the Access-protected `/operator/retrieva
 
 Useful semantic retrieval has passed. The final check is to prove that the same consumer cannot retrieve the Physics project after its application-project grant is revoked:
 
-1. Open [BRVIN Admin](https://parmar-ai.thenewtongs.workers.dev/admin/brvin) and sign in.
-2. Open **Applications**, find **BRVIN Teachers** and its **Production** environment, and revoke its grant to the Physics knowledge project. The equivalent action is available from the Physics project's details under **Grant application access**.
-3. Confirm the grant is no longer active; do not deactivate the application/environment or revoke the source's teacher/project grant by mistake.
-4. Open a fresh Access-protected retrieval-test page and attempt the same query through the existing consumer path. Capture the explicit Core denial. If the UI filters the project out before a request can be made, record that separately; do not use direct AI Search, Core D1, or another service to bypass the Service Binding. Use the app's supported diagnostic path to exercise Core's active-grant check.
-5. Keep M11 open until a post-revocation denial is demonstrated. Re-grant the project only if the pilot needs retrieval restored after the test, then verify the grant is active again.
+1. **Before revoking access**, open the Access-protected retrieval-test page in one browser tab, select the Physics project, leave the exact-page override blank, and keep the page loaded. Do not submit yet.
+2. In a second tab, open [BRVIN Admin](https://parmar-ai.thenewtongs.workers.dev/admin/brvin) and sign in.
+3. Open **Applications**, find **BRVIN Teachers** and its **Production** environment, and revoke its grant to the Physics knowledge project. The equivalent action is available from the Physics project's details under **Grant application access**.
+4. Confirm the application-project grant is no longer active; do not deactivate the application/environment or revoke the source's teacher/project grant by mistake.
+5. Return to the already-loaded retrieval-test tab **without refreshing it** and submit the same semantic query once. The app's same-origin POST uses the retained teacher/project mapping and calls Core through the private `BRVIN_SERVICE` binding. Core should return **`PROJECT_NOT_AUTHORIZED` (HTTP 403)**. Capture that explicit denial as the M11 evidence.
+6. Do not reload the retrieval-test tab between revocation and the request. A fresh page load correctly removes the revoked project from the authorised-project selector; that is useful UI behaviour but is not proof that an attempted retrieval was denied by Core. Do not use direct AI Search, Core D1 or another service to bypass the Service Binding.
+7. Keep M11 open until the explicit post-revocation denial is demonstrated. Re-grant the project only if the Physics pilot needs access restored after the test, then verify the grant is active again.
 
 ## Safety and limits
 
