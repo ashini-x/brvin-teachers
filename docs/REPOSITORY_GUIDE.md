@@ -35,7 +35,7 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 6. docs/IDENTIFIER_POLICY.md when working on tenant, project, collection or source identity/reference handling.
 7. docs/OPERATOR_CONSOLE_DESIGN.md when working on the Operator Console, tenant workspace, admin UX or BRVIN management handoff.
 8. docs/BRVIN_MANAGEMENT_INTEGRATION.md when implementing classroom, collection, source, upload, Core management or cross-repository handoff.
-9. The relevant contract, security, operations or decision document.
+9. The relevant contract, security, operations or decision document.\n10. docs/BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md for any Core retrieval provider, indexing, source-progress UI or v2 consumer compatibility work.
 
 ### In ashini-x/parmar-ai
 
@@ -67,7 +67,7 @@ A cross-repository change is required only when the feature depends on a BRVIN-o
 
 Never use a BRVIN core change as a shortcut for missing tenant authorization in the consumer. BRVIN app-project grants are application-wide; this application must still enforce the authenticated student's server-side tenant/project mapping.
 
-## 4. Session handoff and status discipline
+For the approved provider migration, use the Core plan [BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md) as the backend source of truth and this repository's [BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md](BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md) for UI/consumer acceptance. Do not start consumer-side Qdrant or Vertex integration.\n\n## 4. Session handoff and status discipline
 
 At the start of every session, establish:
 - current commit and branch in both repositories;
