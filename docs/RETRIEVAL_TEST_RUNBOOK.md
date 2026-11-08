@@ -75,17 +75,11 @@ A successful HTTP/RPC response with zero passages proves that the private servic
 
 The operator supplied a screenshot from the Access-protected `/operator/retrieval-test` page after running the recommended Newton second-law question. The route returned two relevant passages from `Force and Laws of Motion - Class IX pilot handout`; both cite physical PDF page 2. The displayed relevance scores were **0.993** and **0.960**. The excerpts explain that acceleration is in the direction of net force, increases with net force, and is smaller for greater mass under the same net force. This is accepted as the useful semantic-retrieval portion of M11. The screenshot records the returned evidence; it does not itself show the submitted query or exact-page field, which should be left blank in future semantic runs.
 
-## Remaining M11 check — application grant revocation
+## Recorded authorization acceptance — 8 November 2026
 
-Useful semantic retrieval has passed. The final check is to prove that the same consumer cannot retrieve the Physics project after its application-project grant is revoked:
+The real BRVIN Teachers Production consumer passed the complete authorization check. After useful semantic retrieval had returned two relevant passages from physical PDF page 2 (displayed scores **0.993** and **0.960**), the operator revoked the Production application's access to Physics and submitted another request through the consumer. The page displayed **Not Authorised**. The operator then restored access to Physics, and the same consumer successfully answered again.
 
-1. **Before revoking access**, open the Access-protected retrieval-test page in one browser tab, select the Physics project, leave the exact-page override blank, and keep the page loaded. Do not submit yet.
-2. In a second tab, open [BRVIN Admin](https://parmar-ai.thenewtongs.workers.dev/admin/brvin) and sign in.
-3. Open **Applications**, find **BRVIN Teachers** and its **Production** environment, and revoke its grant to the Physics knowledge project. The equivalent action is available from the Physics project's details under **Grant application access**.
-4. Confirm the application-project grant is no longer active; do not deactivate the application/environment or revoke the source's teacher/project grant by mistake.
-5. Return to the already-loaded retrieval-test tab **without refreshing it** and submit the same semantic query once. The app's same-origin POST uses the retained teacher/project mapping and calls Core through the private `BRVIN_SERVICE` binding. Core should return **`PROJECT_NOT_AUTHORIZED` (HTTP 403)**. Capture that explicit denial as the M11 evidence.
-6. Do not reload the retrieval-test tab between revocation and the request. A fresh page load correctly removes the revoked project from the authorised-project selector; that is useful UI behaviour but is not proof that an attempted retrieval was denied by Core. Do not use direct AI Search, Core D1 or another service to bypass the Service Binding.
-7. Keep M11 open until the explicit post-revocation denial is demonstrated. Re-grant the project only if the Physics pilot needs access restored after the test, then verify the grant is active again.
+This verifies three distinct outcomes through the real consumer path: relevant semantic evidence with correct source-page provenance, denial after access revocation, and retrieval restoration after a valid re-grant. The denial/restoration outcomes are recorded from the operator's explicit confirmation; no separate screenshot or raw HTTP status was supplied for those two actions. M11 real-consumer acceptance is complete.
 
 ## Safety and limits
 
@@ -96,4 +90,4 @@ Useful semantic retrieval has passed. The final check is to prove that the same 
 - Both semantic and exact-page requests pass through the BRVIN retrieval quota check and may consume a project retrieval allowance. A timeout can occur after quota has been reserved.
 - The test page deliberately permits only one retrieval attempt per page load and does not automatically retry. Avoid repeated tests; reopening and submitting is a new request.
 - The query and returned passage text are not written to the Teachers application D1 or intentionally logged by this diagnostic. BRVIN's normal retrieval accounting and content-free audit/diagnostic behavior still apply.
-- Remove this temporary diagnostic route after the pilot retrieval acceptance has been recorded, unless it is deliberately retained as an operator-only support tool.
+- The useful-retrieval and grant-revocation acceptance has been recorded. Remove this temporary diagnostic route when no longer needed for operator support, unless it is deliberately retained as an operator-only diagnostic.
