@@ -71,6 +71,20 @@ A direct AI Search engine smoke check produced the expected top page for each of
 
 A successful HTTP/RPC response with zero passages proves that the private service was reached, but it does **not** prove that useful retrieval worked. A relevant passage with a plausible page number is not a substitute for checking the page against the original PDF when validating strict citation accuracy.
 
+## Recorded consumer semantic retrieval — 8 November 2026
+
+The operator supplied a screenshot from the Access-protected `/operator/retrieval-test` page after running the recommended Newton second-law question. The route returned two relevant passages from `Force and Laws of Motion - Class IX pilot handout`; both cite physical PDF page 2. The displayed relevance scores were **0.993** and **0.960**. The excerpts explain that acceleration is in the direction of net force, increases with net force, and is smaller for greater mass under the same net force. This is accepted as the useful semantic-retrieval portion of M11. The screenshot records the returned evidence; it does not itself show the submitted query or exact-page field, which should be left blank in future semantic runs.
+
+## Remaining M11 check — application grant revocation
+
+Useful semantic retrieval has passed. The final check is to prove that the same consumer cannot retrieve the Physics project after its application-project grant is revoked:
+
+1. Open [BRVIN Admin](https://parmar-ai.thenewtongs.workers.dev/admin/brvin) and sign in.
+2. Open **Applications**, find **BRVIN Teachers** and its **Production** environment, and revoke its grant to the Physics knowledge project. The equivalent action is available from the Physics project's details under **Grant application access**.
+3. Confirm the grant is no longer active; do not deactivate the application/environment or revoke the source's teacher/project grant by mistake.
+4. Open a fresh Access-protected retrieval-test page and attempt the same query through the existing consumer path. Capture the explicit Core denial. If the UI filters the project out before a request can be made, record that separately; do not use direct AI Search, Core D1, or another service to bypass the Service Binding. Use the app's supported diagnostic path to exercise Core's active-grant check.
+5. Keep M11 open until a post-revocation denial is demonstrated. Re-grant the project only if the pilot needs retrieval restored after the test, then verify the grant is active again.
+
 ## Safety and limits
 
 - The diagnostic calls `retrieveTeacherKnowledge`, which uses the existing app-to-project mapping and private `BRVIN_SERVICE` binding. BRVIN Core rechecks the active application/environment, project grant, ready source grants, and monthly quota on every retrieval.
