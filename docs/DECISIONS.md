@@ -129,3 +129,20 @@ The screen hierarchy is Overview → Teachers → Teacher workspace → Classroo
 **Reason:** Give operators one predictable, beginner-friendly place to create custom-named teacher workspaces and manage each knowledge hierarchy while preserving system ownership and tenant isolation.
 
 **Full specification:** [OPERATOR_CONSOLE_DESIGN.md](OPERATOR_CONSOLE_DESIGN.md).
+
+
+### ADR-012 — Retrieval provider portability must preserve the product experience
+
+**Status:** Accepted compatibility direction; implementation not started  
+**Decision date:** 8 November 2026  
+**Related Core decision:** BRVIN Core ADR-012 in parmar-ai
+
+**Decision:** BRVIN Teachers remains a downstream BRVIN v2 consumer. Core may replace the internal AI Search/Workers AI retrieval implementation with a Vertex AI + Qdrant provider after the Core pilot and staged acceptance gates, but this repository must preserve the existing Operator Console and consumer journey.
+
+The same teacher/project/collection/source workflows, secure upload, five-step progress indicator, physical per-page map, persisted status/error display, retry/recovery, READY gating, retrieval test and source/page citations remain. Only vendor-specific labels may be changed to provider-neutral wording (for example, "AI Search" to "Search index"). Advanced authenticated operator diagnostics may display provider/model information.
+
+This app must not call Qdrant or Vertex AI directly, store their credentials, generate embeddings, own the index or use a vector filter as authorization. It continues to call the private BRVIN v2 binding; Core D1 remains authoritative for app/project/source grants, readiness and quota. The v2 response contract should remain unchanged for this provider migration.
+
+**Reason:** A backend upgrade should improve scale and control without changing the familiar administrator workflow or creating a second knowledge system in the consumer.
+
+**Full acceptance:** [BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md](BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md). Core rollout and rollback gates: [Core migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md).
