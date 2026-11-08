@@ -1,6 +1,6 @@
 # BRVIN Teachers — Retrieval Provider Compatibility and UI Preservation
 
-**Status:** Approved compatibility plan; Core M13 provider boundary merged; M14 isolated pilot adapters under development; no consumer/provider migration code implemented  
+**Status:** Approved compatibility plan; Core M13 and M14 pilot/backfill code are merged; live non-production backfill and provider acceptance remain pending; no consumer/provider migration code implemented  
 **Owner:** ashini-x/brvin-teachers  
 **Core authority:** [BRVIN retrieval provider migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md)
 
@@ -99,7 +99,7 @@ M16 is complete only after the Core and consumer tests pass together. A UI scree
 
 As of 8 November 2026, Core M13 PR [#147](https://github.com/ashini-x/parmar-ai/pull/147) is squash-merged into `main` as `4ab292ff57addef051b28e32477e2136d91add8d`. It provides Core-owned retrieval/embedding ports, the current Cloudflare AI Search adapter and immutable OCR-derived corpus manifests. The Core production selector remains `cloudflare-ai-search`; `BRVIN_CORPUS_MANIFEST_ENABLED=false` remains explicit. The merge triggered the normal paired Core Worker release, but no provider cutover occurred.
 
-Core M14 is in progress on `brvin/m14-vertex-qdrant-physics-pilot`. It adds a verified GCS corpus replay reader, an OCR-free replay runner, Vertex embedding and Qdrant dense+sparse RRF adapters, and a fixed Physics evaluation matrix. These are Core-internal, mocked-test changes only so far: no non-production Qdrant cluster/API key or live Vertex model/region/quota validation is available yet. No M14 values or secrets are configured in production.
+Core M14 foundation PR [#148](https://github.com/ashini-x/parmar-ai/pull/148) is merged as `8d665b48f08cc7197ca306cb0b00417d2321fc72`, and staging-only saved-Vision backfill PR [#149](https://github.com/ashini-x/parmar-ai/pull/149) is merged as `8b2ca76c3cbc7378334169bf4dc0093ab57e4f53`. Their final CI runs passed 277 / 282 Vitest tests respectively, 54 Node tests and both Worker dry-runs. The code includes the corpus replay reader/runner, Vertex document/query embeddings, Qdrant dense+sparse RRF and a fail-closed backfill to a separate M14 GCS bucket. The actual backfill has not yet run, and non-production Vertex credentials/model/region/quota and Qdrant cluster/API key are not provisioned. Core production stays on Cloudflare AI Search with corpus writes disabled.
 
 There is no M13/M14 consumer code change. Keep the existing private BRVIN v2 binding, typed connector, tenant-to-project mapping, answer generation and citations exactly as deployed. The Core change adds no request field, response field or consumer configuration. The current deployed Teachers Operator Console and its five-stage progress/page-map experience remain unchanged. Do not update this repository merely to mirror Core-internal provider abstractions; coordinate a consumer change only if a future reviewed Core contract change actually requires one.
 
