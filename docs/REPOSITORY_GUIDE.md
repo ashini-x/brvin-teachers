@@ -113,3 +113,10 @@ The protected Core M15 paired shadow runner has merged in Core PR #209 and is de
 
 Core's first 12-case paired receipt has been captured. Qdrant covered all 11 expected page targets and had higher page MRR, but it returned five candidates on each of two no-match queries; AI Search returned zero on both. Core's page-label scorecard was corrected in PR #211 and is deployed to staging Worker v80. These are page-level proxies, not independent passage qrels or answer-abstention evidence. The production provider remains AI Search. No Teachers runtime, v2 contract, Operator Console or provider binding changed.
 
+
+
+## Core M15 second-source staging checkpoint — 11 November 2026
+
+Core now has a separate staging-only operator at https://parmar-ai-m14-staging.thenewtongs.workers.dev/admin/m15/benchmark for the generated eight-page Physics benchmark source. See the Core runbook at https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_M15_SECOND_SOURCE_BENCHMARK.md before using it. The PDF must not be uploaded through this Teachers repository or any Teachers production tenant/project/collection. The separate test-card PDF is evaluation-only and must not be indexed.
+
+Core staging Worker v82 contains the new benchmark-specific AI Search binding and Qdrant collection. Teachers remains on its current production Worker and private BRVIN v2 binding; no runtime, contract, upload/index flow, tenant/project mapping, auth, D1, or secrets were changed. Keep Qdrant and Vertex dependencies/credentials out of Teachers. The 17-query run is Core retrieval-only and does not test the Teachers-owned Gemini answer/abstention path.
