@@ -145,3 +145,18 @@ Core's authenticated staging diagnostic returned five candidates for each of the
 Therefore, the currently deployed consumer has no Gemini answer/abstention endpoint to exercise with the two negative prompts. Do not treat the retrieval-test page as an answer test, and do not add direct Qdrant/Vertex access or alter the frozen v2 contract to work around this gap. A genuine M16 consumer answer/abstention test requires the student/channel/model runtime to be implemented, or a separately approved operator-only harness with its own security and cost boundaries. No such harness is introduced by this documentation update.
 
 M16 remains open. Preserve the existing UI and private v2 boundary while Core continues M14/M15 retrieval validation. Answer correctness, citation behavior and abstention must be tested through an actual consumer-owned generation path before M16 acceptance.
+
+
+## 9. M14 diagnostic outcome and current answer-path readiness — 10 November 2026
+
+Core's authenticated staging diagnostic returned five candidates for each of the two expected-no-match prompts. None of the complete candidate texts contained exact lowercase f = ma; the nearest formula material is uppercase F/Fnet, with the corpus source equation recorded as Fnet = m × a. The Planck-constant prompt returned five unrelated Physics chunks. The friction query returned one stable top-five set but three different orderings; the directly relevant page-3 worked-example chunk ranked 1, 1 and 3 because leading candidates tied at RRF 0.6666667. RRF is a rank-fusion value, not a confidence probability. These are Core staging retrieval results only; they do not constitute a consumer answer or abstention test.
+
+**The current Teachers Operator retrieval page is retrieval-only.** Source inspection on 10 November 2026 confirms:
+- src/index.ts dispatches the application to the protected Operator Console/health handler (plus the connection-probe route).
+- src/retrieval-test.js calls retrieveTeacherKnowledge through the private BRVIN_SERVICE binding and renders source passages, scores and physical PDF pages.
+- src/brvin-v2.js implements the private v2 retrieval adapter; it does not call Gemini or produce a final answer.
+- The repository README and v2 integration guide state that student/channel/model runtime is deferred.
+
+Therefore, the currently deployed consumer has no Gemini answer/abstention endpoint to exercise with the two negative prompts. Do not treat the retrieval-test page as an answer test, and do not add direct Qdrant/Vertex access or alter the frozen v2 contract to work around this gap. A genuine M16 consumer answer/abstention test requires the student/channel/model runtime to be implemented, or a separately approved operator-only harness with its own security and cost boundaries. No such harness is introduced by this documentation update.
+
+M16 remains open. Preserve the existing UI and private v2 boundary while Core continues M14/M15 retrieval validation. Answer correctness, citation behavior and abstention must be tested through an actual consumer-owned generation path before M16 acceptance.
