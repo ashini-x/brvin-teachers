@@ -108,3 +108,8 @@ Consumer PR #2 and Core PR #107 are merged and deployed; consumer PR #4 / releas
 ## Core M15 checkpoint — 11 November 2026
 
 The protected Core M15 paired shadow runner has merged in Core PR #209 and is deployed to staging Worker v79 (100%). It is exposed on the existing M14 operator page as **Run AI Search vs Qdrant shadow benchmark**. The route is admin-token protected, source-confirmed, source-filtered and read-only. The 12-case receipt is pending. No direct AI Search/Qdrant/Vertex access, code, secrets or bindings have been added to BRVIN Teachers; preserve the private BRVIN v2 contract, tenant/project mapping and Teacher Operator Console unchanged.
+
+## Core M15 shadow receipt — 11 November 2026
+
+Core's first 12-case paired receipt has been captured. Qdrant covered all 11 expected page targets and had higher page MRR, but it returned five candidates on each of two no-match queries; AI Search returned zero on both. Core's page-label scorecard was corrected in PR #211 and is deployed to staging Worker v80. These are page-level proxies, not independent passage qrels or answer-abstention evidence. The production provider remains AI Search. No Teachers runtime, v2 contract, Operator Console or provider binding changed.
+
