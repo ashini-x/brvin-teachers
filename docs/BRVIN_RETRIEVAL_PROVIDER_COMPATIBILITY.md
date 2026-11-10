@@ -1,6 +1,6 @@
 # BRVIN Teachers — Retrieval Provider Compatibility and UI Preservation
 
-**Status (11 November 2026):** Core M14's non-production Vertex/Qdrant pilot is complete at the scoped milestone boundary (Worker v78); M15 AI Search vs Qdrant shadow benchmarking is active. The v78 pilot scores nDCG@5 0.8853 / MRR@5 0.9000 / grade-2+ recall 1.0000 / precision 0.4000 on seven source-grounded model-adjudicated chunks. The first current AI Search baseline is read-only and source-filtered; production remains on Cloudflare AI Search. No Teachers provider migration code, direct provider access or deployment is implemented. M16 answer-generation/abstention acceptance remains blocked because the student/channel/model runtime is not deployed.
+**Status (11 November 2026):** Core M14's non-production Vertex/Qdrant pilot is complete at the scoped milestone boundary (staging Worker v78); Core M15's authenticated read-only AI Search vs Qdrant shadow runner is now deployed on staging Worker v79. The 12-query operator receipt is pending. Production remains on AI Search. No Teachers provider migration code, direct provider access or deployment is implemented; the v2 contract and current Core/Teachers UI remain unchanged. M16 answer-generation/abstention acceptance remains blocked until the consumer-owned student/channel/model runtime is deployed.
 **Owner:** ashini-x/brvin-teachers  
 **Core authority:** [BRVIN retrieval provider migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md)
 
@@ -170,3 +170,10 @@ No Teachers code, v2 contract, Operator Console, upload/index workflow, bindings
 Core has started the M15 current-provider baseline using read-only searches against the existing AI Search instance `fatman-2026-8b183803`, filtered to the Physics source folder only. The source is already indexed (page item chunk counts 3/4/4); Qdrant's same-PDF pilot has seven custom chunks. On the fixed 12-case suite, AI Search covered 8/11 expected physical-page targets; uppercase-symbol and numerical-setup positives returned no candidates; the exact-formula discovery prompt returned a general passage without the formula; both no-match prompts returned no candidates. These observations belong to the Core M15 benchmark, not the Teachers answer runtime.
 
 No Teachers code, v2 contract, Operator Console, upload/index workflow, bindings or deployment changed. Keep the private v2 binding, tenant/project mapping, source/page provenance and current UI unchanged. Do not add Qdrant/Vertex credentials, SDKs, embeddings or provider access to this repository. M15 remains Core-owned until a contract or UI parity change is required; M16 remains later consumer/admin parity and answer-path work.
+
+
+## 11 November 2026 — Core M15 shadow runner deployed
+
+Core PR #209 is merged and its protected 12-case paired shadow runner is live on the isolated M14 staging operator (Worker v79, 100%). It calls the existing AI Search instance through a search-only binding scoped to the immutable Physics source folder, and Qdrant through query-only mode without collection/index preparation. It is Core-only; no Teachers code, v2 contract, Operator Console, upload/index workflow, bindings or production Worker changed. Production Core remains on AI Search.
+
+The operator receipt is pending because its staging bearer token is entered locally in the operator page and is not shared with chat. M15 will continue with independent passage qrels, a broader corpus, authorization/revocation, latency/cost, recovery and load. Do not add Qdrant/Vertex SDKs, credentials or direct provider access to this repository. M16 remains later consumer/admin parity and real answer/abstention work.
