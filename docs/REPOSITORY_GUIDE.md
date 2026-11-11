@@ -1,6 +1,6 @@
 # Repository Guide — Coordinating BRVIN Teachers and BRVIN Core
 
-**Last reviewed:** 11 November 2026  
+**Last reviewed:** 12 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **Core repository:** ashini-x/parmar-ai
 
@@ -120,3 +120,14 @@ Core's first 12-case paired receipt has been captured. Qdrant covered all 11 exp
 Core now has a separate staging-only operator at https://parmar-ai-m14-staging.thenewtongs.workers.dev/admin/m15/benchmark for the generated eight-page Physics benchmark source. See the Core runbook at https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_M15_SECOND_SOURCE_BENCHMARK.md before using it. The PDF must not be uploaded through this Teachers repository or any Teachers production tenant/project/collection. The separate test-card PDF is evaluation-only and must not be indexed.
 
 Core staging Worker v82 contains the new benchmark-specific AI Search binding and Qdrant collection. Teachers remains on its current production Worker and private BRVIN v2 binding; no runtime, contract, upload/index flow, tenant/project mapping, auth, D1, or secrets were changed. Keep Qdrant and Vertex dependencies/credentials out of Teachers. The 17-query run is Core retrieval-only and does not test the Teachers-owned Gemini answer/abstention path.
+
+
+## Core M15 current status — 12 November 2026
+
+Core's eight-page synthetic Physics source is indexed only in the dedicated Core staging AI Search instance and Qdrant collection. The paired 17-query retrieval and 34-generation OCR-only evaluation are complete; calibrated offline re-grade is 16/17 for each provider. The separate five-query original-PDF-assisted notation audit passed 5/5 for both providers, but it validates only a bounded visual-evidence route and does not repair raw OCR, normalized text or indexed formulas.
+
+The first incomplete M15 gate is independent passage relevance and claim-to-passage grounding. Core PR [#228](https://github.com/ashini-x/parmar-ai/pull/228) publishes the 109-excerpt source-fingerprinted review pack with blank Reviewer A, Reviewer B and adjudication fields. Two reviewers must annotate separate copies independently; model/assistant grades are not human qrels.
+
+Core's remaining gates are wrong-project/no-grant, revocation while vectors remain, throttling and deterministic recovery, HNSW-aware controlled load, repeatable latency/throughput and embedding/index/storage/query cost, and rollback rehearsal. Production Core `parmar-ai` and `brvin-service` still select `cloudflare-ai-search`; Teachers remains on Worker v12 with only private `BRVIN_MANAGEMENT` and `BRVIN_SERVICE` bindings. No consumer deployment or provider access is part of M15.
+
+Do not upload the M15 benchmark PDF or its Test Card into a Teachers tenant or production upload flow. Do not treat Core's staging Gemini evaluator as a deployed Teachers answer-generation feature. See the Core [M15 runbook](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_M15_SECOND_SOURCE_BENCHMARK.md) and [migration plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_RETRIEVAL_PROVIDER_MIGRATION.md).
