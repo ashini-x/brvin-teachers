@@ -239,3 +239,9 @@ The Core-owned provider direction remains Vertex AI embeddings plus Qdrant dense
 The last verified Core system reference records an 800-query/month project-level limit with a code maximum of 800. This is independent of the student-facing 10/day allowance and cannot support the 300,000/month planning target. Core must redesign that shared quota and prove sufficient capacity before production cutover. Teachers must continue to enforce its own authenticated tenant/project mapping and may not rely on a Core quota or a cache key as tenant authorization.
 
 See Core's [BRVIN scale and semantic-cache plan](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_SCALE_AND_SEMANTIC_CACHE_PLAN.md) for detailed acceptance criteria. This documentation update does not change the Teachers runtime, private v2 contract, D1 schema, bindings, UI or deployment.
+
+## 11. Live Core state reconciliation — 14 November 2026
+
+The current Cloudflare read-back confirms `parmar-ai` production v779, `brvin-service` production v156, isolated `parmar-ai-m14-staging` v102, and `brvin-teachers` production v12, all at 100%. Production Core continues selecting Cloudflare AI Search; Vertex/Qdrant provider configuration remains isolated to Core staging. Teachers remains unchanged as a private v2 consumer with its two Core Service Bindings and own tenant D1 only.
+
+The sole persisted two-source paired Core v2 receipt is the pre-PR-247 baseline `18728f63-e13d-4e73-880f-a2b980844d04`. It still records Qdrant missing M15 source page 2 for MS03 and three unrelated MN01 no-match candidates. The score-floor fix is deployed to staging v102, but a new protected paired evaluation has not been run. Core's next action is that five-case paired run through the existing v2 service path; the staging admin token is entered locally in the operator page and must never be stored or exposed in Teachers. No consumer change is required or authorized for this gate.
