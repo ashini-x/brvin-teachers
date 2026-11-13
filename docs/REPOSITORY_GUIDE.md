@@ -37,6 +37,8 @@ BRVIN Teachers is a downstream consumer of BRVIN v2. It is not a BRVIN subsystem
 8. docs/BRVIN_MANAGEMENT_INTEGRATION.md when implementing classroom, collection, source, upload, Core management or cross-repository handoff.
 9. The relevant contract, security, operations or decision document.
 10. docs/BRVIN_RETRIEVAL_PROVIDER_COMPATIBILITY.md for any Core retrieval provider, indexing, source-progress UI or v2 consumer compatibility work.
+11. Read Core's docs/BRVIN_SCALE_AND_SEMANTIC_CACHE_PLAN.md when working on scale targets, semantic/exact caching, retrieval quotas, capacity, load testing or provider cost. It is the authority for those cross-repository requirements.
+12. Read Core's docs/BRVIN_NEW_CHAT_CONTINUATION_PROMPT.md when resuming work in a fresh ChatGPT conversation; always verify its stated checkpoint against current GitHub and Cloudflare state.
 
 ### In ashini-x/parmar-ai
 
@@ -156,3 +158,9 @@ This follow-up is Core-only. Teachers must continue to call only the private v2 
 Core PR #247 and its post-merge Release/staging workflows have passed. Core production `parmar-ai` v742 and private `brvin-service` v140 remain at 100% on Cloudflare AI Search; the isolated staging operator is v101. Teachers remains on v12 and has no provider dependencies or direct Qdrant/Vertex access.
 
 The next Core-owned step is the protected five-case paired Core v2 staging evaluation, reserving ten staging project-query units, to verify that MS03 now returns the expected physical page 2. Do not rerun the component diagnostic or two-source Prepare. MN01 no-match calibration, broader quality/grounding, recovery, representative load, repeatable latency/cost and rollback remain open. Keep all existing Teachers workflows and private v2 boundary unchanged.
+
+## 14 November 2026 — capacity and cache design handoff
+
+The approved shared planning target is 1,000 daily active aspirants × 10 questions/day (10,000/day; 300,000 per 30-day month). This is not a Teachers load-test result and does not authorize a provider cutover. Core owns Qdrant/Vertex retrieval and the shared 800/month quota redesign; Teachers remains a private v2 consumer and retains its own tenant/project mapping and Gemini answer ownership.
+
+Any final-answer cache added to Teachers must remain consumer-owned, enforce tenant/project/source scope and keep citations current. Teachers must not add provider credentials or direct Qdrant/Vertex dependencies. See the Core scale/cache plan for invalidation, numeric near-miss bypasses, capacity tests and M15–M17 rollout gates.
