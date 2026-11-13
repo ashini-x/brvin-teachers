@@ -1,6 +1,6 @@
 # Repository Guide — Coordinating BRVIN Teachers and BRVIN Core
 
-**Last reviewed:** 13 November 2026  
+**Last reviewed:** 14 November 2026  
 **Application repository:** ashini-x/brvin-teachers  
 **Core repository:** ashini-x/parmar-ai
 
