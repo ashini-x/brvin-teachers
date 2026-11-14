@@ -180,3 +180,9 @@ The initial offline relevance-gate feasibility check is recorded in Core's [BRVI
 ## 14 November 2026 — initial relevance-gate feasibility check
 
 Core's offline 109-candidate ablation found that fixed RRF and a single lexical-coverage proxy each trade negative-noise reduction against held-out positive recall. No Core gate, threshold or reranker was selected, and no production/staging runtime behavior changed. The next Core-owned gate is broader independently labelled multi-document/query-family evidence. Teachers continues to call only the private BRVIN v2 Service Bindings; no direct Qdrant/Vertex access or consumer/UI change is authorized.
+
+## 14 November 2026 — Core M15 expanded staging evaluation
+
+Core has completed its protected, Core-only 12-query two-source Physics evaluation (staging receipt `0f5f9769-452a-466e-b5ae-735ddba6378a`). Both Core providers completed all queries with zero provenance violations and found all 11 query-specific expected page targets. AI Search returned no candidates for both expected no-match prompts; Qdrant returned five unrelated passages across those two prompts. This remains page-target evidence, not independent passage/span qrels, consumer answer testing, load testing or a production decision.
+
+No Teachers implementation, runtime, private v2 contract, tenant/project mapping, D1 schema, bindings, Operator Console, upload/index workflow or deployment changed. Continue to use only the private Core Service Binding. Do not add Qdrant/Vertex credentials, SDKs, embeddings or provider-specific routes to Teachers. Production Core remains on Cloudflare AI Search; M15 is still in progress, while M16 consumer parity and M17 canary/soak remain future gates.
