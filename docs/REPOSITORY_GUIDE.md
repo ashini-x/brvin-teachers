@@ -165,6 +165,12 @@ The approved shared planning target is 1,000 daily active aspirants × 10 questi
 
 Any final-answer cache added to Teachers must remain consumer-owned, enforce tenant/project/source scope and keep citations current. Teachers must not add provider credentials or direct Qdrant/Vertex dependencies. See the Core scale/cache plan for invalidation, numeric near-miss bypasses, capacity tests and M15–M17 rollout gates.
 
+## 14 November 2026 — Core staging quota plumbing checkpoint
+
+Core PR #272 merged as `9bcae39f5e6b9deafd794da3ec1ec4a65922f4aa`. The post-merge staging workflow passed and deployed isolated Core M15 staging v104 at 100%, with a 300,000/month staging limit and the owner breaker disabled. Release validation passed; production deploy and production verification were skipped. Production Core remains parmar-ai v779 and brvin-service v156 on Cloudflare AI Search with the 800/month project allowance; Teachers remains v12.
+
+This is a Core-only scale-plumbing change. Teachers' private v2 contract, tenant/project mapping, Core Service Bindings, Gemini answer ownership, UI, upload/index flow, citations and student daily allowance are unchanged. M15 is still blocked on independent human passage/span qrels and an approved non-Physics source family before the broader relevance and no-match gates; no production migration is authorized by this staging deployment. Keep Qdrant/Vertex credentials, SDKs and provider routes out of Teachers.
+
 ## 14 November 2026 — post-score-floor live-state reconciliation
 
 The latest Cloudflare read-back confirms Core production parmar-ai v779 and brvin-service v156, isolated parmar-ai-m14-staging v103, and Teachers production v12, all at 100%. Both production Core provider selectors remain cloudflare-ai-search. The staging M15 benchmark health endpoint reports ready and Teachers /health returns ok. Teachers still has only the BRVIN_MANAGEMENT and BRVIN_SERVICE Core Service Bindings plus its own D1; it has no Qdrant/Vertex credentials, SDKs, embeddings or direct provider route.
