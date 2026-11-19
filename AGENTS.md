@@ -2,6 +2,10 @@
 
 These instructions apply to all coding assistants and contributors working in this repository.
 
+## Shared brand and typography
+
+For any BRɅIN wordmark, logo, font, typography-token or general UI visual change, follow the canonical Core policy: [BRɅIN Brand Typography and Asset Policy](https://github.com/ashini-x/parmar-ai/blob/main/docs/BRVIN_BRAND_TYPOGRAPHY.md). The same policy applies to this consumer application. Do not add the AERUNO Trial font or unlicensed OpenAI Sans binaries to this repository, Cloudflare assets or application bundles.
+
 ## Before work
 
 1. Read this file and docs/REPOSITORY_GUIDE.md.
